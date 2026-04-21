@@ -215,13 +215,6 @@ function sed_get_latesttopics($limit, $mask)
 
 	$res = '';
 
-	$sql0 = sed_sql_query("SELECT fs_id, fs_title, fs_parentcat, fs_lt_id, fs_lt_title, fs_lt_date, fs_lt_posterid, fs_lt_postername 
-		FROM $db_forum_sections WHERE fs_parentcat = 0 ORDER BY fs_order ASC");
-
-	while ($fsn_sub = sed_sql_fetchassoc($sql0)) {
-		$forum_parentcat[$fsn_sub['fs_id']] = $fsn_sub;
-	}
-
 	$sql = sed_sql_query("SELECT t.ft_id, t.ft_sectionid, t.ft_title, t.ft_updated, t.ft_postcount, t.ft_lastposterid, t.ft_lastpostername, 
 		s.fs_id, s.fs_title, s.fs_category, s.fs_parentcat, s.fs_lt_id, s.fs_lt_title, s.fs_lt_date, u.user_id, u.user_avatar, u.user_maingrp 
 		FROM $db_forum_sections s, $db_forum_topics t 
@@ -234,17 +227,9 @@ function sed_get_latesttopics($limit, $mask)
 		if (sed_auth('forums', $row['fs_id'], 'R')) {
 			$img = ($usr['id'] > 0 && $row['ft_updated'] > $usr['lastvisit']) ? "<a href=\"" . sed_url("forums", "m=posts&q=" . $row['ft_id'] . "&n=unread", "#unread") . "\">" . $out['ic_arrow_unread'] . "</a>" : "<a href=\"" . sed_url("forums", "m=posts&q=" . $row['ft_id'] . "&n=last", "#bottom") . "\">" . $out['ic_arrow_follow'] . "</a> ";
 			
-			$parentcat = array();
-			if ($row['fs_parentcat'] > 0) {
-				$parentcat['sectionid']  = $forum_parentcat[$row['fs_parentcat']]['fs_id'];
-				$parentcat['title']  = $forum_parentcat[$row['fs_parentcat']]['fs_title'];
-			}
-
-			//print_r($row);
-
 			$t->assign(array(
 				"LATEST_TOPICS_ROW_ID" => $row['ft_id'],
-				"LATEST_TOPICS_ROW_FORUMPATH" => sed_build_forums($row['fs_id'], sed_cutstring($row['fs_title'], 30), sed_cutstring($row['fs_category'], 30), TRUE, $parentcat),
+				"LATEST_TOPICS_ROW_FORUMPATH" => sed_build_forums($row['fs_id'], sed_cutstring($row['fs_title'], 30), sed_cutstring($row['fs_category'], 30), TRUE),
 				"LATEST_TOPICS_ROW_URL" => sed_url("forums", "m=posts&q=" . $row['ft_id'] . "&al=" . $row['ft_title'] . "&n=last", "#bottom"),
 				"LATEST_TOPICS_ROW_SHORTTITLE" => sed_cutstring($row['ft_title'], 50),
 				"LATEST_TOPICS_ROW_TITLE" => $row['ft_title'],
@@ -263,7 +248,7 @@ function sed_get_latesttopics($limit, $mask)
 				$mask,
 				$img,
 				sed_build_date($cfg['formatmonthdayhourmin'], $row['ft_updated'], $cfg['plu_mask_topics_date']),
-				sed_build_forums($row['fs_id'], sed_cutstring($row['fs_title'], 25), sed_cutstring($row['fs_category'], 16), TRUE, $parentcat),
+				sed_build_forums($row['fs_id'], sed_cutstring($row['fs_title'], 25), sed_cutstring($row['fs_category'], 16), TRUE),
 				"<a href=\"" . sed_url("forums", "m=posts&q=" . $row['ft_id'] . "&al=" . $row['ft_title'] . "&n=last", "#bottom") . "\">" . sed_cc(sed_cutstring(stripslashes($row['ft_title']), 50)) . "</a>",
 				$row['ft_postcount'] - 1
 			);

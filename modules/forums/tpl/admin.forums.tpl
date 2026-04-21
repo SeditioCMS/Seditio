@@ -249,6 +249,11 @@
 						</li>
 
 						<li class="form-row">
+							<div class="form-label"><label>{PHP.L.adm_parentcat} :</label></div>
+							<div class="form-field">{FS_ADD_PARENTCAT}</div>
+						</li>
+
+						<li class="form-row">
 							<div class="form-label"><label>{PHP.L.Title} :</label></div>
 							<div class="form-field">
 								<div class="field">{FS_ADD_TITLE}</div>

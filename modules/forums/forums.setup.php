@@ -38,6 +38,7 @@ hideprivateforums=02:radio::0:Hide private forums
 hottopictrigger=03:select:5,10,15,20,25,30,35,40,50:20:Posts for a topic to be hot
 maxtopicsperpage=04:select:5,10,15,20,25,30,35,40,45,50,60,70,80,90:30:Maximum topics or posts per page
 antibumpforums=05:radio::0:Anti-bump protection
+maxforumdepth=06:select:2,3,4,5,6,7,8,10:5:Maximum subforum nesting depth
 [END_SED_MODULE_CONFIG]
 
 ==================== */

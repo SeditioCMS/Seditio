@@ -69,6 +69,7 @@ $L['cfg_formatmonthdayhourmin'] = array("Forum date mask", "Default: d.m H:i");
 $L['cfg_hideprivateforums'] = array("Hide private forums", "");
 $L['cfg_hottopictrigger'] = array("Posts for a topic to be 'hot'", "");
 $L['cfg_maxtopicsperpage'] = array("Maximum topics or posts per page", "");
+$L['cfg_maxforumdepth'] = array("Maximum subforum nesting depth", "");
 $L['cfg_antibumpforums'] = array("Anti-bump protection", "Will prevent users from posting twice in a row in the same topic");
 $L['cfg_disable_forums'] = array("Disable the forums", "");
 /* $L['cfg_trash_forum'] — plugins/trashcan/lang/trashcan.*.lang.php */

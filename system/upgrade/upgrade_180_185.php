@@ -33,6 +33,8 @@ if ($chk_ft && sed_sql_numrows($chk_ft) > 0) {
 if ($chk_fs && sed_sql_numrows($chk_fs) > 0) {
 	@sed_sql_query("ALTER TABLE $db_forum_sections MODIFY fs_title VARCHAR(255) NOT NULL DEFAULT ''");
 	$adminmain .= "forum_sections: fs_title modified.<br />";
+	@sed_sql_query("ALTER TABLE $db_forum_sections ADD KEY fs_parentcat_order (fs_category, fs_parentcat, fs_order)");
+	$adminmain .= "forum_sections: KEY fs_parentcat_order added.<br />";
 }
 
 /* ======== Comments: add com_parent for tree nesting (only if table exists) ======== */

@@ -78,7 +78,8 @@ if (sed_sql_numrows($check) == 0) {
 		fs_postcount_pruned int(11) DEFAULT '0',
 		fs_viewcount mediumint(8) NOT NULL DEFAULT '0',
 		PRIMARY KEY (fs_id),
-		KEY fs_order (fs_order)
+		KEY fs_order (fs_order),
+		KEY fs_parentcat_order (fs_category, fs_parentcat, fs_order)
 	) ENGINE={$mysqlengine} DEFAULT CHARSET={$mysqlcharset} COLLATE={$mysqlcollate};");
 
 	// Default data

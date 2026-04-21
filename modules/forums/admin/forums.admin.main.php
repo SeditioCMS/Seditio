@@ -63,7 +63,18 @@ if ($n == 'edit') {
 		$rtitle = sed_sql_prep($rtitle);
 		$rdesc = sed_sql_prep($rdesc);
 		$rcat = sed_sql_prep($rcat);
-		$rparentcat = sed_import('rparentcat', 'P', 'INT'); // New in sed 172
+		$rparentcat = sed_import('rparentcat', 'P', 'INT');
+		$max_depth = (int)(isset($cfg['maxforumdepth']) ? $cfg['maxforumdepth'] : 5);
+		if (!sed_forum_validate_parent($id, $rparentcat, $max_depth)) {
+			$rparentcat = 0;
+		}
+
+		if ($rparentcat > 0) {
+			$all_sections = sed_forum_load_sections();
+			if (isset($all_sections[$rparentcat])) {
+				$rcat = sed_sql_prep($all_sections[$rparentcat]['fs_category']);
+			}
+		}
 
 		$sql = sed_sql_query("SELECT fs_id, fs_order, fs_category FROM $db_forum_sections WHERE fs_id='" . $id . "'");
 		sed_die(sed_sql_numrows($sql) == 0);
@@ -85,13 +96,21 @@ if ($n == 'edit') {
 
 		$sql = sed_sql_query("UPDATE $db_forum_sections SET fs_state='$rstate', fs_title='$rtitle', fs_desc='$rdesc', fs_category='$rcat', fs_parentcat='$rparentcat', fs_icon='$ricon', fs_autoprune='$rautoprune', fs_allowusertext='$rallowusertext', fs_allowbbcodes='$rallowbbcodes', fs_allowsmilies='$rallowsmilies', fs_allowprvtopics='$rallowprvtopics', fs_countposts='$rcountposts' WHERE fs_id='$id'");
 
+		if ($row_cur['fs_category'] != $rcat) {
+			$child_ids = sed_forum_get_children_ids($id);
+			if (!empty($child_ids)) {
+				$child_ids_str = implode(',', array_map('intval', $child_ids));
+				sed_sql_query("UPDATE $db_forum_sections SET fs_category='$rcat' WHERE fs_id IN ($child_ids_str)");
+			}
+		}
+
 		sed_redirect(sed_url("admin", "m=forums", "", true), false, ['msg' => '917']);
 		exit;
 	} elseif ($a == 'delete') {
 		sed_check_xg();
 		sed_auth_clear('all');
 		$num = sed_forum_deletesection($id);
-		sed_redirect(sed_url("message", "msg=916&rc=103&num=" . $num, "", true));
+		sed_redirect(sed_url("admin", "m=forums", "", true), false, array('msg' => '916', 'num' => $num));
 		exit;
 	} elseif ($a == 'resync') {
 		sed_check_xg();
@@ -127,20 +146,7 @@ if ($n == 'edit') {
 	$urlpaths[sed_url("admin", "m=forums&n=edit&id=" . $id)] = sed_cc($fs_title);
 	$admintitle = sed_cc($fs_title);
 
-	$form_parent_cat = "<select name=\"rparentcat\"><option value=\"0\">--</option>";
-
-	$sql = sed_sql_query("SELECT s.fs_id, s.fs_title, s.fs_category FROM $db_forum_sections 
-                        AS s LEFT JOIN $db_forum_structure AS n ON n.fn_code = s.fs_category 
-                        WHERE fs_id <> '$id' AND fs_parentcat < 1 AND fs_category = '" . $fs_category . "' 
-                        ORDER by fn_path ASC, fs_order ASC");
-
-	while ($row = sed_sql_fetchassoc($sql)) {
-		$parent_name = sed_build_forums($row['fs_id'], $row['fs_title'], $row['fs_category'], FALSE);
-		$selected = ($fs_parentcat == $row['fs_id']) ? " selected=\"selected\"" : "";
-		$form_parent_cat .= "<option value=\"" . $row['fs_id'] . "\"" . $selected . ">" . $parent_name . "</option>";
-	}
-
-	$form_parent_cat .= "</select>";
+	$form_parent_cat = sed_selectbox_forum_parent('rparentcat', $fs_parentcat, '', array($fs_id));
 
 	$fs_icon_img = file_exists($fs_icon) ? " <img src=\"" . $fs_icon . "\" alt=\"\" />" : "";
 
@@ -176,14 +182,14 @@ if ($n == 'edit') {
 	if ($a == 'order') {
 		$w = sed_import('w', 'G', 'ALP', 4);
 
-		$sql = sed_sql_query("SELECT fs_order, fs_category FROM $db_forum_sections WHERE fs_id='" . $id . "'");
+		$sql = sed_sql_query("SELECT fs_order, fs_category, fs_parentcat FROM $db_forum_sections WHERE fs_id='" . $id . "'");
 		sed_die(sed_sql_numrows($sql) == 0);
 		$row_cur = sed_sql_fetchassoc($sql);
 
 		if ($w == 'up') {
-			$sql = sed_sql_query("SELECT fs_id, fs_order FROM $db_forum_sections WHERE fs_category='" . $row_cur['fs_category'] . "' AND fs_order<'" . $row_cur['fs_order'] . "' ORDER BY fs_order DESC LIMIT 1");
+			$sql = sed_sql_query("SELECT fs_id, fs_order FROM $db_forum_sections WHERE fs_category='" . $row_cur['fs_category'] . "' AND fs_parentcat='" . $row_cur['fs_parentcat'] . "' AND fs_order<'" . $row_cur['fs_order'] . "' ORDER BY fs_order DESC LIMIT 1");
 		} else {
-			$sql = sed_sql_query("SELECT fs_id, fs_order FROM $db_forum_sections WHERE fs_category='" . $row_cur['fs_category'] . "' AND fs_order>'" . $row_cur['fs_order'] . "' ORDER BY fs_order ASC LIMIT 1");
+			$sql = sed_sql_query("SELECT fs_id, fs_order FROM $db_forum_sections WHERE fs_category='" . $row_cur['fs_category'] . "' AND fs_parentcat='" . $row_cur['fs_parentcat'] . "' AND fs_order>'" . $row_cur['fs_order'] . "' ORDER BY fs_order ASC LIMIT 1");
 		}
 
 		if (sed_sql_numrows($sql) > 0) {
@@ -197,16 +203,31 @@ if ($n == 'edit') {
 	} elseif ($a == 'add') {
 		$g = array('ntitle', 'ndesc', 'ncat');
 		foreach ($g as $k => $x) $$x = $_POST[$x];
+		$nparentcat = sed_import('nparentcat', 'P', 'INT');
+		$max_depth = (int)(isset($cfg['maxforumdepth']) ? $cfg['maxforumdepth'] : 5);
+		if ($nparentcat > 0 && $max_depth > 0) {
+			$parents = sed_forum_get_parents($nparentcat);
+			if (count($parents) + 1 >= $max_depth) {
+				$nparentcat = 0;
+			}
+		}
+
+		if ($nparentcat > 0) {
+			$all_sections = sed_forum_load_sections();
+			if (isset($all_sections[$nparentcat])) {
+				$ncat = $all_sections[$nparentcat]['fs_category'];
+			}
+		}
 
 		if (!empty($ntitle)) {
-			$sql1 = sed_sql_query("SELECT fs_order FROM $db_forum_sections WHERE fs_category='" . sed_sql_prep($ncat) . "' ORDER BY fs_order DESC LIMIT 1");
+			$sql1 = sed_sql_query("SELECT fs_order FROM $db_forum_sections WHERE fs_category='" . sed_sql_prep($ncat) . "' AND fs_parentcat='" . (int)$nparentcat . "' ORDER BY fs_order DESC LIMIT 1");
 			if ($row1 = sed_sql_fetchassoc($sql1)) {
 				$nextorder = $row1['fs_order'] + 1;
 			} else {
 				$nextorder = 100;
 			}
 
-			$sql = sed_sql_query("INSERT INTO $db_forum_sections (fs_order, fs_title, fs_desc, fs_category, fs_icon, fs_autoprune, fs_allowusertext, fs_allowbbcodes, fs_allowsmilies, fs_allowprvtopics, fs_countposts) VALUES ('" . (int)$nextorder . "', '" . sed_sql_prep($ntitle) . "', '" . sed_sql_prep($ndesc) . "', '" . sed_sql_prep($ncat) . "', 'system/img/admin/forums.png', 0, 1, 1, 1, 0, 1)");
+			$sql = sed_sql_query("INSERT INTO $db_forum_sections (fs_order, fs_title, fs_desc, fs_category, fs_parentcat, fs_icon, fs_autoprune, fs_allowusertext, fs_allowbbcodes, fs_allowsmilies, fs_allowprvtopics, fs_countposts) VALUES ('" . (int)$nextorder . "', '" . sed_sql_prep($ntitle) . "', '" . sed_sql_prep($ndesc) . "', '" . sed_sql_prep($ncat) . "', '" . (int)$nparentcat . "', 'system/img/admin/forums.png', 0, 1, 1, 1, 0, 1)");
 
 			$forumid = sed_sql_insertid();
 
@@ -227,27 +248,33 @@ if ($n == 'edit') {
 		}
 	}
 
-	$sql = sed_sql_query("SELECT s.*, n.* FROM $db_forum_sections AS s LEFT JOIN
-    $db_forum_structure AS n ON n.fn_code=s.fs_category
-    ORDER by fn_path ASC, fs_order ASC, fs_title ASC");
+	$all_sections = sed_forum_load_sections();
+	$tree = sed_forum_get_tree();
+
+	$cat_info = array();
+	$sql_str = sed_sql_query("SELECT * FROM $db_forum_structure ORDER BY fn_path ASC");
+	while ($r = sed_sql_fetchassoc($sql_str)) {
+		$cat_info[$r['fn_code']] = $r;
+	}
 
 	$prev_cat = '';
 	$line = 1;
 
-	while ($row = sed_sql_fetchassoc($sql)) {
+	foreach ($tree as $row) {
 		$fs_id = $row['fs_id'];
 		$fs_state = $row['fs_state'];
 		$fs_order = $row['fs_order'];
 		$fs_title = sed_cc($row['fs_title']);
 		$fs_desc = sed_cc($row['fs_desc']);
 		$fs_category = $row['fs_category'];
+		$depth = $row['depth'];
 
-		if ($fs_category != $prev_cat) {
-
+		if ($fs_category != $prev_cat && isset($cat_info[$fs_category])) {
+			$ci = $cat_info[$fs_category];
 			$t->assign(array(
-				"FN_CAT_URL" => sed_url("admin", "m=forums&s=structure&n=options&id=" . $row['fn_id']),
-				"FN_CAT_TITLE" => sed_cc($row['fn_title']),
-				"FN_CAT_PATH" => $row['fn_path']
+				"FN_CAT_URL" => sed_url("admin", "m=forums&s=structure&n=options&id=" . $ci['fn_id']),
+				"FN_CAT_TITLE" => sed_cc($ci['fn_title']),
+				"FN_CAT_PATH" => $ci['fn_path']
 			));
 
 			$t->parse("ADMIN_FORUMS.FS_CAT.FS_LIST.FN_CAT");
@@ -256,8 +283,11 @@ if ($n == 'edit') {
 			$line = 1;
 		}
 
+		$tree_prefix = sed_forum_format_tree_prefix_html($depth, $row['is_last'], $row['prefix_continues']);
+
 		$t->assign(array(
-			"FS_LIST_TITLE" => sed_link(sed_url("admin", "m=forums&n=edit&id=" . $fs_id), $fs_title),
+			"FS_LIST_TITLE" => $tree_prefix . sed_link(sed_url("admin", "m=forums&n=edit&id=" . $fs_id), $fs_title),
+			"FS_LIST_DEPTH" => $depth,
 			"FS_LIST_ORDER_UP_URL" => sed_url("admin", "m=forums&id=" . $fs_id . "&a=order&w=up"),
 			"FS_LIST_ORDER_DOWN_URL" => sed_url("admin", "m=forums&id=" . $fs_id . "&a=order&w=down"),
 			"FS_LIST_ALLOWPRIWATETOPICS" => $sed_yesno[$row['fs_allowprvtopics']],
@@ -274,8 +304,10 @@ if ($n == 'edit') {
 	}
 
 	$t->assign(array(
+		"FS_CAT_SEND" => sed_url("admin", "m=forums"),
 		"FS_ADD_SEND" => sed_url("admin", "m=forums&a=add"),
 		"FS_ADD_CATEGORY" => sed_selectbox_forumcat('', 'ncat'),
+		"FS_ADD_PARENTCAT" => sed_selectbox_forum_parent('nparentcat', 0),
 		"FS_ADD_TITLE" => sed_textbox('ntitle', '', 64, 128),
 		"FS_ADD_DESC" => sed_textbox('ndesc', '', 64, 255)
 	));

@@ -387,48 +387,29 @@ $notlastpage = (($d + $maxtopicsperpage) < $totalposts) ? TRUE : FALSE;
 $pages = sed_pagination(sed_url("forums", "m=posts&q=" . $q), $d, $totalposts, $maxtopicsperpage);
 list($pages_prev, $pages_next) = sed_pagination_pn(sed_url("forums", "m=posts&q=" . $q), $d, $totalposts, $maxtopicsperpage, TRUE);
 
-/* ============ For Subforums Sed 172 ================ */
+/* ============ For Subforums ================ */
 
-$sql1 = sed_sql_query("SELECT s.fs_id, s.fs_title, s.fs_category, s.fs_parentcat FROM $db_forum_sections AS s LEFT JOIN
-	$db_forum_structure AS n ON n.fn_code=s.fs_category
-    ORDER by fn_path ASC, fs_order ASC");
-
+$jumpbox_tree = sed_forum_get_tree();
 $movebox = "<input type=\"submit\" class=\"submit btn\" value=\"" . $L['Move'] . "\" /><select name=\"ns\" size=\"1\">";
 $jumpbox = "<select name=\"jumpbox\" size=\"1\" onchange=\"sedjs.redirect(this)\">";
 $jumpbox .= "<option value=\"" . sed_url("forums") . "\">" . $L['Forums'] . "</option>";
 
-while ($row1 = sed_sql_fetchassoc($sql1)) {
-	if (sed_auth('forums', $row1['fs_id'], 'R')) {
-		$forum_sections[$row1['fs_id']] = $row1;
+foreach ($jumpbox_tree as $jb_item) {
+	if (sed_auth('forums', $jb_item['fs_id'], 'R')) {
+		$jb_prefix = sed_forum_format_tree_prefix_html($jb_item['depth'], $jb_item['is_last'], $jb_item['prefix_continues']);
+		$cfs = $jb_prefix . sed_cc($jb_item['fs_title']);
+
+		if ($jb_item['fs_id'] != $s && $usr['isadmin']) {
+			$movebox .= "<option value=\"" . $jb_item['fs_id'] . "\">" . $cfs . "</option>";
+		}
+
+		$selected = ($jb_item['fs_id'] == $s) ? "selected=\"selected\"" : '';
+		$jumpbox .= "<option $selected value=\"" . sed_url("forums", "m=topics&s=" . $jb_item['fs_id']) . "\">" . $cfs . "</option>";
 	}
-}
-
-foreach ($forum_sections as $key => $value) {
-	$pcat = $forum_sections[$key]['fs_parentcat'];
-	$parentcat2 = array();
-	if ($pcat > 0) {
-		$parentcat2['sectionid']  = $forum_sections[$pcat]['fs_id'];
-		$parentcat2['title']  = $forum_sections[$pcat]['fs_title'];
-	}
-
-	$cfs = sed_build_forums($forum_sections[$key]['fs_id'], $forum_sections[$key]['fs_title'], $forum_sections[$key]['fs_category'], FALSE, $parentcat2);
-
-	if ($forum_sections[$key]['fs_id'] != $s && $usr['isadmin']) {
-		$movebox .= "<option value=\"" . $forum_sections[$key]['fs_id'] . "\">" . $cfs . "</option>";
-	}
-
-	$selected = ($forum_sections[$key]['fs_id'] == $s) ? "selected=\"selected\"" : '';
-	$jumpbox .= "<option $selected value=\"" . sed_url("forums", "m=topics&s=" . $forum_sections[$key]['fs_id']) . "\">" . $cfs . "</option>";
 }
 
 $movebox .= "</select> " . $L['Ghost'] . " " . sed_checkbox('ghost', 1, true);
 $jumpbox .= "</select>";
-
-$parentcat = array();
-if ($fs_parentcat > 0) {
-	$parentcat['sectionid']  = $forum_sections[$fs_parentcat]['fs_id'];
-	$parentcat['title']  = $forum_sections[$fs_parentcat]['fs_title'];
-}
 
 /* ============ ==================== ==================*/
 
@@ -451,7 +432,7 @@ if ($ft_poll > 0) {
 
 $ft_title = ($ft_mode == 1) ? "# " . sed_cc($ft_title) : sed_cc($ft_title);
 
-$toptitle = sed_link(sed_url("forums"), $L['Forums']) . " " . $cfg['separator'] . " " . sed_build_forums($s, $fs_title, $fs_category, TRUE, $parentcat);
+$toptitle = sed_link(sed_url("forums"), $L['Forums']) . " " . $cfg['separator'] . " " . sed_build_forums($s, $fs_title, $fs_category, TRUE);
 $toptitle .= " " . $cfg['separator'] . " " . sed_link(sed_url("forums", "m=posts&q=" . $q . "&al=" . $ft_title), $ft_title);
 $toptitle .= ($usr['isadmin']) ? " *" : '';
 
@@ -486,7 +467,7 @@ $t = new XTemplate($mskin);
 // ---------- Breadcrumbs
 $urlpaths = array();
 $urlpaths[sed_url("forums")] = $L['Forums'];
-sed_build_forums_bc($s, $fs_title, $fs_category, $parentcat);
+sed_build_forums_bc($s, $fs_title, $fs_category);
 $urlpaths[sed_url("forums", "m=posts&q=" . $q . "&al=" . $ft_title)] = $ft_title;
 
 // ---------- Polls on forum (only when polls module is active)
@@ -505,7 +486,7 @@ if (sed_module_active('polls') && $ft_poll > 0) {
 
 		$sql7 = sed_sql_query("SELECT po_id, po_text, po_count FROM $db_polls_options WHERE po_pollid='$ft_poll' ORDER by po_id ASC");
 
-		$xpoll = new XTemplate(sed_skinfile('poll'));
+		$xpoll = new XTemplate(sed_skinfile('polls.poll'));
 
 		while ($row7 = sed_sql_fetchassoc($sql7)) {
 			$po_id = $row7['po_id'];

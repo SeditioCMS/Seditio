@@ -68,6 +68,7 @@ $L['core_forums'] = "Форум";
 $L['cfg_hideprivateforums'] = array("Скрывать приватные разделы форума", "");
 $L['cfg_hottopictrigger'] = array("Сообщений в теме для присвоения ей статуса 'популярная'", "");
 $L['cfg_maxtopicsperpage'] = array("Максимум тем или сообщений на странице", "");
+$L['cfg_maxforumdepth'] = array("Максимальная глубина вложенности подфорумов", "");
 $L['cfg_antibumpforums'] = array("'Анти-бамп' защита", "Запрет на добавление пользователями нескольких сообщений подряд в одной и той же теме форума");
 $L['cfg_disable_forums'] = array("Отключить форум", "");
 /* $L['cfg_trash_forum'] — plugins/trashcan/lang/trashcan.*.lang.php */

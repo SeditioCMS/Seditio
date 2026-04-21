@@ -256,38 +256,20 @@ if ($usr['isadmin'] && !empty($q) && !empty($a)) {
 	}
 }
 
-/* ===========  For Subforums Sed 172 =================*/
+/* ===========  For Subforums =================*/
 
-$sql1 = sed_sql_query("SELECT s.fs_id, s.fs_title, s.fs_category, s.fs_parentcat FROM $db_forum_sections AS s LEFT JOIN
-	$db_forum_structure AS n ON n.fn_code=s.fs_category
-    ORDER by fn_path ASC, fs_order ASC");
-
+$jumpbox_tree = sed_forum_get_tree();
 $jumpbox = "<select name=\"jumpbox\" size=\"1\" onchange=\"sedjs.redirect(this)\">";
 $jumpbox .= "<option value=\"" . sed_url("forums") . "\">" . $L['Forums'] . "</option>";
 
-while ($row1 = sed_sql_fetchassoc($sql1)) {
-	if (sed_auth('forums', $row1['fs_id'], 'R')) {
-		$forum_sections[$row1['fs_id']] = $row1;
+foreach ($jumpbox_tree as $jb_item) {
+	if (sed_auth('forums', $jb_item['fs_id'], 'R')) {
+		$jb_prefix = sed_forum_format_tree_prefix_html($jb_item['depth'], $jb_item['is_last'], $jb_item['prefix_continues']);
+		$selected = ($jb_item['fs_id'] == $s) ? "selected=\"selected\"" : '';
+		$jumpbox .= "<option $selected value=\"" . sed_url("forums", "m=topics&s=" . $jb_item['fs_id'] . "&al=" . $jb_item['fs_title']) . "\">" . $jb_prefix . sed_cc($jb_item['fs_title']) . "</option>";
 	}
-}
-
-foreach ($forum_sections as $key => $value) {
-	$pcat = $forum_sections[$key]['fs_parentcat'];
-	$parentcat2 = array();
-	if ($pcat > 0) {
-		$parentcat2['sectionid']  = $forum_sections[$pcat]['fs_id'];
-		$parentcat2['title']  = $forum_sections[$pcat]['fs_title'];
-	}
-	$selected = ($forum_sections[$key]['fs_id'] == $s) ? "selected=\"selected\"" : '';
-	$jumpbox .= "<option $selected value=\"" . sed_url("forums", "m=topics&s=" . $forum_sections[$key]['fs_id'] . "&al=" . $forum_sections[$key]['fs_title']) . "\">" . sed_build_forums($forum_sections[$key]['fs_id'], $forum_sections[$key]['fs_title'], $forum_sections[$key]['fs_category'], FALSE, $parentcat2) . "</option>";
 }
 $jumpbox .= "</select>";
-
-$parentcat = array();
-if ($fs_parentcat > 0) {
-	$parentcat['sectionid']  = $forum_sections[$fs_parentcat]['fs_id'];
-	$parentcat['title']  = $forum_sections[$fs_parentcat]['fs_title'];
-}
 
 /* ============ ==================== ==================*/
 
@@ -342,13 +324,13 @@ $t = new XTemplate($mskin);
 $pages = sed_pagination(sed_url("forums", "m=topics&s=" . $s . "&al=" . $fs_title . "&o=" . $pn_o . "&w=" . $pn_w), $d, $totaltopics, $maxtopicsperpage);
 list($pages_prev, $pages_next) = sed_pagination_pn(sed_url("forums", "m=topics&s=" . $s . "&al=" . $fs_title . "&o=" . $pn_o . "&w=" . $pn_w), $d, $totaltopics, $maxtopicsperpage, TRUE);
 
-$toptitle = sed_link(sed_url("forums"), $L['Forums']) . " " . $cfg['separator'] . " " . sed_build_forums($s, $fs_title, $fs_category, TRUE, $parentcat);
+$toptitle = sed_link(sed_url("forums"), $L['Forums']) . " " . $cfg['separator'] . " " . sed_build_forums($s, $fs_title, $fs_category, TRUE);
 $toptitle .= ($usr['isadmin']) ? " *" : '';
 
 // ---------- Breadcrumbs
 $urlpaths = array();
 $urlpaths[sed_url("forums")] = $L['Forums'];
-sed_build_forums_bc($s, $fs_title, $fs_category, $parentcat);
+sed_build_forums_bc($s, $fs_title, $fs_category);
 
 if (!empty($pages)) {
 	$t->assign(array(
@@ -382,19 +364,30 @@ $t->assign(array(
 $extp = sed_getextplugins('forums.topics.loop');
 /* ===== */
 
-/* ===========  For Subforums Sed 172 =================*/
+/* ===========  For Subforums =================*/
 
 $sql2 = sed_sql_query("SELECT s.*, n.* FROM $db_forum_sections AS s, $db_forum_structure AS n
 					   WHERE s.fs_parentcat=" . $s . " AND n.fn_code=s.fs_category
 					   ORDER BY fn_path ASC, fs_order ASC");
 
+$forum_subforums = array();
 while ($fsn_sub = sed_sql_fetchassoc($sql2)) {
 	$forum_subforums[$fsn_sub['fs_id']] = $fsn_sub;
 }
 
+$sub_children = array();
+if (!empty($forum_subforums)) {
+	$sub_ids_str = implode(',', array_map('intval', array_keys($forum_subforums)));
+	$sql_gc = sed_sql_query("SELECT fs_id, fs_title, fs_desc, fs_icon, fs_parentcat, fs_lt_date, fs_lt_posterid
+		FROM $db_forum_sections WHERE fs_parentcat IN ($sub_ids_str) ORDER BY fs_order ASC");
+	while ($gc = sed_sql_fetchassoc($sql_gc)) {
+		$sub_children[(int)$gc['fs_parentcat']][] = $gc;
+	}
+}
+
 $fsn_num = 0;
 
-if (isset($forum_subforums) && is_array($forum_subforums)) {
+if (!empty($forum_subforums)) {
 
 	if (!isset($sed_sections_act)) {
 		$sed_sections_act = array();
@@ -504,6 +497,28 @@ if (isset($forum_subforums) && is_array($forum_subforums)) {
 				"FORUMS_SECTIONS_ROW_ODDEVEN" => sed_build_oddeven($fsn_num),
 				"FORUMS_SECTIONS_ROW" => $fsn
 			));
+
+			if (!empty($sub_children[$fsn['fs_id']])) {
+				$sc_ii = 0;
+				foreach ($sub_children[$fsn['fs_id']] as $sc_row) {
+					$sc_title = $sc_row['fs_title'];
+					if ($usr['id'] > 0 && $sc_row['fs_lt_date'] > $usr['lastvisit'] && $sc_row['fs_lt_posterid'] != $usr['id']) {
+						$sc_title = "+ " . $sc_title;
+					}
+					$sc_ii++;
+					$t->assign(array(
+						"FORUMS_SECTIONS_ROW_SUBFORUMS_ID" => $sc_row['fs_id'],
+						"FORUMS_SECTIONS_ROW_SUBFORUMS_TITLE" => $sc_title,
+						"FORUMS_SECTIONS_ROW_SUBFORUMS_DESC" => $sc_row['fs_desc'],
+						"FORUMS_SECTIONS_ROW_SUBFORUMS_ICON" => $sc_row['fs_icon'],
+						"FORUMS_SECTIONS_ROW_SUBFORUMS_URL" => sed_url("forums", "m=topics&s=" . $sc_row['fs_id'] . "&al=" . $sc_row['fs_title']),
+						"FORUMS_SECTIONS_ROW_SUBFORUMS_ODDEVEN" => sed_build_oddeven($sc_ii),
+						"FORUMS_SECTIONS_ROW_SUBFORUMS_NUM" => $sc_ii
+					));
+					$t->parse("MAIN.FORUMS_SECTIONS.FORUMS_SECTIONS_ROW.FORUMS_SECTIONS_ROW_SECTION.FORUMS_SECTIONS_ROW_SUBFORUMS.FORUMS_SECTIONS_ROW_SUBFORUMS_LIST");
+				}
+				$t->parse("MAIN.FORUMS_SECTIONS.FORUMS_SECTIONS_ROW.FORUMS_SECTIONS_ROW_SECTION.FORUMS_SECTIONS_ROW_SUBFORUMS");
+			}
 
 			$t->parse("MAIN.FORUMS_SECTIONS.FORUMS_SECTIONS_ROW.FORUMS_SECTIONS_ROW_SECTION");
 		}

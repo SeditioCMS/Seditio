@@ -69,6 +69,7 @@ $L['cfg_formatmonthdayhourmin'] = array("Forum tarih biçimi", "Varsayılan: d.m
 $L['cfg_hideprivateforums'] = array("Özel forumları gizle", "");
 $L['cfg_hottopictrigger'] = array("Konunun 'popüler' sayılması için mesaj sayısı", "");
 $L['cfg_maxtopicsperpage'] = array("Sayfa başına en fazla konu veya mesaj", "");
+$L['cfg_maxforumdepth'] = array("Alt forum iç içe geçme derinliği üst sınırı", "");
 $L['cfg_antibumpforums'] = array("Ardışık mesaj koruması", "Aynı konuda art arda iki mesaj yazılmasını engeller");
 $L['cfg_disable_forums'] = array("Forumları devre dışı bırak", "");
 /* $L['cfg_trash_forum'] — plugins/trashcan/lang/trashcan.*.lang.php */

@@ -51,6 +51,8 @@ function sed_build_forums($sectionid, $title, $category, $link = true, $parentca
 	$pathcodes = explode('.', (string) $pathstr);
 	$tmp = array();
 
+	$parents = sed_forum_get_parents($sectionid);
+
 	if ($link) {
 		foreach ($pathcodes as $k => $x) {
 			$x = trim($x);
@@ -61,9 +63,9 @@ function sed_build_forums($sectionid, $title, $category, $link = true, $parentca
 			$tmp[] = sed_link(sed_url("forums", "c=" . $x, "#" . $x), $ptitle);
 		}
 
-		if (is_array($parentcat) && !empty($parentcat)) {
-			$ptitle = sed_cc($parentcat['title']);
-			$tmp[] = sed_link(sed_url("forums", "m=topics&s=" . $parentcat['sectionid'] . "&al=" . $ptitle), $ptitle);
+		foreach ($parents as $p) {
+			$ptitle = sed_cc($p['fs_title']);
+			$tmp[] = sed_link(sed_url("forums", "m=topics&s=" . $p['fs_id'] . "&al=" . $ptitle), $ptitle);
 		}
 		$tmp[] = sed_link(sed_url("forums", "m=topics&s=" . $sectionid . "&al=" . $title), sed_cc($title));
 	} else {
@@ -75,8 +77,8 @@ function sed_build_forums($sectionid, $title, $category, $link = true, $parentca
 			$tmp[] = sed_cc($sed_forums_str[$x]['title']);
 		}
 
-		if (is_array($parentcat) && !empty($parentcat)) {
-			$tmp[] = $parentcat['title'];
+		foreach ($parents as $p) {
+			$tmp[] = sed_cc($p['fs_title']);
 		}
 
 		$tmp[] = sed_cc($title);
@@ -106,9 +108,10 @@ function sed_build_forums_bc($sectionid, $title, $category, $parentcat = false)
 		$urlpaths[sed_url("forums", "c=" . $x, "#" . $x)] = $ptitle;
 	}
 
-	if (is_array($parentcat) && !empty($parentcat)) {
-		$ptitle = sed_cc($parentcat['title']);
-		$urlpaths[sed_url("forums", "m=topics&s=" . $parentcat['sectionid'] . "&al=" . $ptitle)] = $ptitle;
+	$parents = sed_forum_get_parents($sectionid);
+	foreach ($parents as $p) {
+		$ptitle = sed_cc($p['fs_title']);
+		$urlpaths[sed_url("forums", "m=topics&s=" . $p['fs_id'] . "&al=" . $ptitle)] = $ptitle;
 	}
 
 	$title = sed_cc($title);
@@ -322,14 +325,15 @@ function sed_selectbox_forumcat($check, $name)
  */
 function sed_selectbox_sections($check, $name)
 {
-	global $db_forum_sections, $cfg;
+	global $cfg;
 
-	$sql = sed_sql_query("SELECT fs_id, fs_title, fs_category FROM $db_forum_sections WHERE 1 ORDER by fs_order ASC");
+	$tree = sed_forum_get_tree();
 	$result = "<select name=\"$name\" size=\"1\">";
-	while ($row = sed_sql_fetchassoc($sql)) {
-		$selected = ($row['fs_id'] == $check) ? "selected=\"selected\"" : '';
-		$result .= "<option value=\"" . $row['fs_id'] . "\" $selected>" . sed_cc(sed_cutstring($row['fs_category'], 24));
-		$result .= ' ' . $cfg['separator'] . ' ' . sed_cc(sed_cutstring($row['fs_title'], 32));
+	foreach ($tree as $item) {
+		$prefix = sed_forum_format_tree_prefix_html($item['depth'], $item['is_last'], $item['prefix_continues']);
+		$selected = ($item['fs_id'] == $check) ? "selected=\"selected\"" : '';
+		$result .= "<option value=\"" . $item['fs_id'] . "\" $selected>" . $prefix . sed_cc(sed_cutstring($item['fs_category'], 24));
+		$result .= ' ' . $cfg['separator'] . ' ' . sed_cc(sed_cutstring($item['fs_title'], 32)) . "</option>";
 	}
 	$result .= "</select>";
 	return ($result);
@@ -348,7 +352,14 @@ function sed_forum_deletesection($id)
 	$id = (int)$id;
 	$num = 0;
 
-	// Remove rights (auth) for this section first
+	$sql = sed_sql_query("SELECT fs_parentcat FROM $db_forum_sections WHERE fs_id='$id'");
+	$parent_id = 0;
+	if ($row = sed_sql_fetchassoc($sql)) {
+		$parent_id = (int)$row['fs_parentcat'];
+	}
+
+	sed_sql_query("UPDATE $db_forum_sections SET fs_parentcat='$parent_id' WHERE fs_parentcat='$id'");
+
 	$sql = sed_sql_query("DELETE FROM $db_auth WHERE auth_code='forums' AND auth_option='$id'");
 	$num += sed_sql_affectedrows();
 
@@ -432,6 +443,310 @@ function sed_forum_resyncall()
 		sed_forum_resync($row['fs_id']);
 	}
 	return;
+}
+
+/**
+ * Loads all sections into a flat array keyed by fs_id.
+ * Used as the source for tree building, parent lookups, etc.
+ *
+ * @return array
+ */
+function sed_forum_load_sections()
+{
+	global $db_forum_sections, $db_forum_structure;
+
+	static $cache = null;
+	if ($cache !== null) {
+		return $cache;
+	}
+
+	$cache = array();
+	$sql = sed_sql_query("SELECT s.*, n.fn_path FROM $db_forum_sections AS s
+		LEFT JOIN $db_forum_structure AS n ON n.fn_code = s.fs_category
+		ORDER BY fn_path ASC, fs_order ASC");
+
+	while ($row = sed_sql_fetchassoc($sql)) {
+		$cache[(int)$row['fs_id']] = $row;
+	}
+	return $cache;
+}
+
+/**
+ * HTML prefix for one tree row (box-drawing: │ ├ └ ─).
+ *
+ * @param int   $depth
+ * @param bool  $is_last
+ * @param array $prefix_continues  Per ancestor level: true = draw vertical bar (│)
+ * @return string
+ */
+function sed_forum_format_tree_prefix_html($depth, $is_last, $prefix_continues)
+{
+	if ($depth < 1) {
+		return '';
+	}
+	$out = '';
+	$pc = is_array($prefix_continues) ? $prefix_continues : array();
+	for ($k = 0; $k < $depth - 1; $k++) {
+		if (!empty($pc[$k])) {
+			$out .= '&#x2502;&nbsp;&nbsp;';
+		} else {
+			$out .= '&nbsp;&nbsp;&nbsp;&nbsp;';
+		}
+	}
+	$out .= $is_last ? '&#x2514;&#x2500;&nbsp;' : '&#x251C;&#x2500;&nbsp;';
+	return $out;
+}
+
+/**
+ * @param array $children
+ * @param array $all
+ * @param array $exclude_set
+ * @param string $category
+ * @param int $pid
+ * @param int $depth
+ * @param array $prefix_continues
+ * @return array
+ */
+function sed_forum_get_tree_walk($children, $all, $exclude_set, $category, $pid, $depth, $prefix_continues)
+{
+	$result = array();
+	if (!isset($children[$pid])) {
+		return $result;
+	}
+	$filtered = array();
+	foreach ($children[$pid] as $nid) {
+		if (isset($exclude_set[$nid]) || !isset($all[$nid])) {
+			continue;
+		}
+		if (!empty($category) && $all[$nid]['fs_category'] !== $category) {
+			continue;
+		}
+		$filtered[] = $nid;
+	}
+	foreach ($filtered as $i => $nid) {
+		$is_last = ($i === count($filtered) - 1);
+		$item = $all[$nid];
+		$item['depth'] = $depth;
+		$item['is_last'] = $is_last;
+		$item['prefix_continues'] = $prefix_continues;
+		$result[] = $item;
+		$child_prefix = $prefix_continues;
+		$child_prefix[] = !$is_last;
+		$sub = sed_forum_get_tree_walk($children, $all, $exclude_set, $category, $nid, $depth + 1, $child_prefix);
+		$result = array_merge($result, $sub);
+	}
+	return $result;
+}
+
+/**
+ * Builds a flat ordered list from the section tree suitable for rendering
+ * (admin list, select dropdowns). Each item gets 'depth', 'is_last', 'prefix_continues'.
+ *
+ * @param string $category  If set, only sections of this category
+ * @param array  $exclude   Section IDs to exclude (with all descendants)
+ * @return array  Flat list ordered by tree position
+ */
+function sed_forum_get_tree($category = '', $exclude = array())
+{
+	$all = sed_forum_load_sections();
+
+	$children = array();
+	foreach ($all as $id => $row) {
+		if (!empty($category) && $row['fs_category'] !== $category) {
+			continue;
+		}
+		$pid = (int)$row['fs_parentcat'];
+		$children[$pid][] = $id;
+	}
+
+	$exclude_set = array();
+	foreach ($exclude as $eid) {
+		$exclude_set[(int)$eid] = true;
+		foreach (sed_forum_get_children_ids((int)$eid, $all) as $cid) {
+			$exclude_set[$cid] = true;
+		}
+	}
+
+	return sed_forum_get_tree_walk($children, $all, $exclude_set, $category, 0, 0, array());
+}
+
+/**
+ * Returns the chain of parent sections from root down to (but not including) $section_id.
+ *
+ * @param int   $section_id
+ * @param array $all  Pre-loaded sections (optional, auto-loaded if null)
+ * @return array  Ordered from root to direct parent, each element is a section row
+ */
+function sed_forum_get_parents($section_id, $all = null)
+{
+	if ($all === null) {
+		$all = sed_forum_load_sections();
+	}
+
+	$chain = array();
+	$current = (int)$section_id;
+	$seen = array();
+
+	while ($current > 0 && isset($all[$current])) {
+		if (isset($seen[$current])) {
+			break;
+		}
+		$seen[$current] = true;
+		$pid = (int)$all[$current]['fs_parentcat'];
+		if ($pid > 0 && isset($all[$pid])) {
+			array_unshift($chain, $all[$pid]);
+		}
+		$current = $pid;
+	}
+	return $chain;
+}
+
+/**
+ * Returns all descendant IDs of the given section (recursive).
+ *
+ * @param int   $section_id
+ * @param array $all  Pre-loaded sections (optional)
+ * @return array  Flat list of descendant fs_id values
+ */
+function sed_forum_get_children_ids($section_id, $all = null)
+{
+	if ($all === null) {
+		$all = sed_forum_load_sections();
+	}
+
+	$children_map = array();
+	foreach ($all as $id => $row) {
+		$pid = (int)$row['fs_parentcat'];
+		$children_map[$pid][] = $id;
+	}
+
+	$result = array();
+	$stack = isset($children_map[$section_id]) ? $children_map[$section_id] : array();
+
+	while (!empty($stack)) {
+		$nid = array_pop($stack);
+		$result[] = $nid;
+		if (isset($children_map[$nid])) {
+			foreach ($children_map[$nid] as $cid) {
+				$stack[] = $cid;
+			}
+		}
+	}
+	return $result;
+}
+
+/**
+ * Latest post row (fs_lt_*) among a section's descendants, using loaded subforum rows.
+ *
+ * @param int   $section_id      Parent section fs_id
+ * @param array $forum_subforums Rows keyed by fs_id (e.g. main page subforum query)
+ * @return array|null           One section row or null
+ */
+function sed_forum_latest_in_subtree($section_id, &$forum_subforums)
+{
+	$latest = 0;
+	$latest_row = null;
+	$desc_ids = sed_forum_get_children_ids($section_id);
+	foreach ($desc_ids as $did) {
+		if (isset($forum_subforums[$did]) && $forum_subforums[$did]['fs_lt_date'] > $latest) {
+			$latest = $forum_subforums[$did]['fs_lt_date'];
+			$latest_row = $forum_subforums[$did];
+		}
+	}
+	return $latest_row;
+}
+
+/**
+ * Validates that $new_parent_id is a legal parent for $section_id:
+ * not itself, not a descendant, and depth limit not exceeded.
+ *
+ * @param int $section_id
+ * @param int $new_parent_id
+ * @param int $max_depth  Maximum nesting depth (0 = unlimited)
+ * @return bool
+ */
+function sed_forum_validate_parent($section_id, $new_parent_id, $max_depth = 5)
+{
+	if ($new_parent_id == 0) {
+		return true;
+	}
+	if ($section_id == $new_parent_id) {
+		return false;
+	}
+
+	$descendants = sed_forum_get_children_ids($section_id);
+	if (in_array($new_parent_id, $descendants)) {
+		return false;
+	}
+
+	if ($max_depth > 0) {
+		$all = sed_forum_load_sections();
+		$parents = sed_forum_get_parents($new_parent_id, $all);
+		$subtree_depth = 0;
+		$sub_ids = sed_forum_get_children_ids($section_id, $all);
+		if (!empty($sub_ids)) {
+			foreach ($sub_ids as $cid) {
+				$cp = sed_forum_get_parents($cid, $all);
+				$rel_depth = 0;
+				foreach ($cp as $p) {
+					if ((int)$p['fs_id'] === $section_id) {
+						break;
+					}
+					$rel_depth++;
+				}
+				$d = count($cp) - $rel_depth;
+				if ($d > $subtree_depth) {
+					$subtree_depth = $d;
+				}
+			}
+		}
+		$new_depth = count($parents) + 1 + $subtree_depth;
+		if ($new_depth > $max_depth) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Builds a parent-section <select> dropdown with tree indentation.
+ *
+ * @param string $name       HTML name attribute
+ * @param int    $selected   Currently selected parent ID
+ * @param string $category   Limit to this category code
+ * @param array  $exclude    Section IDs to exclude (with descendants)
+ * @return string HTML
+ */
+function sed_selectbox_forum_parent($name, $selected = 0, $category = '', $exclude = array())
+{
+	global $sed_forums_str;
+
+	$tree = sed_forum_get_tree($category, $exclude);
+	$show_cat = empty($category);
+
+	$result = "<select name=\"" . $name . "\"><option value=\"0\">--</option>";
+	$prev_cat = '';
+	foreach ($tree as $item) {
+		if ($show_cat && $item['fs_category'] !== $prev_cat) {
+			if ($prev_cat !== '') {
+				$result .= "</optgroup>";
+			}
+			$cat_label = isset($sed_forums_str[$item['fs_category']]['title'])
+				? sed_cc($sed_forums_str[$item['fs_category']]['title'])
+				: sed_cc($item['fs_category']);
+			$result .= "<optgroup label=\"" . $cat_label . "\">";
+			$prev_cat = $item['fs_category'];
+		}
+		$prefix = sed_forum_format_tree_prefix_html($item['depth'], $item['is_last'], $item['prefix_continues']);
+		$sel = ((int)$item['fs_id'] === (int)$selected) ? " selected=\"selected\"" : "";
+		$result .= "<option value=\"" . $item['fs_id'] . "\"" . $sel . ">" . $prefix . sed_cc($item['fs_title']) . "</option>";
+	}
+	if ($show_cat && $prev_cat !== '') {
+		$result .= "</optgroup>";
+	}
+	$result .= "</select>";
+	return $result;
 }
 
 /**

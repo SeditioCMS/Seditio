@@ -60,6 +60,17 @@
 									<div class="table-td">
 										<h4><a href="{FORUMS_SECTIONS_ROW_URL}">{FORUMS_SECTIONS_ROW_TITLE}</a></h4>
 										<div class="desc">{FORUMS_SECTIONS_ROW_DESC}</div>
+
+										<!-- BEGIN: FORUMS_SECTIONS_ROW_SUBFORUMS -->
+										<div class="subforums">
+											<ul class="subforums-list">
+												<!-- BEGIN: FORUMS_SECTIONS_ROW_SUBFORUMS_LIST -->
+												<li><a href="{FORUMS_SECTIONS_ROW_SUBFORUMS_URL}">{FORUMS_SECTIONS_ROW_SUBFORUMS_TITLE}</a></li>
+												<!-- END: FORUMS_SECTIONS_ROW_SUBFORUMS_LIST -->
+											</ul>
+										</div>
+										<!-- END: FORUMS_SECTIONS_ROW_SUBFORUMS -->
+
 									</div>
 
 								</div>
