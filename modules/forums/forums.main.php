@@ -68,16 +68,20 @@ while ($fsn_sub = sed_sql_fetchassoc($sql2)) {
 	$subforum_children[(int)$fsn_sub['fs_parentcat']][] = $fsn_sub['fs_id'];
 }
 
+$forum_children_map = sed_forum_get_children_map();
+
 //---
 
 if (!isset($sed_sections_act)) {
 	$sed_sections_act = array();
-	$timeback = $sys['now'] - 604800;
+	$timeback = (int)($sys['now'] - 604800);
 	$sqlact = sed_sql_query("SELECT fs_id FROM $db_forum_sections");
 	while ($tmprow = sed_sql_fetchassoc($sqlact)) {
-		$section = $tmprow['fs_id'];
-		$sqltmp = sed_sql_query("SELECT COUNT(*) FROM $db_forum_posts WHERE fp_creation>'$timeback' AND fp_sectionid='$section'");
-		$sed_sections_act[$section] = sed_sql_result($sqltmp, 0, "COUNT(*)");
+		$sed_sections_act[(int)$tmprow['fs_id']] = 0;
+	}
+	$sqltmp = sed_sql_query("SELECT fp_sectionid, COUNT(*) AS actcnt FROM $db_forum_posts WHERE fp_creation>'$timeback' GROUP BY fp_sectionid");
+	while ($row = sed_sql_fetchassoc($sqltmp)) {
+		$sed_sections_act[(int)$row['fp_sectionid']] = (int)$row['actcnt'];
 	}
 	sed_cache_store('sed_sections_act', $sed_sections_act, 600);
 }
@@ -91,7 +95,7 @@ if (!isset($sed_sections_vw)) {
 	sed_cache_store('sed_sections_vw', $sed_sections_vw, 120);
 }
 
-$secact_max = max($sed_sections_act);
+$secact_max = !empty($sed_sections_act) ? max($sed_sections_act) : 0;
 
 $out['markall'] = ($usr['id'] > 0) ? sed_link(sed_url("forums", "n=markall"), $L['for_markallasread']) : '';
 
@@ -199,8 +203,12 @@ foreach ($sect_arr as $fsec_key => $fsec) {
 
 			if ($fsn['fs_lt_id'] > 0) {
 				$fsn['fs_timago'] = sed_build_timegap($fsn['fs_lt_date'], $sys['now_offset']);
-				$fsn['lastpost'] = ($usr['id'] > 0 && $fsn['fs_lt_date'] > $usr['lastvisit'] && $fsn['fs_lt_posterid'] != $usr['id']) ? "<a href=\"" . sed_url("forums", "m=posts&q=" . $fsn['fs_lt_id'] . "&al=" . $fsn['fs_lt_title'] . "&n=unread", "#unread") . "\">" : "<a href=\"" . sed_url("forums", "m=posts&q=" . $fsn['fs_lt_id'] . "&al=" . $fsn['fs_lt_title'] . "&n=last", "#bottom") . "\">";
-				$fsn['lastpost'] .= sed_cutstring($fsn['fs_lt_title'], 32) . "</a>";
+				$url_params_lp = "m=posts&q=" . $fsn['fs_lt_id'] . "&al=" . $fsn['fs_lt_title'];
+				$lp_unread = ($usr['id'] > 0 && $fsn['fs_lt_date'] > $usr['lastvisit'] && $fsn['fs_lt_posterid'] != $usr['id']);
+				$lp_url = $lp_unread
+					? sed_url("forums", $url_params_lp . "&n=unread", "#unread")
+					: sed_url("forums", $url_params_lp . "&n=last", "#bottom");
+				$fsn['lastpost'] = sed_link($lp_url, sed_cutstring($fsn['fs_lt_title'], 32));
 			} else {
 				$fsn['fs_timago'] = '&nbsp;';
 				$fsn['lastpost'] = '&nbsp;';
@@ -261,13 +269,18 @@ foreach ($sect_arr as $fsec_key => $fsec) {
 			if (!empty($subforum_children[$fsn['fs_id']])) {
 				$ii = 0;
 
-				$latest_desc = sed_forum_latest_in_subtree($fsn['fs_id'], $forum_subforums);
+				$latest_desc = sed_forum_latest_in_subtree($fsn['fs_id'], $forum_subforums, $forum_children_map);
 				if ($latest_desc && $latest_desc['fs_lt_date'] > $lt_date) {
 					$fsnn = $latest_desc;
-					$fsnn['fs_lt_date'] = sed_build_date($cfg['formatmonthdayhourmin'], $fsnn['fs_lt_date']);
-					$fsnn['lastpost'] = ($usr['id'] > 0 && $fsnn['fs_lt_date'] > $usr['lastvisit'] && $fsnn['fs_lt_posterid'] != $usr['id']) ? "<a href=\"" . sed_url("forums", "m=posts&q=" . $fsnn['fs_lt_id'] . "&al=" . $fsnn['fs_lt_title'] . "&n=unread", "#unread") . "\">" : "<a href=\"" . sed_url("forums", "m=posts&q=" . $fsnn['fs_lt_id'] . "&al=" . $fsnn['fs_lt_title'] . "&n=last", "#bottom") . "\">";
-					$fsnn['lastpost'] .= sed_cutstring($fsnn['fs_lt_title'], 32) . "</a>";
-					$fsnn['fs_timago'] = sed_build_timegap($latest_desc['fs_lt_date'], $sys['now_offset']);
+					$latest_ts = (int)$fsnn['fs_lt_date'];
+					$is_unread = ($usr['id'] > 0 && $latest_ts > $usr['lastvisit'] && $fsnn['fs_lt_posterid'] != $usr['id']);
+					$url_params_lp = "m=posts&q=" . $fsnn['fs_lt_id'] . "&al=" . $fsnn['fs_lt_title'];
+					$lp_url = $is_unread
+						? sed_url("forums", $url_params_lp . "&n=unread", "#unread")
+						: sed_url("forums", $url_params_lp . "&n=last", "#bottom");
+					$fsnn['lastpost'] = sed_link($lp_url, sed_cutstring($fsnn['fs_lt_title'], 32));
+					$fsnn['fs_timago'] = sed_build_timegap($latest_ts, $sys['now_offset']);
+					$fsnn['fs_lt_date'] = ($latest_ts > 0) ? sed_build_date($cfg['formatmonthdayhourmin'], $latest_ts) : '';
 
 					$t->assign(array(
 						"FORUMS_SECTIONS_ROW_LASTPOSTDATE" => $fsnn['fs_lt_date'],
@@ -276,7 +289,7 @@ foreach ($sect_arr as $fsec_key => $fsec) {
 						"FORUMS_SECTIONS_ROW_TIMEAGO" => $fsnn['fs_timago']
 					));
 
-					$lt_date = $latest_desc['fs_lt_date'];
+					$lt_date = $latest_ts;
 				}
 
 				foreach ($subforum_children[$fsn['fs_id']] as $sub_id) {

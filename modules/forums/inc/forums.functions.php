@@ -383,10 +383,12 @@ function sed_forum_resync($id)
 {
 	global $db_forum_topics, $db_forum_posts, $db_forum_sections;
 
+	$id = (int)$id;
+
 	$sql = sed_sql_query("SELECT COUNT(*) FROM $db_forum_topics WHERE ft_sectionid='$id'");
 	$num = sed_sql_result($sql, 0, "COUNT(*)");
 
-	$sql = sed_sql_query("SELECT ft_id FROM $db_forum_topics WHERE 1");
+	$sql = sed_sql_query("SELECT ft_id FROM $db_forum_topics WHERE ft_sectionid='$id'");
 	while ($row = sed_sql_fetchassoc($sql)) {
 		sed_forum_resynctopic($row['ft_id']);
 	}
@@ -602,22 +604,36 @@ function sed_forum_get_parents($section_id, $all = null)
 }
 
 /**
- * Returns all descendant IDs of the given section (recursive).
+ * Builds parent-id => child fs_id lists for the full section tree.
  *
- * @param int   $section_id
- * @param array $all  Pre-loaded sections (optional)
- * @return array  Flat list of descendant fs_id values
+ * @param array|null $all  From sed_forum_load_sections(); null loads sections once
+ * @return array
  */
-function sed_forum_get_children_ids($section_id, $all = null)
+function sed_forum_get_children_map($all = null)
 {
 	if ($all === null) {
 		$all = sed_forum_load_sections();
 	}
-
 	$children_map = array();
 	foreach ($all as $id => $row) {
 		$pid = (int)$row['fs_parentcat'];
 		$children_map[$pid][] = $id;
+	}
+	return $children_map;
+}
+
+/**
+ * Returns all descendant IDs of the given section (recursive).
+ *
+ * @param int   $section_id
+ * @param array $all  Pre-loaded sections (optional, ignored if $children_map set)
+ * @param array|null $children_map  From sed_forum_get_children_map(); reuse to avoid rebuilding
+ * @return array  Flat list of descendant fs_id values
+ */
+function sed_forum_get_children_ids($section_id, $all = null, $children_map = null)
+{
+	if ($children_map === null) {
+		$children_map = sed_forum_get_children_map($all);
 	}
 
 	$result = array();
@@ -640,13 +656,14 @@ function sed_forum_get_children_ids($section_id, $all = null)
  *
  * @param int   $section_id      Parent section fs_id
  * @param array $forum_subforums Rows keyed by fs_id (e.g. main page subforum query)
+ * @param array|null $children_map Optional; from sed_forum_get_children_map() for one pass per page
  * @return array|null           One section row or null
  */
-function sed_forum_latest_in_subtree($section_id, &$forum_subforums)
+function sed_forum_latest_in_subtree($section_id, &$forum_subforums, $children_map = null)
 {
 	$latest = 0;
 	$latest_row = null;
-	$desc_ids = sed_forum_get_children_ids($section_id);
+	$desc_ids = sed_forum_get_children_ids($section_id, null, $children_map);
 	foreach ($desc_ids as $did) {
 		if (isset($forum_subforums[$did]) && $forum_subforums[$did]['fs_lt_date'] > $latest) {
 			$latest = $forum_subforums[$did]['fs_lt_date'];

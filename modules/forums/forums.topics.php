@@ -391,12 +391,14 @@ if (!empty($forum_subforums)) {
 
 	if (!isset($sed_sections_act)) {
 		$sed_sections_act = array();
-		$timeback = $sys['now'] - 604800;
+		$timeback = (int)($sys['now'] - 604800);
 		$sqlact = sed_sql_query("SELECT fs_id FROM $db_forum_sections");
 		while ($tmprow = sed_sql_fetchassoc($sqlact)) {
-			$section = $tmprow['fs_id'];
-			$sqltmp = sed_sql_query("SELECT COUNT(*) FROM $db_forum_posts WHERE fp_creation>'$timeback' AND fp_sectionid='$section'");
-			$sed_sections_act[$section] = sed_sql_result($sqltmp, 0, "COUNT(*)");
+			$sed_sections_act[(int)$tmprow['fs_id']] = 0;
+		}
+		$sqltmp = sed_sql_query("SELECT fp_sectionid, COUNT(*) AS actcnt FROM $db_forum_posts WHERE fp_creation>'$timeback' GROUP BY fp_sectionid");
+		while ($row = sed_sql_fetchassoc($sqltmp)) {
+			$sed_sections_act[(int)$row['fp_sectionid']] = (int)$row['actcnt'];
 		}
 		sed_cache_store('sed_sections_act', $sed_sections_act, 600);
 	}
@@ -410,7 +412,7 @@ if (!empty($forum_subforums)) {
 		sed_cache_store('sed_sections_vw', $sed_sections_vw, 120);
 	}
 
-	$secact_max = max($sed_sections_act);
+	$secact_max = !empty($sed_sections_act) ? max($sed_sections_act) : 0;
 
 	foreach ($forum_subforums as $fsn_key => $fsn) {
 
