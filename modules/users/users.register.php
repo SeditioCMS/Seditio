@@ -323,7 +323,7 @@ $t->assign(array(
 
 // Extra fields 
 if (count($extrafields) > 0) {
-	$extra_array = sed_build_extrafields('user', 'USERS_REGISTER', $extrafields, $ruserextrafields, 'ruser');
+	$extra_array = sed_build_extrafields('user', 'USERS_REGISTER', $extrafields, isset($ruserextrafields) ? $ruserextrafields : array(), 'ruser');
 	$t->assign($extra_array);
 }
 
