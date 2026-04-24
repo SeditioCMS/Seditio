@@ -22,6 +22,10 @@ if (!defined('SED_CODE') || !defined('SED_ADMIN')) {
 $adminmain .= "Clearing the internal SQL cache...<br />";
 sed_sql_query("TRUNCATE TABLE $db_cache");
 
+$adminmain .= "Enlarging cache.c_value to MEDIUMTEXT...<br />";
+@sed_sql_query("ALTER TABLE $db_cache MODIFY c_value MEDIUMTEXT");
+$adminmain .= "cache: c_value set to MEDIUMTEXT.<br />";
+
 /* ======== Forum table alterations (only if tables exist) ======== */
 $adminmain .= "Checking forum tables...<br />";
 $chk_ft = @sed_sql_query("SHOW TABLES LIKE '$db_forum_topics'");

@@ -50,7 +50,7 @@ $sql = sed_sql_query("CREATE TABLE " . $cfg['mysqldb'] . "cache (
   c_name varchar(16) NOT NULL DEFAULT '',
   c_expire int(11) NOT NULL DEFAULT '0',
   c_auto tinyint(1) NOT NULL DEFAULT '1',
-  c_value text,
+  c_value mediumtext,
   PRIMARY KEY (c_name)
 ) ENGINE={$cfg['mysqlengine']} DEFAULT CHARSET={$cfg['mysqlcharset']} COLLATE={$cfg['mysqlcollate']};");
 
