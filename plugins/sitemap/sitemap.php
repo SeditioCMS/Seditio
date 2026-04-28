@@ -227,5 +227,16 @@ if (isset($smcfg[$m])) {
 
 @ob_clean();
 header("Content-type: text/xml; charset=UTF-8");
-echo (utf8_encode($feed));
+
+if (function_exists('mb_check_encoding')) {
+	if (!mb_check_encoding($feed, 'UTF-8')) {
+		if (function_exists('mb_convert_encoding')) {
+			$feed = mb_convert_encoding($feed, 'UTF-8', 'auto');
+		} elseif (function_exists('utf8_encode')) {
+			$feed = utf8_encode($feed);
+		}
+	}
+}
+
+echo $feed;
 exit;

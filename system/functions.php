@@ -4111,7 +4111,12 @@ function sed_langfile($code, $type = 'plugin', $lang = null)
 		return '';
 	}
 
-	$lang = $lang ?? ($usr['lang'] ?? null) ?? ($cfg['defaultlang'] ?? 'en');
+	if ($lang === null) {
+		$lang = isset($usr['lang']) ? $usr['lang'] : null;
+	}
+	if ($lang === null) {
+		$lang = isset($cfg['defaultlang']) ? $cfg['defaultlang'] : 'en';
+	}
 	$lang = preg_replace('/[^a-z0-9_-]/i', '', $lang);
 
 	if ($type === 'module') {
