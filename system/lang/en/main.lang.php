@@ -37,6 +37,7 @@ $L['Allcategories'] = "All categories";
 $L['Allpages'] = "All pages";
 $L['Alltimesare'] = "All times are";
 $L['Announcement'] = "Announcement";
+$L['Anonymous'] = "Anonymous";
 $L['Archives'] = "Archives";
 $L['Ascending'] = "Ascending";
 $L['Author'] = "Author";
@@ -356,14 +357,12 @@ $L['hea_noprivatemessages'] = "No private messages";
 $L['hea_youareloggedas'] = "Logged in as";
 $L['hea_youarenotlogged'] = "You're not logged in.";
 $L['hea_valqueues'] = "In validation queues : ";
-
 $L['hea_logout'] = "Logout";  // New in v175
 $L['hea_profile'] = "Profile"; // New in v175
 $L['hea_private_messages'] = "Private messages";  // New in v175
 $L['hea_mypfs'] = "My files"; // New in v175
 $L['hea_users'] = "Users"; // New in v175
 $L['hea_administration'] = "Administration";  // New in v175
-
 $L['hea_pageadd'] = "Add new page"; // New in v178
 
 /* ====== Footer ====== */
@@ -388,20 +387,17 @@ $L['aut_usernamealreadyindb'] = "The user name you provided is already in the da
 $L['aut_emailalreadyindb'] = "The email you provided is already in the database";
 $L['aut_passwordmismatch'] = "The password fields do not match !";
 $L['aut_emailbanned'] = "This email (or this host) is banned, reason is : ";
-
 $L['aut_contactadmin'] = "If you have any difficulties please contact the board administrator";
-
 $L['aut_regrequesttitle'] = "Registration request";
 $L['aut_regrequest'] = "Hi %1\$s,\n\nYou are receiving this email because you have (or someone pretending to be you has) registered a new account on our website. If you did not request this email then please ignore it, if you keep receiving it please contact the site administrator. \n\nYour account is currently inactive, an administrator will need to activate it before you can log in. You will receive another email when this has occured. Then you will be able to login with : \n\nUsername = %1\$s \nPassword = %2\$s";
-
 $L['aut_regreqnoticetitle'] = "New account request";
 $L['aut_regreqnotice'] = "Hi,\n\nYou are receiving this email because %1\$s requested a new account.\nThis user won't be able to login until you manually set the account as 'active', here :\n\n %2\$s";
-
 $L['aut_emailreg'] = "Hi %1\$s,\n\nYou are receiving this email because you have (or someone pretending to be you has) registered a new account on our website. If you did not request this email then please ignore it, if you keep receiving it please contact the site administrator.\n\nTo use your account you need to activate it with this link :\n\n %3\$s \n\n Then you'll be able to login with : \n\nUsername = %1\$s \nPassword = %2\$s";
-
 $L['aut_registertitle'] = "Register a new member account";
 $L['aut_registersubtitle'] = "";
 $L['aut_logintitle'] = "Login form";
+
+/* ====== Forums strings moved to modules/forums/lang/ ======= */
 
 /* ====== Messages ====== */
 

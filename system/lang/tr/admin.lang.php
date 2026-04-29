@@ -146,7 +146,6 @@ $L['cfg_multihost'] = array("Çoklu host modu", "Birden fazla hostu etkinleştir
 $L['cfg_absurls'] = array("Mutlak URL", "Mutlak URL kullanımını etkinleştir");  // v175'te yeni
 $L['cfg_sefurls'] = array("SEF URL'leri", "Sitede SEF URL'lerini etkinleştir");  // v175'te yeni
 $L['cfg_sefurls301'] = array("SEF URL'lere 301 yönlendirmesi", "Eski URL'den SEF URL'lere 301 yönlendirmesini etkinleştir");  // v175'te yeni
-
 $L['cfg_dateformat'] = array("Ana tarih maskesi", "Varsayılan: d.m.Y H:i");
 $L['cfg_formatmonthday'] = array("Kısa tarih maskesi", "Varsayılan: d.m");
 $L['cfg_formatyearmonthday'] = array("Orta tarih maskesi", "Varsayılan: d.m.Y");
@@ -190,7 +189,6 @@ $L['cfg_pfsuserfolder'] = array("Klasör depolama modu", "Etkinleştirilirse, ku
 $L['cfg_th_amode'] = array("Küçük resim oluşturma", "");
 $L['cfg_th_x'] = array("Küçük resimler, genişlik", "Varsayılan: 112 piksel");
 $L['cfg_th_y'] = array("Küçük resimler, yükseklik", "Varsayılan: 84 piksel, önerilen: Genişlik x 0.75");
-
 //$L['cfg_th_border'] = array("Küçük resimler, kenarlık boyutu", "Varsayılan: 4 piksel");
 $L['cfg_th_keepratio'] = array("Küçük resimler, oranı korusun mu?", "");
 $L['cfg_th_jpeg_quality'] = array("Küçük resimler, Jpeg kalitesi", "Varsayılan: 85");
@@ -240,7 +238,6 @@ $L['cfg_freetext6'] = array("Serbest metin Alanı #6<br />{PHP.cfg.freetext6} t�
 $L['cfg_freetext7'] = array("Serbest metin Alanı #7<br />{PHP.cfg.freetext7} tüm tpl dosyalarında", "");
 $L['cfg_freetext8'] = array("Serbest metin Alanı #8<br />{PHP.cfg.freetext8} tüm tpl dosyalarında", "");
 $L['cfg_freetext9'] = array("Serbest metin Alanı #9<br />{PHP.cfg.freetext9} tüm tpl dosyalarında", "");
-
 $L['cfg_extra1title'] = array("Alan #1 (Dizi), başlık", "");
 $L['cfg_extra2title'] = array("Alan #2 (Dizi), başlık", "");
 $L['cfg_extra3title'] = array("Alan #3 (Dizi), başlık", "");
@@ -268,7 +265,6 @@ $L['cfg_extra6uchange'] = array("Kullanıcı profilinde düzenlenebilir mi?", ""
 $L['cfg_extra7uchange'] = array("Kullanıcı profilinde düzenlenebilir mi?", "");
 $L['cfg_extra8uchange'] = array("Kullanıcı profilinde düzenlenebilir mi?", "");
 $L['cfg_extra9uchange'] = array("Kullanıcı profilinde düzenlenebilir mi?", "");
-
 $L['cfg_disable_comments'] = array("Yorumları devre dışı bırak", "");
 /* $L['cfg_disable_forums'] moved to modules/forums/lang/ */
 $L['cfg_disable_pfs'] = array("PFS'yi devre dışı bırak", "");
@@ -280,8 +276,10 @@ $L['cfg_disable_plug'] = array("Eklentileri devre dışı bırak", "");
 /* Çöp kutusu eklentisi: plugins/trashcan/lang/trashcan.*.lang.php */
 
 $L['cfg_color_group'] = array("Kullanıcı gruplarını renkli yap", "Varsayılan: Hayır, daha iyi performans için");  // Yeni v175
+
 $L['cfg_ajax'] = array("AJAX'ı etkinleştir", "");  // Yeni v175
 $L['cfg_enablemodal'] = array("Modal pencereleri etkinleştir", "");  // Yeni v175
+
 $L['cfg_hometitle'] = array("Ana sayfa başlığı", "Opsiyonel, SEO için"); // Yeni v179
 $L['cfg_homemetadescription'] = array("Ana sayfa meta açıklaması", "Opsiyonel, SEO için"); // Yeni v179
 $L['cfg_homemetakeywords'] = array("Ana sayfa meta anahtar kelimeleri", "Opsiyonel, SEO için"); // Yeni v179
@@ -330,7 +328,6 @@ $L['adm_dic_list'] = "Dizinler listesi";
 $L['adm_dictionary'] = "Dizin";
 $L['adm_dic_title'] = "Dizin başlığı";
 $L['adm_dic_code'] = "Dizin kodu (ekstra alan adı)";
-$L['adm_dic_list'] = "Dizinler listesi";
 $L['adm_dic_term_list'] = "Terimler listesi";
 $L['adm_dic_add'] = "Yeni dizin ekle";
 $L['adm_dic_edit'] = "Dizini düzenle";
@@ -340,8 +337,11 @@ $L['adm_dic_term_value'] = "Terim değeri";
 $L['adm_dic_term_defval'] = "Bir terimi varsayılan yap?";
 $L['adm_dic_term_edit'] = "Dizinden terimi düzenle";
 $L['adm_dic_children'] = "Alt dizin";
+
 $L['adm_dic_mera'] = "Birim";
+
 $L['adm_dic_values'] = "Seçim, radio, checkbox için değerler";
+
 $L['adm_dic_form_title'] = "Form elemanı başlığı";
 $L['adm_dic_form_desc'] = "Form elemanı için metin";
 $L['adm_dic_form_size'] = "Metin alanının boyutu";
@@ -409,10 +409,12 @@ $L['adm_fileyesno'] = "Dosya (evet/hayır)";
 $L['adm_fileurl'] = "Dosya URL'si";
 $L['adm_filesize'] = "Dosya boyutu";
 $L['adm_filecount'] = "Dosya görüntülenme sayısı";
+
 $L['adm_tpl_mode'] = "Şablon modu";
 $L['adm_tpl_empty'] = "Varsayılan";
 $L['adm_tpl_forced'] = "Aynı olan";
 $L['adm_tpl_parent'] = "Ana kategoriyle aynı olan";
+
 $L['adm_enablecomments'] = "Yorumları etkinleştir";   // Yeni v173
 $L['adm_enableratings'] = "Puanlamayı etkinleştir";     // Yeni v173
 
@@ -506,8 +508,13 @@ $L['adm_uninstall_submit'] = "Kaldırmayı onayla";
 
 /* ====== Modules ====== */
 
+$L['adm_modules'] = "Modüller";
 $L['adm_locked'] = "Kilit";
 $L['adm_module_locked'] = "Modül kilitli (kaldırılamaz veya duraklatılamaz)";
+$L['adm_modules_installed'] = "Yüklü modüller";
+$L['adm_modules_available'] = "Kullanılabilir modüller";
+$L['adm_modules_none'] = "Yüklü modül yok.";
+$L['adm_modules_noavailable'] = "Yükleme için yeni modül bulunmuyor.";
 
 /* ====== Private messages ====== */
 

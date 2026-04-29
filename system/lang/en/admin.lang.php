@@ -201,9 +201,7 @@ $L['cfg_pfs_filemask'] = array("File names based on pattern of time", "Generate 
 
 $L['cfg_available_image_sizes'] = array("Available image resolutions", "Listed with commas, no spaces. Example: 120x80,800x600");  // New in sed180
 
-$L['cfg_disable_gallery'] = array("Disable the gallery", "");         // New in v150
-$L['cfg_gallery_gcol'] = array("Number of columns for the galleries", "Default : 4");     // New in v150
-$L['cfg_gallery_bcol'] = array("Number of columns for the pictures", "Default : 6");        // New in v150
+/* Gallery config (cfg_disable_gallery, cfg_gallery_gcol, cfg_gallery_bcol) moved to modules/gallery/lang/ */
 $L['cfg_th_imgmaxwidth'] = array("Max width in pixel for a picture displayed, if it's larger a sized-down copy will be processed", "");
 $L['cfg_th_logofile'] = array("Png/jpeg/Gif logo that will be added to all the new PFS images", "Leave empty to disable");
 $L['cfg_th_logopos'] = array("Position of the logo in the PFS images", "Default : Bottom left");
@@ -309,7 +307,6 @@ $L['adm_enablebbcodes'] = "Enable BBcodes";
 $L['adm_enablesmilies'] = "Enable smilies";
 $L['adm_enableprvtopics'] = "Allow private topics";
 $L['adm_countposts'] = "Count posts";
-$L['adm_autoprune'] = "Auto-prune topics after * days";
 /* Forum admin strings moved to modules/forums/lang/ */
 $L['adm_defstate'] = "Default state";
 $L['adm_defstate_0'] = "Folded";
@@ -331,7 +328,6 @@ $L['adm_dic_list'] = "Directories list";
 $L['adm_dictionary'] = "Directory";
 $L['adm_dic_title'] = "Title of the directory";
 $L['adm_dic_code'] = "Code of the directory (name of extra field)";
-$L['adm_dic_list'] = "List of the directories";
 $L['adm_dic_term_list'] = "List of terms";
 $L['adm_dic_add'] = "Add new directory";
 $L['adm_dic_edit'] = "Edit directory";
@@ -352,6 +348,7 @@ $L['adm_dic_form_size'] = "Size of text field";
 $L['adm_dic_form_maxsize'] = "The maximum size of text field";
 $L['adm_dic_form_cols'] = "The cols of text field";
 $L['adm_dic_form_rows'] = "The rows of text field";
+$L['adm_dic_form_wysiwyg'] = "WYSIWYG editor type";
 
 $L['adm_dic_extra'] = "Extra field";
 $L['adm_dic_addextra'] = "Add extra field";
@@ -359,12 +356,8 @@ $L['adm_dic_editextra'] = "Edit extra field";
 $L['adm_dic_extra_location'] = "Name of table";
 $L['adm_dic_extra_type'] = "Data type of field";
 $L['adm_dic_extra_size'] = "Length of field";
-
 $L['adm_dic_comma_separat'] = "(comma separated)";
-
 $L['adm_help_dic'] = "Directories store terms, while Extrapoles (Extra fields) turn those terms into template fields.<br />1) In \"Directory\" set Code (base for placeholders and the DB column), Type and (for select/radio/checkbox) Values.<br />2) In \"Terms list\" add terms: Title (shown) and Value (stored code). Optionally mark the \"default term\".<br />3) In \"Extra field\" choose the insertion Location (pages/users/com, etc.). After saving, Seditio adds a column like tableprefix_{CODE} (page_{CODE}/user_{CODE}/com_{CODE}) and uses your terms when building select/radio/checkbox inputs.<br />Template placeholders: {XXX_CODE} — the extrapole value (in forms it is an input, on output it is term-resolved); {XXX_CODE_TITLE}, {XXX_CODE_DESC}, {XXX_CODE_MERA}, {XXX_CODE_VAL} (title/description/unit/raw value).";
-
-$L['adm_dic_form_wysiwyg'] = "WYSIWYG editor type";
 
 $L['adm_dic_extra_default'] = 'Default value';
 $L['adm_dic_extra_default_help'] = 'Leave empty — will use empty string or 0 (depending on field type). Enter a value — it will be used as DEFAULT.';

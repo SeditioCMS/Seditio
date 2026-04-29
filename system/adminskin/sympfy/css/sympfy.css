@@ -1055,6 +1055,10 @@ ul.content-box-tabs li a.current {
   margin: 10px;
 }
 
+.log-desc .desc {
+  word-break: break-all;
+}
+
 /*-------------------------*/
 
 /***** TOP BAR MENU *****/

@@ -6,7 +6,7 @@ Copyright (c) Seditio Team
 https://seditio.org
 -----------------------
 Seditio language pack
-Language : English (code:tr)
+Language : Türkçe (code:tr)
 Localization done by : Neocrome
 -----------------------
 [BEGIN_SED]
@@ -390,12 +390,9 @@ $L['aut_emailbanned'] = "Bu e-posta (veya bu host) yasaklanmış, sebep: ";
 $L['aut_contactadmin'] = "Herhangi bir zorluk yaşarsanız lütfen site yöneticisi ile iletişime geçin";
 $L['aut_regrequesttitle'] = "Kayıt talebi";
 $L['aut_regrequest'] = "Merhaba %1\$s,\n\nBu e-postayı alıyorsunuz çünkü siz (veya sizin gibi birisi) web sitemizde yeni bir hesap oluşturmuşsunuz. Eğer bu e-postayı istemediyseniz, lütfen göz ardı edin. Eğer sürekli alıyorsanız, lütfen site yöneticisi ile iletişime geçin. \n\nHesabınız şu anda aktif değil, giriş yapabilmeniz için bir yönetici hesabınızı aktif hale getirmelidir. Bu işlem yapıldığında başka bir e-posta alacaksınız. O zaman giriş yapabileceksiniz: \n\nKullanıcı adı = %1\$s \nŞifre = %2\$s";
-
 $L['aut_regreqnoticetitle'] = "Yeni hesap talebi";
 $L['aut_regreqnotice'] = "Merhaba,\n\nBu e-postayı alıyorsunuz çünkü %1\$s yeni bir hesap talep etti.\nBu kullanıcı, hesabı 'aktif' olarak ayarlanana kadar giriş yapamayacak. Bunu burada manuel olarak yapabilirsiniz:\n\n %2\$s";
-
 $L['aut_emailreg'] = "Merhaba %1\$s,\n\nBu e-postayı alıyorsunuz çünkü siz (veya sizin gibi birisi) web sitemizde yeni bir hesap oluşturmuşsunuz. Eğer bu e-postayı istemediyseniz, lütfen göz ardı edin. Eğer sürekli alıyorsanız, lütfen site yöneticisi ile iletişime geçin.\n\nHesabınızı kullanabilmek için şu bağlantıyı tıklayarak aktif etmeniz gerekiyor:\n\n %3\$s \n\nO zaman giriş yapabileceksiniz: \n\nKullanıcı adı = %1\$s \nŞifre = %2\$s";
-
 $L['aut_registertitle'] = "Yeni bir üye hesabı kaydedin";
 $L['aut_registersubtitle'] = "";
 $L['aut_logintitle'] = "Giriş formu";
@@ -411,7 +408,6 @@ $L['aut_logintitle'] = "Giriş formu";
 $L['spoiler_locked_both'] = "{groupName} grubundaki ve {minlevel} üzerindeki erişim seviyesi olan kullanıcılar için gizli içerik mevcut";
 $L['spoiler_locked_group'] = "Gizli içerik sadece {groupName} grubu için mevcut";
 $L['spoiler_locked_level'] = "Gizli içerik, en az {minlevel} erişim seviyesine sahip kullanıcılar için mevcut";
-
 
 /* ====== Plug ====== */
 

@@ -5384,25 +5384,25 @@ function sed_build_extrafields_data($rowname, $tpl_tag, $extrafields, $data, $ge
 }
 
 
-/* ============== FLAGS AND COUNTRIES (ISO 3166) =============== */
+/* ============== FLAGS AND COUNTRIES =============== */
 
 $sed_languages['de'] = 'Deutsch';
 $sed_languages['dk'] = 'Dansk';
-$sed_languages['es'] = 'Espanol';
+$sed_languages['es'] = 'Español';
 $sed_languages['fi'] = 'Suomi';
-$sed_languages['fr'] = 'Francais';
+$sed_languages['fr'] = 'Français';
 $sed_languages['it'] = 'Italiano';
 $sed_languages['nl'] = 'Nederlands';
-$sed_languages['ru'] = '&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;';
+$sed_languages['ru'] = 'Русский';
 $sed_languages['se'] = 'Svenska';
 $sed_languages['en'] = 'English';
 $sed_languages['pl'] = 'Polski';
 $sed_languages['pt'] = 'Portugese';
-$sed_languages['cn'] = '&#27721;&#35821;';
+$sed_languages['cn'] = '中文';
 $sed_languages['gr'] = 'Greek';
 $sed_languages['hu'] = 'Hungarian';
-$sed_languages['jp'] = '&#26085;&#26412;&#35486;';
-$sed_languages['kr'] = '&#54620;&#44397;&#47568;';
+$sed_languages['jp'] = '日本語';
+$sed_languages['kr'] = '한국어';
 
 $sed_countries = array(
 	'00' => '---',

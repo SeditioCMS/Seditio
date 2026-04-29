@@ -149,7 +149,7 @@ $L['cfg_sefurls301'] = array("301 редирект на SEF URLs", "Включа
 $L['cfg_dateformat'] = array("Основная маска даты", "По умолчанию: d.m.Y H:i");
 $L['cfg_formatmonthday'] = array("Краткая маска даты", "По умолчанию: d.m");
 $L['cfg_formatyearmonthday'] = array("Средняя маска даты", "По умолчанию: d.m.Y");
-$L['cfg_formatmonthdayhourmin'] = array("Маска даты в форуме", "По умолчанию: d.m H:i");
+/* $L['cfg_formatmonthdayhourmin'] moved to modules/forums/lang/ */
 $L['cfg_servertimezone'] = array("Часовой пояс сервера", "Смещение времени на сервере от GMT+00");
 $L['cfg_defaulttimezone'] = array("Часовой пояс по умолчанию", "Для гостей и новых пользователей, от -12 до +12");
 $L['cfg_timedout'] = array("Время бездействия, в секундах", "Время бездействия, после которого пользователь считается отсутствующим");
@@ -201,9 +201,7 @@ $L['cfg_pfs_filemask'] = array("Имена файлов на основе шаб
 
 $L['cfg_available_image_sizes'] = array("Доступные разрешения изображений", "Перечислять через запятую, без пробелов. Пример: 120x80,800x600");  // New in sed180
 
-$L['cfg_disable_gallery'] = array("Отключить галерею", "");         // New in v150
-$L['cfg_gallery_gcol'] = array("Количество колонок для галерей", "По умолчанию : 4");     // New in v150
-$L['cfg_gallery_bcol'] = array("Количество колонок для изображений", "По умолчанию : 6");        // New in v150
+/* Gallery config (cfg_disable_gallery, cfg_gallery_gcol, cfg_gallery_bcol) moved to modules/gallery/lang/ */
 $L['cfg_th_imgmaxwidth'] = array("Макс. ширина в пикселях для отображаемого изображения; при превышении создаётся уменьшенная копия", "");
 $L['cfg_th_logofile'] = array("Png/jpeg/Gif водяной знак для всех загружаемых в PFS изображений", "Оставьте пустым для отключения");
 $L['cfg_th_logopos'] = array("Позиция логотипа на PFS изображении", "По умолчанию: внизу слева");
@@ -315,7 +313,6 @@ $L['adm_defstate_0'] = "Свёрнуто";    // New in v11
 $L['adm_defstate_1'] = "Развёрнуто";    // New in v11
 $L['adm_parentcat'] = "Родительский раздел";    // New in v172
 
-
 /* ====== IP search ====== */
 
 $L['adm_searchthisuser'] = "Поиск этого IP в базе данных пользователей";
@@ -325,14 +322,13 @@ $L['adm_dnsrecord'] = "Запись DNS для этого адреса";
 
 $L['adm_help_smilies'] = "Недоступно";
 
-/* ====== Directories ====== */
+/* ====== Dictionary ====== */
 
-$L['adm_directory'] = "Справочник";
+$L['adm_dic_list'] = "Список справочников";
+$L['adm_dictionary'] = "Справочник";
 $L['adm_dic_title'] = "Заголовок справочника";
 $L['adm_dic_code'] = "Код справочника (имя экстраполя)";
-$L['adm_dic_list'] = "Список справочников";
 $L['adm_dic_term_list'] = "Список терминов";
-
 $L['adm_dic_add'] = "Добавить новый справочник";
 $L['adm_dic_edit'] = "Редактирование справочника";
 $L['adm_dic_add_term'] = "Добавить новый термин";
@@ -352,6 +348,7 @@ $L['adm_dic_form_size'] = "Размер текстового поля";
 $L['adm_dic_form_maxsize'] = "Максимальный размер поля";
 $L['adm_dic_form_cols'] = "Ширина текстового поля";
 $L['adm_dic_form_rows'] = "Высота текстового поля";
+$L['adm_dic_form_wysiwyg'] = "Тип WYSIWYG редактора";
 
 $L['adm_dic_extra'] = "Экстраполе";
 $L['adm_dic_addextra'] = "Добавление экстраполя";
@@ -359,12 +356,8 @@ $L['adm_dic_editextra'] = "Редактирование экстраполя";
 $L['adm_dic_extra_location'] = "Наименование таблицы";
 $L['adm_dic_extra_type'] = "Тип данных поля";
 $L['adm_dic_extra_size'] = "Длина поля";
-
 $L['adm_dic_comma_separat'] = "(разделенные через запятую)";
-
 $L['adm_help_dic'] = "Справочники (Directory) содержат термины, а экстраполя (Extra fields) превращают эти термины в поля для шаблонов.<br />1) В \"Справочник\" задайте Code (будет основой для плейсхолдеров и DB-колонки), Type и (для select/radio/checkbox) Values.<br />2) В \"Список терминов\" добавьте термины: Title (отображение) и Value (хранимый код). При необходимости укажите \"термин по умолчанию\".<br />3) В \"Экстраполе\" выберите локацию: pages/users/com и т.п. После сохранения система добавит колонку вида tableprefix_{CODE} (page_{CODE}/user_{CODE}/com_{CODE}), а при построении select/radio/checkbox будет использовать ваши термины.<br />Плейсхолдеры в шаблонах: {XXX_CODE} — значение экстраполя (в формах это поле ввода, при выводе — значение с учетом справочника); {XXX_CODE_TITLE}, {XXX_CODE_DESC}, {XXX_CODE_MERA}, {XXX_CODE_VAL} (заголовок/описание/мера/сырое значение).";
-
-$L['adm_dic_form_wysiwyg'] = "Тип WYSIWYG редактора";
 
 $L['adm_dic_extra_default'] = 'Значение по умолчанию';
 $L['adm_dic_extra_default_help'] = 'Оставьте пустым — будет пустая строка или 0 (в зависимости от типа поля). Введите нужное значение — оно будет использовано как DEFAULT.';
