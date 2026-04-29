@@ -149,7 +149,7 @@ $L['cfg_sefurls301'] = array("301 редирект на SEF URLs", "Включа
 $L['cfg_dateformat'] = array("Основная маска даты", "По умолчанию: d.m.Y H:i");
 $L['cfg_formatmonthday'] = array("Краткая маска даты", "По умолчанию: d.m");
 $L['cfg_formatyearmonthday'] = array("Средняя маска даты", "По умолчанию: d.m.Y");
-/* $L['cfg_formatmonthdayhourmin'] moved to modules/forums/lang/ */
+$L['cfg_formatmonthdayhourmin'] = array("Маска даты в форуме", "По умолчанию: m-d H:i");
 $L['cfg_servertimezone'] = array("Часовой пояс сервера", "Смещение времени на сервере от GMT+00");
 $L['cfg_defaulttimezone'] = array("Часовой пояс по умолчанию", "Для гостей и новых пользователей, от -12 до +12");
 $L['cfg_timedout'] = array("Время бездействия, в секундах", "Время бездействия, после которого пользователь считается отсутствующим");

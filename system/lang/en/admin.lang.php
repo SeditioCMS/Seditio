@@ -149,7 +149,7 @@ $L['cfg_sefurls301'] = array("301 redirect to the SEF URLs", "Enable 301 redirec
 $L['cfg_dateformat'] = array("Main date mask", "Default: d.m.Y H:i");
 $L['cfg_formatmonthday'] = array("Short date mask", "Default: d.m");
 $L['cfg_formatyearmonthday'] = array("Medium date mask", "Default: d.m.Y");
-/* $L['cfg_formatmonthdayhourmin'] moved to modules/forums/lang/ */
+$L['cfg_formatmonthdayhourmin'] = array("Forum date mask", "Default: m-d H:i");
 $L['cfg_servertimezone'] = array("Server time zone", "Offset of the server from the GMT+00");
 $L['cfg_defaulttimezone'] = array("Default time zone", "For guests and new members, from -12 to +12");
 $L['cfg_timedout'] = array("Idle delay, in seconds", "After this delay, user is away");

@@ -149,7 +149,7 @@ $L['cfg_sefurls301'] = array("SEF URL'lere 301 yönlendirmesi", "Eski URL'den SE
 $L['cfg_dateformat'] = array("Ana tarih maskesi", "Varsayılan: d.m.Y H:i");
 $L['cfg_formatmonthday'] = array("Kısa tarih maskesi", "Varsayılan: d.m");
 $L['cfg_formatyearmonthday'] = array("Orta tarih maskesi", "Varsayılan: d.m.Y");
-/* $L['cfg_formatmonthdayhourmin'] moved to modules/forums/lang/ */
+$L['cfg_formatmonthdayhourmin'] = array("Forum tarih maskesi", "Varsayılan: m-d H:i");
 $L['cfg_servertimezone'] = array("Sunucu zaman dilimi", "Sunucunun GMT+00'a göre farkı");
 $L['cfg_defaulttimezone'] = array("Varsayılan zaman dilimi", "Misafirler ve yeni üyeler için, -12 ile +12 arasında");
 $L['cfg_timedout'] = array("Boşta bekleme süresi, saniye cinsinden", "Bu süre sonrasında kullanıcı 'uzak' olarak kabul edilir");
