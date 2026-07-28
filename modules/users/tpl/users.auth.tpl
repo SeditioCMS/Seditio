@@ -65,6 +65,10 @@
 
 				</form>
 
+				<!-- IF {USERS_AUTH_OAUTH_BUTTONS} -->
+				{USERS_AUTH_OAUTH_BUTTONS}
+				<!-- ENDIF -->
+
 				<div class="auth-links">
 					<ul class="systemlist">
 						<li><a href="{USERS_AUTH_REGISTER}">{PHP.skinlang.usersauth.Register}</a></li>

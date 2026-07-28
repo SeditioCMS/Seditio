@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/common.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-jul-28
 Type=Core
 Author=Seditio Team
 Description=Common
@@ -238,7 +238,7 @@ if (isset($rsedition) && $rsedition > 0 && $cfg['authmode'] > 0) {
 			$usr['skin'] = ($cfg['forcedefaultskin']) ? $cfg['defaultskin'] : $row['user_skin'];
 			$usr['lang'] = ($cfg['forcedefaultlang']) ? $cfg['defaultlang'] : $row['user_lang'];
 			$usr['newpm'] = $row['user_newpm'];
-			$usr['auth'] = unserialize($row['user_auth']);
+			$usr['auth'] = !empty($row['user_auth']) ? unserialize($row['user_auth']) : array();
 			$usr['level'] = $sed_groups[$usr['maingrp']]['level'];
 			$usr['profile'] = $row;
 			$sys['sql_update_lastvisit'] = '';

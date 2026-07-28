@@ -88,6 +88,10 @@
 						</li>
 					</ul>
 
+					<!-- IF {USERS_REGISTER_OAUTH_BUTTONS} -->
+					{USERS_REGISTER_OAUTH_BUTTONS}
+					<!-- ENDIF -->
+
 				</form>
 
 			</div>

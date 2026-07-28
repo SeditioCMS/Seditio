@@ -136,7 +136,14 @@
 						<div class="form-field">{USERS_PROFILE_TEXT}</div>
 					</li>
 
-					<!-- BEGIN: USERS_PROFILE_OLDPASS -->
+					<!-- IF {PROFILE_OAUTH_BLOCK} -->
+					<li class="form-row">
+						<div class="form-label"><label>{PHP.L.hybridauth_social_accounts}</label></div>
+						<div class="form-field">{PROFILE_OAUTH_BLOCK}</div>
+					</li>
+					<!-- ENDIF -->
+
+				<!-- BEGIN: USERS_PROFILE_OLDPASS -->
 					<li class="form-row">
 						<div class="form-label"><label>{PHP.skinlang.usersprofile.Oldpassword}</label></div>
 						<div class="form-field">
