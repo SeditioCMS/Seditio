@@ -12,7 +12,7 @@ Localization done by : Antar, Antony & Amro
 [BEGIN_SED]
 File=system/lang/ru/main.lang.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-jul-29
 Type=Lang
 Author=Seditio Team
 Description=Language main
@@ -28,6 +28,10 @@ $L['Add'] = "Добавить";
 $L['Admin.'] = "Админ.";
 $L['Administration'] = "Панель управления";
 $L['Adminpanel'] = "Управление сайтом";
+$L['admintooltip']['pageadd'] = "Добавить страницу";
+$L['admintooltip']['pageedit'] = "Редактировать страницу";
+$L['admintooltip']['pageeditcategory'] = "Редактировать категорию";
+$L['admintooltip']['pageeditoption'] = "Редактировать свойство";
 $L['Age'] = "Возраст";
 $L['Ago'] = "назад";
 $L['AIM'] = "Адрес AIM";

@@ -94,20 +94,6 @@
 <script src="skins/{PHP.skin}/js/jquery.plugins.min.js"></script>
 <script src="skins/{PHP.skin}/js/app.js"></script>
 
-<!-- BEGIN: USER -->
-<script>
-	var L = {};
-	L.pageadd = "{PHP.skinlang.admintooltip.pageadd}";
-	L.pageedit = "{PHP.skinlang.admintooltip.pageedit}";
-	L.pageeditcategory = "{PHP.skinlang.admintooltip.pageeditcategory}";
-	L.pageeditoption = "{PHP.skinlang.admintooltip.pageeditoption}";	
-</script>
-<!-- END: USER -->
-
-<!-- BEGIN: ADMIN -->
-<script src="skins/{PHP.skin}/js/admintooltip.js"></script>
-<!-- END: ADMIN -->
-
 </body>
 
 </html>

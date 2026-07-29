@@ -2565,6 +2565,22 @@ const sedjs = {
                 }
             }
         };
+    },
+
+    /**
+     * User panel toggle listener (vanilla JS delegation)
+     */
+    userpanel() {
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.openuserpanel');
+            if (btn) {
+                e.preventDefault();
+                const panel = btn.closest('.userpanel');
+                if (panel) {
+                    this.toggleClass(panel, 'open');
+                }
+            }
+        });
     }
 };
 
@@ -2573,6 +2589,7 @@ window.sedjs = sedjs;
 
 // Initialize functions when DOM is ready
 sedjs.ready(() => {
+    sedjs.userpanel();
     sedjs.sedtabs();
     sedjs.autofiletitle();
     sedjs.spoiler();

@@ -12,7 +12,7 @@ Localization done by : Neocrome
 [BEGIN_SED]
 File=system/lang/tr/main.lang.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-jul-29
 Type=Lang
 Author=Seditio Team
 Description=Language main
@@ -28,6 +28,10 @@ $L['Add'] = "Ekle";
 $L['Admin.'] = "Yönetici";
 $L['Administration'] = "Yönetim";
 $L['Adminpanel'] = "Yönetim Paneli";
+$L['admintooltip']['pageadd'] = "Sayfa ekle";
+$L['admintooltip']['pageedit'] = "Sayfa düzenle";
+$L['admintooltip']['pageeditcategory'] = "Kategori düzenle";
+$L['admintooltip']['pageeditoption'] = "Konfigürasyon seçeneğini düzenle";
 $L['Age'] = "Yaş";
 $L['Ago'] = "önce";
 $L['AIM'] = "AIM Adresi";

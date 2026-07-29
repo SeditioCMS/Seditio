@@ -227,11 +227,6 @@ var seditio 				  	= [];
 		  }
 	});
 	
-	/* user panel menu */
-	$('.openuserpanel').on('click', function () {
-	  $(this).closest('.userpanel').toggleClass('open');
-	});
-	
   },
   $(document).ready(t)
 }
