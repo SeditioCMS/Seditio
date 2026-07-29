@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/page/page.main.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-jul-29
 Type=Module
 Author=Seditio Team
 Description=Page view
@@ -49,7 +49,7 @@ if (!empty($al)) {
 
 if (sed_sql_numrows($sql) == 0) {
 	if (!empty($al) && array_key_exists($al, $sed_cat)) {
-		sed_redirect(sed_url("page", "c=" . $al, "", true));
+		sed_redirect(sed_url("page", "c=" . $al, "", true), false, array(), 301);
 	} else {
 		sed_die((sed_sql_numrows($sql) == 0), 404);
 	}
@@ -73,6 +73,23 @@ $pag['page_begin'] = sed_build_date($cfg['dateformat'], $pag['page_begin']);
 $pag['page_expire'] = sed_build_date($cfg['dateformat'], $pag['page_expire']);
 $pag['page_url_param'] = (empty($pag['page_alias'])) ? "id=" . $pag['page_id'] : "al=" . $pag['page_alias'];
 $pag['page_pageurl'] = sed_url("page", $pag['page_url_param']);
+
+/* Canonical path redirect: compare only path, preserve all query params (UTM, pagination, etc.) */
+if ($cfg['sefurls']) {
+	$canonical_redir_params = $pag['page_url_param'];
+	$a_redir = sed_import('a', 'G', 'ALP');
+	if ($a_redir === 'dl') {
+		$canonical_redir_params .= '&a=dl';
+	}
+	$canonical_redir_path = $sys['dir_uri'] . sed_url("page", $canonical_redir_params, "", false, false);
+	$current_redir_path = strtok($sys['request_uri'], '?');
+	if (rtrim($current_redir_path, '/') !== rtrim($canonical_redir_path, '/')) {
+		$qpos = strpos($sys['request_uri'], '?');
+		$original_query = ($qpos !== false) ? substr($sys['request_uri'], $qpos + 1) : '';
+		$redirect_url = $canonical_redir_path . (!empty($original_query) ? '?' . $original_query : '');
+		sed_redirect($redirect_url, false, array(), 301);
+	}
+}
 
 list($usr['auth_read'], $usr['auth_write'], $usr['isadmin']) = sed_auth('page', $pag['page_cat']);
 sed_block($usr['auth_read']);

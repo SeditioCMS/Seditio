@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/functions.php
 Version=186
-Updated=2026-apr-09
+Updated=2026-jul-29
 Type=Core
 Author=Seditio Team
 Description=Functions
@@ -4153,8 +4153,9 @@ function sed_readraw($file)
  * @param string $url Target URI
  * @param bool   $base64 Whether URL is base64-encoded
  * @param array  $msg Optional flash: array('msg' => '917', 'num' => 5, 'rc' => 102)
+ * @param int    $status HTTP status code (301, 302, 303, 307, etc.). Default 302
  */
-function sed_redirect($url, $base64 = false, $msg = array())
+function sed_redirect($url, $base64 = false, $msg = array(), $status = 302)
 {
 	global $cfg, $sys;
 
@@ -4167,6 +4168,8 @@ function sed_redirect($url, $base64 = false, $msg = array())
 		if (isset($msg['rc']))  $_SESSION[$key]['rc']  = $msg['rc'];
 	}
 
+	$status = (int)$status;
+
 	if ($cfg['redirmode']) {
 		$output = $cfg['doctype'] . "
 		<html>
@@ -4177,10 +4180,12 @@ function sed_redirect($url, $base64 = false, $msg = array())
 		<body>Redirecting to " . sed_link($url, $cfg['mainurl'] . "/") . "
 		</body>
 		</html>";
+		http_response_code($status);
 		header("Refresh: 0; URL=" . $url);
 		echo ($output);
 		exit;
 	} else {
+		http_response_code($status);
 		header("Location: " . $url);
 		exit;
 	}

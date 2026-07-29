@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/page/page.urls.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-jul-29
 Type=Module
 Author=Seditio Team
 Description=Page and list URL rewrite and translation rules
