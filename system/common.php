@@ -246,7 +246,9 @@ if (isset($rsedition) && $rsedition > 0 && $cfg['authmode'] > 0) {
 
 			if ($usr['lastlog'] + $cfg['timedout'] < $sys['now_offset']) {
 				$sys['comingback'] = TRUE;
+				$_SESSION['sed_sourcekey_prev'] = sed_sourcekey();
 				$usr['lastvisit'] = $usr['lastlog'];
+				$usr['sourcekey'] = md5($row['user_secret'] . $usr['lastvisit']);
 				$sys['sql_update_lastvisit'] = ", user_lastvisit='" . $usr['lastvisit'] . "'";
 			}
 

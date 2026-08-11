@@ -82,6 +82,7 @@ if ($a == 'check') {
 				}
 
 				if (empty($error_string)) {
+					$_SESSION['sed_sourcekey_prev'] = sed_sourcekey();
 					$ruserid = $row['user_id'];
 					$rdefskin = $row['user_skin'];
 					$rmdpass_secret = $row['user_secret'];
