@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/core/admin/admin.manage.inc.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-aug-11
 Type=Core.admin
 Author=Seditio Team
 Description=Administration panel
@@ -215,7 +215,6 @@ if (!empty($p)) {
 				if (file_exists($extplugin_info)) {
 					$info = sed_infoget($extplugin_info, 'SED_EXTPLUGIN');
 				} else {
-					include(SED_ROOT . "/system/lang/" . $usr['lang'] . "/message.lang.php");
 					$info['Name'] = $x[0] . " : " . $L['msg907_1'];
 				}
 

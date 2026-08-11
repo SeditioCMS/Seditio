@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/functions.php
 Version=186
-Updated=2026-jul-29
+Updated=2026-aug-11
 Type=Core
 Author=Seditio Team
 Description=Functions
@@ -2000,7 +2000,6 @@ function sed_die_message($code, $message_title = '', $message_body = '', $redire
 	global $L, $cfg, $sys, $usr, $lang;
 
 	$mskin = sed_skinfile(array($code, 'message')) ? sed_skinfile(array($code, 'message')) : sed_skinfile('service.message');
-	require(SED_ROOT . "/system/lang/$lang/message.lang.php");
 
 	if (array_key_exists($code, $cfg['msg_status'])) {
 		sed_sendheaders('text/html', $cfg['msg_status'][$code]);

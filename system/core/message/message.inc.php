@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=message.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-aug-11
 Type=Core
 Author=Seditio Team
 Description=Messages
@@ -28,8 +28,6 @@ $rc = sed_import('rc', 'G', 'INT');
 $redirect = sed_import('redirect', 'G', 'SLU');
 
 $redirect = ($redirect == "/") ? "" : $redirect;
-
-require("system/lang/$lang/message.lang.php");
 
 unset($r, $rd, $ru);
 
@@ -62,7 +60,7 @@ switch ($msg) {
 
 	case '104':
 		$message = $L['msg104_0'];
-		$body = $L["msg104_1"];
+		$body = str_replace('{username}', $usr['name'], $L['msg104_1']);
 		$rd = 4;
 		$ru = empty($redirect) ? sed_url("index", "", "", true, true) : str_replace("&", "&amp;", base64_decode($redirect));
 		break;
@@ -115,6 +113,11 @@ switch ($msg) {
 		if ($num > 0) {
 			$body .= "<br />(-> " . date($cfg['dateformat'], $num) . "GMT" . ")";
 		}
+		break;
+
+	case '154':
+		$message = $L['msg154_0'];
+		$body = $L['msg154_1'];
 		break;
 
 	case '157':
@@ -221,7 +224,7 @@ switch ($msg) {
 
 	case '916':
 		$message = $L['msg916_0'];
-		$body = $L["msg916_1"];
+		$body = str_replace('{num}', (isset($num) ? $num : ''), $L['msg916_1']);
 		$rd = 2;
 		$ru = sed_url("admin");
 		break;

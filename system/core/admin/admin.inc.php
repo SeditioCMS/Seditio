@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/core/admin/admin.inc.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-aug-11
 Type=Core.admin
 Author=Seditio Team
 Description=Administration panel
@@ -123,8 +123,6 @@ $t->assign(array(
 ));
 
 if (!empty($msg) || !empty($adminwarnings)) {
-	require(SED_ROOT . "/system/lang/$lang/message.lang.php");
-
 	$msg_type = (array_key_exists($msg, $cfg['msgtype'])) ? $cfg['msgtype'][$msg] : 'i';
 
 	$t->assign(array(

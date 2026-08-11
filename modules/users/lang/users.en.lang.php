@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/users/lang/users.en.lang.php
 Version=186
-Updated=2026-feb-21
+Updated=2026-aug-11
 Type=Module.lang
 Author=Seditio Team
 Description=Users English language file

@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/footer.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-aug-06
 Type=Core
 Author=Seditio Team
 Description=Global footer
@@ -96,10 +96,10 @@ $sys['creationtime'] = round(($sys['endtime'] - $sys['starttime']), 3);
 
 /* ========================================================
 #
-#  If you're not owner of a commercial licence or a copyright removal,
-#  please do not delete the copyright line in the footer, thanks.
-#  With doing this you'd break the licence agrement for personal users,
-#  you probably won't go in jail for this but that's bad bad bad !
+#  Seditio is distributed completely free of charge under the BSD License.
+#  Developing and supporting this CMS takes a lot of time and effort.
+#  Keeping the copyright and support link in the footer is your simple way
+#  to help promote and grow the project. Please do not remove it, thanks!
 #
 ========================================================== */
 

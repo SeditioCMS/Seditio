@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/users/users.auth.php
 Version=186
-Updated=2026-feb-21
+Updated=2026-aug-11
 Type=Module
 Author=Seditio Team
 Description=User authentication
@@ -21,6 +21,7 @@ if (!defined('SED_CODE')) {
 }
 
 $v = sed_import('v', 'G', 'H32');
+$error_string = '';
 
 if ($usr['id'] > 0) {
 	sed_redirect(sed_url("index"));
@@ -56,75 +57,73 @@ if ($a == 'check') {
 	$error_string .= (mb_strlen($rpassword) < 4) ? $L['aut_passwordtooshort'] . "<br />" : '';
 
 	if (empty($error_string)) {
-		// New in sed171
-		$sql = sed_sql_query("SELECT user_salt, user_passtype FROM $db_users WHERE user_name='" . sed_sql_prep($rusername) . "' OR user_email = '" . sed_sql_prep($rusername) . "'");
-
-		if (sed_sql_numrows($sql) == 1) {
-			$row = sed_sql_fetchassoc($sql);
-			$mdsalt = $row['user_salt']; // New sed172       	  
-			$rmdpass = ($row['user_passtype'] == 0) ?  sed_hash($rpassword, 0) : sed_hash($rpassword, 1, $mdsalt); // New sed172 
-		}
-
-		$sql = sed_sql_query("SELECT user_id, user_secret, user_maingrp, user_banexpire, user_skin, user_lang 
-							FROM $db_users WHERE user_password = '$rmdpass' AND (user_name='" . sed_sql_prep($rusername) . "' OR user_email = '" . sed_sql_prep($rusername) . "')");
+		$sql = sed_sql_query("SELECT user_id, user_secret, user_maingrp, user_banexpire, user_skin, user_lang, user_password, user_salt, user_passtype 
+							FROM $db_users WHERE user_name='" . sed_sql_prep($rusername) . "' OR user_email = '" . sed_sql_prep($rusername) . "'");
 
 		if ($row = sed_sql_fetchassoc($sql)) {
-			if ($row['user_maingrp'] == 2) {
-				sed_log("Log in attempt, user inactive : " . $rusername, 'usr');
-				sed_redirect(sed_url("message", "msg=152", "", true));
-				exit;
-			} elseif ($row['user_maingrp'] == 3) {
-				if ($sys['now'] > $row['user_banexpire'] && $row['user_banexpire'] > 0) {
-					$sql = sed_sql_query("UPDATE $db_users SET user_maingrp='4' WHERE user_id='" . $row['user_id'] . "'");
-				} else {
-					sed_log("Log in attempt, user banned : " . $rusername, 'usr');
-					sed_redirect(sed_url("message", "msg=153&num=" . $row['user_banexpire'], "", true));
+			$mdsalt = $row['user_salt'];
+			$rmdpass = ($row['user_passtype'] == 0) ? sed_hash($rpassword, 0) : sed_hash($rpassword, 1, $mdsalt);
+
+			if ($rmdpass != $row['user_password']) {
+				sed_shield_update(7, "Log in");
+				sed_log("Log in failed, wrong password : " . $rusername, 'usr');
+				$error_string .= $L['msg151_1'];
+			} else {
+				if ($row['user_maingrp'] == 2) {
+					sed_log("Log in attempt, user inactive : " . $rusername, 'usr');
+					$error_string .= $L['msg152_1'];
+				} elseif ($row['user_maingrp'] == 3) {
+					if ($sys['now'] > $row['user_banexpire'] && $row['user_banexpire'] > 0) {
+						$sql = sed_sql_query("UPDATE $db_users SET user_maingrp='4' WHERE user_id='" . $row['user_id'] . "'");
+					} else {
+						sed_log("Log in attempt, user banned : " . $rusername, 'usr');
+						$error_string .= $L['msg153_1'];
+					}
+				}
+
+				if (empty($error_string)) {
+					$ruserid = $row['user_id'];
+					$rdefskin = $row['user_skin'];
+					$rmdpass_secret = $row['user_secret'];
+					
+					if ($cfg['authsecret']) {
+						$rmdpass_secret = md5(sed_unique(16)); // New sed171
+						sed_sql_query("UPDATE $db_users SET user_secret = '" . $rmdpass_secret . "', user_lastip='" . $usr['ip'] . "' WHERE user_id='" . $row['user_id'] . "' LIMIT 1");
+					} else {
+						sed_sql_query("UPDATE $db_users SET user_lastip='" . $usr['ip'] . "' WHERE user_id='" . $row['user_id'] . "' LIMIT 1");
+					}
+					
+					if ($cfg['authmode'] == 1 || $cfg['authmode'] == 3) {		
+						$rcookiettl = ($rcookiettl == 0) ? 604800 : $rcookiettl;
+						$rcookiettl = ($rcookiettl > $cfg['cookielifetime']) ? $cfg['cookielifetime'] : $rcookiettl;
+						$u = base64_encode("$ruserid:_:$rmdpass_secret:_:$rdefskin");
+						sed_setcookie($sys['site_id'], $u, time() + $rcookiettl, $cfg['cookiepath'], $cfg['cookiedomain'], $sys['secure'], true);
+					}
+
+					if ($cfg['authmode'] == 2 || $cfg['authmode'] == 3) {
+						$_SESSION[$sys['site_id'] . '_n'] = $ruserid;
+						$_SESSION[$sys['site_id'] . '_p'] = $rmdpass_secret;
+						$_SESSION[$sys['site_id'] . '_s'] = $rdefskin;
+					}
+
+					/* === Hook === */
+					$extp = sed_getextplugins('users.auth.check.done');
+					if (is_array($extp)) {
+						foreach ($extp as $k => $pl) {
+							include(SED_ROOT . '/plugins/' . $pl['pl_code'] . '/' . $pl['pl_file'] . '.php');
+						}
+					}
+					/* ===== */
+
+					$sql = sed_sql_query("DELETE FROM $db_online WHERE online_userid='-1' AND online_ip='" . $usr['ip'] . "' LIMIT 1");
+					sed_redirect(sed_url("message", "msg=104&redirect=" . $redirect, "", true));
 					exit;
 				}
 			}
-
-			$ruserid = $row['user_id'];
-			$rdefskin = $row['user_skin'];
-			$rmdpass_secret = $row['user_secret'];
-			
-			if ($cfg['authsecret']) {
-				$rmdpass_secret = md5(sed_unique(16)); // New sed171
-				sed_sql_query("UPDATE $db_users SET user_secret = '" . $rmdpass_secret . "', user_lastip='" . $usr['ip'] . "' WHERE user_id='" . $row['user_id'] . "' LIMIT 1");
-			} else {
-				sed_sql_query("UPDATE $db_users SET user_lastip='" . $usr['ip'] . "' WHERE user_id='" . $row['user_id'] . "' LIMIT 1");
-				
-			}
-			
-			if ($cfg['authmode'] == 1 || $cfg['authmode'] == 3) {		
-				$rcookiettl = ($rcookiettl == 0) ? 604800 : $rcookiettl;
-				$rcookiettl = ($rcookiettl > $cfg['cookielifetime']) ? $cfg['cookielifetime'] : $rcookiettl;
-				$u = base64_encode("$ruserid:_:$rmdpass_secret:_:$rdefskin");
-				sed_setcookie($sys['site_id'], $u, time() + $rcookiettl, $cfg['cookiepath'], $cfg['cookiedomain'], $sys['secure'], true);
-			}
-
-			if ($cfg['authmode'] == 2 || $cfg['authmode'] == 3) {
-				$_SESSION[$sys['site_id'] . '_n'] = $ruserid;
-				$_SESSION[$sys['site_id'] . '_p'] = $rmdpass_secret;
-				$_SESSION[$sys['site_id'] . '_s'] = $rdefskin;
-			}
-
-			/* === Hook === */
-			$extp = sed_getextplugins('users.auth.check.done');
-			if (is_array($extp)) {
-				foreach ($extp as $k => $pl) {
-					include(SED_ROOT . '/plugins/' . $pl['pl_code'] . '/' . $pl['pl_file'] . '.php');
-				}
-			}
-			/* ===== */
-
-			$sql = sed_sql_query("DELETE FROM $db_online WHERE online_userid='-1' AND online_ip='" . $usr['ip'] . "' LIMIT 1");
-			sed_redirect(sed_url("message", "msg=104&redirect=" . $redirect, "", true));
-			exit;
 		} else {
 			sed_shield_update(7, "Log in");
-			sed_log("Log in failed, user : " . $rusername, 'usr');
-			sed_redirect(sed_url("message", "msg=151", "", true));
-			exit;
+			sed_log("Log in failed, user not found : " . $rusername, 'usr');
+			$error_string .= $L['msg154_1'];
 		}
 	}
 }
@@ -159,7 +158,7 @@ $t->assign(array(
 	"USERS_AUTH_TITLE" => $L['aut_logintitle'],
 	"USERS_AUTH_SEND" => sed_url("users", "m=auth&a=check&redirect=" . $redirect),
 	"USERS_AUTH_BREADCRUMBS" => sed_breadcrumbs($urlpaths),
-	"USERS_AUTH_USER" => sed_textbox("rusername", "", 16, 100),
+	"USERS_AUTH_USER" => sed_textbox("rusername", (isset($rusername) ? $rusername : ''), 16, 100),
 	"USERS_AUTH_PASSWORD" => sed_textbox("rpassword", "", 16, 32, "password", false, "password"),
 	"USERS_AUTH_REGISTER" => sed_url("users", "m=register"),
 	"USERS_AUTH_LOSTPASSWORD" => sed_url("plug", "e=passrecover")

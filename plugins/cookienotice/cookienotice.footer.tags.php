@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/cookienotice/cookienotice.footer.tags.php
 Version=1.0.0
-Updated=2026-jul-14
+Updated=2026-jul-29
 Type=Plugin
 Author=Seditio Team
 Description=Injects cookie notice HTML into the footer template.
@@ -59,16 +59,17 @@ $cookie_text = str_replace(
 $btn_accept = isset($L['cookienotice_btn_accept']) ? $L['cookienotice_btn_accept'] : 'Accept all';
 $btn_close = isset($L['cookienotice_btn_close']) ? $L['cookienotice_btn_close'] : 'Close';
 
-// Construct the HTML code
-$cookies_html = '
-<div class="cookie-notice hidden" id="cookieNotice">
-	<p>' . $cookie_text . '</p>
-	<div class="cookie-buttons">
-		<button class="btn" onclick="acceptCookies()">' . $btn_accept . '</button>
-		<button class="btn close-btn" onclick="closeCookies()">' . $btn_close . '</button>
-	</div>
-</div>
-';
+$mskin = sed_skinfile('cookienotice', true);
+$t_cnt = new XTemplate($mskin);
+$t_cnt->assign(array(
+	'COOKIENOTICE_TEXT' => $cookie_text,
+	'COOKIENOTICE_BTN_ACCEPT' => $btn_accept,
+	'COOKIENOTICE_BTN_CLOSE' => $btn_close,
+	'COOKIENOTICE_STAT_URL' => $stat_url,
+	'COOKIENOTICE_POLICY_URL' => $policy_url
+));
+$t_cnt->parse('MAIN');
+$cookies_html = $t_cnt->text('MAIN');
 
 // Assign HTML to footer template tag
 $t->assign("FOOTER_COOKIENOTICE", $cookies_html);
