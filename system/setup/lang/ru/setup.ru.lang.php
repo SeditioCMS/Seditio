@@ -8,12 +8,12 @@ https://seditio.org
 [BEGIN_SED]
 File=system/setup/lang/ru/setup.ru.lang.php
 Version=186
-Updated=2026-jul-20
+Updated=2026-aug-13
 Type=Core.setup
 Author=Seditio Team
 Description=Russian setup language file
 [END_SED]
-==================== */
+=================== */
 
 // Language name
 $L['lang_name'] = "Русский";
@@ -100,6 +100,12 @@ $L['setup_no_plugins'] = "Плагины в /plugins/ не найдены.";
 // Installation
 $L['setup_install'] = "Установить";
 $L['setup_installing_title'] = "Процесс установки";
+$L['setup_init_installation'] = "Инициализация установки...";
+$L['setup_phase_db'] = "Подключение к БД и проверка параметров...";
+$L['setup_phase_tables'] = "Создание таблиц и импорт структуры БД...";
+$L['setup_phase_config'] = "Запись файла конфигурации и аккаунта админа...";
+$L['setup_phase_extensions'] = "Установка выбранных модулей и плагинов...";
+$L['setup_phase_finalize'] = "Завершение установки и генерация кэша...";
 $L['setup_connected_to_db'] = "Подключение к базе данных";
 $L['setup_config_created'] = "Запись файла конфигурации datas/config.php";
 $L['setup_tables_created'] = "Создание таблиц базы данных";

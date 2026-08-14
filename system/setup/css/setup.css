@@ -707,6 +707,24 @@ input:disabled + .slider {
     margin-right: 8px;
 }
 
+.terminal-spinner {
+    color: var(--accent-mid);
+    font-weight: 700;
+    margin-right: 6px;
+    display: inline-block;
+    animation: spinnerPulse 1.2s infinite ease-in-out;
+}
+
+.terminal-phase-text {
+    color: #e6edf3;
+    font-weight: 500;
+}
+
+@keyframes spinnerPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
 .terminal-line .ok {
     color: #57ab5a;
     font-weight: 600;

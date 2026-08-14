@@ -28,7 +28,8 @@
 
 					<!-- BEGIN: HEADER_ADMIN_USER -->
 					<div id="profile-links">
-						{PHP.L.Hi}, <span class="user-login">{HEADER_USER_NAME}</span>
+						<div class="user-greeting">{PHP.L.Hi}, <span class="user-login">{HEADER_USER_NAME}</span></div>
+						<div class="user-group">{HEADER_USER_GROUPS}</div>
 					</div>
 					<!-- END: HEADER_ADMIN_USER -->
 
@@ -143,6 +144,30 @@
 					</div>
 
 					<div class="topbar-menu-right">
+
+						<!-- BEGIN: HEADER_NOTICES_DROPDOWN -->
+						<div class="notices-dropdown">
+							<button type="button" class="notices-btn" title="{PHP.L.adm_notices}">
+								<i class="ic-speakerphone"></i>
+								<span class="badge badge-success">{HEADER_NOTICES_COUNT}</span>
+							</button>
+							<div class="notices-wrapper">
+								<ul class="notices-list">
+									<!-- BEGIN: HEADER_NOTICE_ITEM -->
+									<li>
+										<a href="{HEADER_NOTICE_URL}">
+											<i class="{HEADER_NOTICE_ICON}"></i>
+											<div class="notice-info">
+												<span class="notice-title">{HEADER_NOTICE_TITLE}</span>
+												<span class="notice-desc">{HEADER_NOTICE_DESC}</span>
+											</div>
+										</a>
+									</li>
+									<!-- END: HEADER_NOTICE_ITEM -->
+								</ul>
+							</div>
+						</div>
+						<!-- END: HEADER_NOTICES_DROPDOWN -->
 
 						<div class="dropdown-menu">
 

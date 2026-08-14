@@ -12,7 +12,7 @@ Localization done by : Neocrome
 [BEGIN_SED]
 File=system/lang/en/main.lang.php
 Version=186
-Updated=2026-jul-29
+Updated=2026-aug-13
 Type=Lang
 Author=Seditio Team
 Description=Language main

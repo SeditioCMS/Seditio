@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/core/admin/admin.header.php
 Version=186
-Updated=2026-jul-17
+Updated=2026-aug-14
 Type=Core
 Author=Seditio Team
 Description=Admin header
@@ -114,13 +114,57 @@ if ($usr['id'] > 0) {
 			$sqlpm = sed_sql_query("SELECT COUNT(*) FROM $db_pm WHERE pm_touserid='" . $usr['id'] . "' AND pm_state=0");
 			$usr['messages'] = sed_sql_result($sqlpm, 0, 'COUNT(*)');
 		}
-		$out['pmreminder'] = sed_link(sed_url("pm"), ($usr['messages'] > 0) ? $usr['messages'] . ' ' . $L['hea_privatemessages'] : $L['hea_noprivatemessages']);
+		$out['pmreminder'] = sed_link(sed_url("pm"), $L['hea_private_messages']);
 	}
 
 	if (!empty($out['notices'])) $t->parse("HEADER.USER.HEADER_NOTICES");
 
+	$user_maingrp_title = isset($sed_groups[$usr['maingrp']]['title']) ? sed_cc($sed_groups[$usr['maingrp']]['title']) : '';
+
+	// TopBar Bell Notifications Assembly
+	$notices_list = array();
+
+	if (sed_module_active('page') && sed_auth('page', 'any', 'A')) {
+		$sqltmp2 = sed_sql_query("SELECT COUNT(*) FROM $db_pages WHERE page_state=1");
+		$sys['pagesqueued'] = sed_sql_result($sqltmp2, 0, 'COUNT(*)');
+		if ($sys['pagesqueued'] > 0) {
+			$notices_list[] = array(
+				'title' => $L['adm_valqueue'],
+				'desc' => $sys['pagesqueued'] . ' ' . ($sys['pagesqueued'] == 1 ? $L['Page'] : $L['Pages']),
+				'url' => sed_url('admin', 'm=page'),
+				'icon' => 'ic-pages'
+			);
+		}
+	}
+
+	if (sed_module_active('pm') && !empty($usr['messages']) && $usr['messages'] > 0) {
+		$notices_list[] = array(
+			'title' => $L['hea_private_messages'],
+			'desc' => $usr['messages'] . ' ' . $L['hea_privatemessages'],
+			'url' => sed_url('pm'),
+			'icon' => 'ic-mail'
+		);
+	}
+
+	$sys['notices_count'] = count($notices_list);
+
+	if ($sys['notices_count'] > 0) {
+		foreach ($notices_list as $nitem) {
+			$t->assign(array(
+				"HEADER_NOTICE_TITLE" => $nitem['title'],
+				"HEADER_NOTICE_DESC" => $nitem['desc'],
+				"HEADER_NOTICE_URL" => $nitem['url'],
+				"HEADER_NOTICE_ICON" => $nitem['icon']
+			));
+			$t->parse("HEADER.HEADER_NOTICES_DROPDOWN.HEADER_NOTICE_ITEM");
+		}
+		$t->assign("HEADER_NOTICES_COUNT", $sys['notices_count']);
+		$t->parse("HEADER.HEADER_NOTICES_DROPDOWN");
+	}
+
 	$t->assign(array(
 		"HEADER_USER_NAME" => $usr['name'],
+		"HEADER_USER_GROUPS" => $user_maingrp_title,
 		"HEADER_USER_ADMINPANEL" => $out['adminpanel'],
 		"HEADER_USER_LOGINOUT" => $out['loginout'],
 		"HEADER_USER_PROFILE" => $out['profile'],
@@ -129,7 +173,8 @@ if ($usr['id'] > 0) {
 		"HEADER_USER_AVATAR" => sed_build_userimage($usr['profile']['user_avatar']),
 		"HEADER_USER_PMREMINDER" => isset($out['pmreminder']) ? $out['pmreminder'] : '',
 		"HEADER_USER_PAGEADD" => $out['pageadd'],
-		"HEADER_USER_MESSAGES" => $usr['messages']
+		"HEADER_USER_MESSAGES" => $usr['messages'],
+		"HEADER_NOTICES_COUNT" => $sys['notices_count']
 	));
 
 	$t->parse("HEADER.HEADER_USER_MENU");

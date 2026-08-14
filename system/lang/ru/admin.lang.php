@@ -19,6 +19,13 @@ Description=Admin panel
 [END_SED]
 ==================== */
 
+/* ====== Dashboard & Admin Home ====== */
+
+$L['adm_clearcache'] = "Очистить кэш";
+$L['adm_cache_cleared'] = "Системный кэш успешно очищен!";
+$L['adm_quick_actions'] = "Быстрые действия";
+$L['adm_about_system'] = "О системе";
+
 /* ====== Core ====== */
 
 $L['core_main'] = "Основные настройки";
@@ -43,6 +50,7 @@ $L['core_admin'] = "Административная панель";
 $L['core_log'] = "Журнал";
 $L['core_manage'] = "Инструменты";
 $L['core_images'] = "Изображения";
+$L['adm_no_notices'] = "Нет новых уведомлений";
 
 /* ====== Upgrade ====== */
 

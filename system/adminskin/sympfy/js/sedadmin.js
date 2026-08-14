@@ -71,12 +71,25 @@ const sedadminjs = (() => {
     };
 
     /**
+     * Checks if an element is currently hidden
+     * @param {HTMLElement} element - The element to check
+     * @returns {boolean} True if hidden
+     */
+    const isElementHidden = (element) => {
+        if (!element) return true;
+        if (element.style.display === 'none') return true;
+        if (element.style.display === 'block') return false;
+        return window.getComputedStyle(element).display === 'none';
+    };
+
+    /**
      * Toggles an element's visibility with slide animation
      * @param {HTMLElement} element - The element to toggle
      * @param {number} duration - Animation duration in milliseconds
      */
-    const slideToggle = (element, duration) => {
-        if (element.style.display === 'none' || !element.style.display) {
+    const slideToggle = (element, duration = 250) => {
+        if (!element) return;
+        if (isElementHidden(element)) {
             slideDown(element, duration);
         } else {
             slideUp(element, duration);
@@ -88,7 +101,7 @@ const sedadminjs = (() => {
      * @param {HTMLElement} element - The element to slide down
      * @param {number} duration - Animation duration in milliseconds
      */
-    const slideDown = (element, duration) => {
+    const slideDown = (element, duration = 250) => {
         element.style.display = 'block';
         const height = element.offsetHeight;
         element.style.height = '0px';
@@ -104,7 +117,7 @@ const sedadminjs = (() => {
      * @param {HTMLElement} element - The element to slide up
      * @param {number} duration - Animation duration in milliseconds
      */
-    const slideUp = (element, duration) => {
+    const slideUp = (element, duration = 250) => {
         const height = element.offsetHeight;
         element.style.height = `${height}px`;
         element.style.overflow = 'hidden';
@@ -487,19 +500,22 @@ const sedadminjs = (() => {
      * Initializes content-related behaviors including collapsible boxes, table styling, and checkbox controls
      */
     const initContent = () => {
-        const headers = document.querySelectorAll('.content-box-header h3, .content-header h3');
+        const headers = document.querySelectorAll('.content-box-header, .content-header, .card-header');
         for (const header of headers) {
-            setStyles(header, { cursor: 's-resize' });
-            header.addEventListener('click', function() {
-                const contentBox = this.parentNode.parentNode;
-                const content = contentBox.querySelector('.content-box-content-tabs') ||
-                    contentBox.querySelector('.content-box-content') ||
-                    contentBox.querySelector('.content-card-content');
+            setStyles(header, { cursor: 'pointer' });
+            header.addEventListener('click', function(e) {
+                if (e.target.closest('select, button, a, input, form')) return;
+
+                const contentBox = this.closest('.content-box, .content-card, .dashboard-card, .card');
+                if (!contentBox) return;
+
+                const content = contentBox.querySelector('.content-box-content-tabs, .content-box-content, .content-card-content, .card-body');
                 const tabs = contentBox.querySelector('.content-box-tabs');
 
-                toggleElement(content);
+                if (content) slideToggle(content, 250);
+                if (tabs) slideToggle(tabs, 250);
+
                 sedjs.toggleClass(contentBox, 'closed-box');
-                if (tabs) toggleElement(tabs);
 
                 if (content) {
                     const activeTab = content.querySelector('.tab-content[style="display: block;"]');
@@ -513,9 +529,7 @@ const sedadminjs = (() => {
 
         const closedBoxes = document.querySelectorAll('.closed-box');
         for (const closedBox of closedBoxes) {
-            const content = closedBox.querySelector('.content-box-content-tabs') ||
-                closedBox.querySelector('.content-box-content') ||
-                closedBox.querySelector('.content-card-content');
+            const content = closedBox.querySelector('.content-box-content-tabs, .content-box-content, .content-card-content, .card-body');
             const tabs = closedBox.querySelector('.content-box-tabs');
             if (content) content.style.display = 'none';
             if (tabs) tabs.style.display = 'none';
@@ -582,7 +596,7 @@ const sedadminjs = (() => {
      */
     const toggleElement = (element) => {
         if (element) {
-            element.style.display = element.style.display === 'none' ? 'block' : 'none';
+            slideToggle(element, 250);
         }
     };
 

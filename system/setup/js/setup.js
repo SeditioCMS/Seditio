@@ -455,7 +455,40 @@ class SeditioSetup {
         const terminal = document.getElementById('install-terminal');
         if (!terminal) return;
         
-        terminal.innerHTML = '<div class="terminal-line"><span class="prompt">&gt;</span> Initializing installation...</div>';
+        terminal.innerHTML = '';
+
+        const spinnerFrames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+        const phases = [
+            SETUP_LANG.init_installation || 'Initializing installation...',
+            SETUP_LANG.phase_db || 'Connecting to database & verifying parameters...',
+            SETUP_LANG.phase_tables || 'Creating database tables & importing schema...',
+            SETUP_LANG.phase_config || 'Writing config file & creating admin account...',
+            SETUP_LANG.phase_extensions || 'Installing selected modules & plugins...',
+            SETUP_LANG.phase_finalize || 'Finalizing setup & warming up cache...'
+        ];
+
+        let frameIdx = 0;
+        let phaseIdx = 0;
+
+        const initLine = document.createElement('div');
+        initLine.className = 'terminal-line';
+        terminal.appendChild(initLine);
+
+        const updateInitText = () => {
+            const frame = spinnerFrames[frameIdx % spinnerFrames.length];
+            const phase = phases[Math.min(phaseIdx, phases.length - 1)];
+            initLine.innerHTML = `<span class="prompt">&gt;</span> <span class="terminal-spinner">${frame}</span> <span class="terminal-phase-text">${phase}</span>`;
+        };
+
+        updateInitText();
+
+        const timer = setInterval(() => {
+            frameIdx++;
+            if (frameIdx % 5 === 0 && phaseIdx < phases.length - 1) {
+                phaseIdx++;
+            }
+            updateInitText();
+        }, 150);
         
         const payload = {
             mysqlhost: this.formData.db.host,
@@ -476,6 +509,9 @@ class SeditioSetup {
         
         try {
             const res = await this.ajax('run_install', payload);
+            clearInterval(timer);
+            initLine.remove();
+
             if (res.ok && res.log) {
                 for (let i = 0; i < res.log.length; i++) {
                     const line = res.log[i];
@@ -501,6 +537,9 @@ class SeditioSetup {
                 terminal.appendChild(lineEl);
             }
         } catch (e) {
+            clearInterval(timer);
+            initLine.remove();
+
             const lineEl = document.createElement('div');
             lineEl.className = 'terminal-line';
             lineEl.innerHTML = `<span class="prompt">&gt;</span> <span class="fail">CRITICAL ERROR: Network request failed. Details: ${e.message}</span>`;

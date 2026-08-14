@@ -47,11 +47,16 @@ $t = new XTemplate(sed_skinfile('admin.home', false, true));
 
 // --------------------------
 
-if (!function_exists('gd_info') && $cfg['th_amode'] != 'Disabled') {
-	$adminwarnings .= $L['adm_nogd'] . "<br />";
+// ---------- Clear Cache Action ----------
+if ($a == 'clearcache') {
+	sed_check_xg();
+	sed_cache_clearall();
+	sed_redirect(sed_url("admin", "m=home", "", true), false, array('msg' => '922'));
+	exit;
 }
 
 $t->assign(array(
+	"HOME_CLEARCACHE_URL" => sed_url("admin", "m=home&a=clearcache&" . sed_xg()),
 	"HOME_PAGE_QUEUED" => sed_module_active('page') ? sed_link(sed_url("admin", "m=page"), $L['Pages'] . " : " . $pagesqueued) : ($L['Pages'] . " : -"),
 	"HOME_PAGE_ADDNEWENTRY" => sed_linkif(sed_url("page", "m=add"), $L['addnewentry'], sed_module_active('page') && sed_auth('page', 'any', 'A'))
 ));
@@ -141,3 +146,5 @@ if (is_array($extp)) {
 
 $t->parse("ADMIN_HOME");
 $adminmain .= $t->text("ADMIN_HOME");
+
+

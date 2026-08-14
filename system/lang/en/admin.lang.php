@@ -19,6 +19,13 @@ Description=Admin panel
 [END_SED]
 ==================== */
 
+/* ====== Dashboard & Admin Home ====== */
+
+$L['adm_clearcache'] = "Clear Cache";
+$L['adm_cache_cleared'] = "System cache cleared successfully!";
+$L['adm_quick_actions'] = "Quick Actions";
+$L['adm_about_system'] = "About System";
+
 /* ====== Core ====== */
 
 $L['core_main'] = "Main setup";
@@ -43,6 +50,7 @@ $L['core_admin'] = "Administration panel";
 $L['core_log'] = "Log";
 $L['core_manage'] = "Manage";
 $L['core_images'] = "Images";
+$L['adm_no_notices'] = "No new notifications";
 
 /* ====== Upgrade ====== */
 

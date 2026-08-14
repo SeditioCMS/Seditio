@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/setup/lang/tr/setup.tr.lang.php
 Version=186
-Updated=2026-jul-20
+Updated=2026-aug-13
 Type=Core.setup
 Author=Seditio Team
 Description=Turkish setup language file
@@ -20,10 +20,10 @@ $L['lang_name'] = "Türkçe";
 
 // Steps
 $L['setup_step1'] = "Hoş Geldiniz";
-$L['setup_step2'] = "Kontroller";
+$L['setup_step2'] = "Kontrol";
 $L['setup_step3'] = "Veritabanı";
 $L['setup_step4'] = "Ayarlar";
-$L['setup_step5'] = "Eklentiler";
+$L['setup_step5'] = "Bileşenler";
 $L['setup_step6'] = "Kurulum";
 
 // Navigation
@@ -32,58 +32,58 @@ $L['setup_prev_step'] = "Geri";
 
 // Welcome
 $L['setup_welcome_title'] = "Seditio'ya Hoş Geldiniz";
-$L['setup_welcome_desc'] = "Bu kurulum sihirbazı, Seditio CMS'yi birkaç basit adımda sıfırdan kurmanıza ve yapılandırmanıza yardımcı olacaktır.";
+$L['setup_welcome_desc'] = "Bu etkileşimli kurulum sihirbazı, Seditio CMS'yi sıfırdan kurmanıza ve yapılandırmanıza birkaç basit adımda yardımcı olacaktır.";
 $L['setup_select_language'] = "Kurulum dilini seçin";
 
 // System Check
 $L['setup_system_check_title'] = "Uyumluluk Kontrolü";
-$L['setup_system_check_desc'] = "Motorun doğru çalışmasını sağlamak için sunucu yapılandırmalarınızı ve klasör izinlerinizi kontrol ediyoruz.";
+$L['setup_system_check_desc'] = "Motorun sorunsuz çalışması için sunucu yapılandırmanızı ve dosya izinlerinizi kontrol ediyoruz.";
 $L['setup_checking'] = "Kontrol ediliyor";
 $L['setup_php_version'] = "PHP Sürümü";
 $L['setup_php_min_74'] = "PHP 5.6 veya üzeri gereklidir";
 $L['setup_available'] = "Mevcut";
-$L['setup_missing'] = "Mevcut değil";
+$L['setup_missing'] = "Eksik";
 $L['setup_folder'] = "Klasör";
 $L['setup_writable'] = "Yazılabilir";
 $L['setup_not_writable'] = "Yazılamaz";
 $L['setup_not_found'] = "Bulunamadı";
 $L['setup_found_writable'] = "Bulundu ve yazılabilir";
-$L['setup_found_notwritable'] = "Bulundu, ancak yazmaya karşı korumalı";
-$L['setup_notfound_folderwritable'] = "Bulunamadı, ancak klasör yazılabilir";
-$L['setup_notfound_foldernotwritable'] = "Bulunamadı ve klasör yazmaya karşı korumalı";
+$L['setup_found_notwritable'] = "Bulundu, ancak yazma korumalı";
+$L['setup_notfound_folderwritable'] = "Bulunamadı, ancak üst klasör yazılabilir";
+$L['setup_notfound_foldernotwritable'] = "Bulunamadı, üst klasör yazma korumalı";
 
-// DB
+// Database
 $L['setup_db_title'] = "Veritabanı Bağlantısı";
-$L['setup_db_desc'] = "MySQL sunucunuz için bağlantı parametrelerini belirtin.";
-$L['setup_db_host'] = "VT Sunucusu";
-$L['setup_db_host_hint'] = "Neredeyse her zaman 'localhost'";
+$L['setup_db_desc'] = "SQL sunucusu bağlantı bilgilerinizi girin.";
+$L['setup_db_host'] = "Veritabanı Sunucusu";
+$L['setup_db_host_hint'] = "Genellikle 'localhost'";
 $L['setup_db_name'] = "Veritabanı Adı";
-$L['setup_db_user'] = "VT Kullanıcısı";
-$L['setup_db_password'] = "VT Parolası";
-$L['setup_db_prefix'] = "Tablo Öneki";
+$L['setup_db_user'] = "Veritabanı Kullanıcısı";
+$L['setup_db_password'] = "Veritabanı Şifresi";
+$L['setup_db_prefix'] = "Tablo Ön Eki";
 $L['setup_db_prefix_hint'] = "Genellikle 'sed_' (emin değilseniz değiştirmeyin)";
 $L['setup_db_clear'] = "İçe aktarmadan önce veritabanını temizle";
 $L['setup_db_clear_hint'] = "Uyarı: Belirtilen veritabanındaki tüm tablolar silinecektir!";
 $L['setup_test_connection'] = "Bağlantıyı Test Et";
 $L['setup_testing'] = "Test ediliyor...";
-$L['setup_db_connected'] = "Bağlantı kuruldu! MySQL sürümü: %s";
-$L['setup_check_credentials'] = "Bağlantı başarısız oldu. Lütfen bilgilerinizi kontrol edin.";
+$L['setup_db_connected'] = "Bağlantı başarılı! MySQL sürümü: %s";
+$L['setup_check_credentials'] = "Bağlantı başarısız. Lütfen bilgilerinizi kontrol edin.";
 
 // Settings
-$L['setup_settings_title'] = "Site Ayarları";
+$L['setup_settings_title'] = "Birincil Web Sitesi Ayarları";
 $L['setup_default_skin'] = "Varsayılan Tema";
 $L['setup_default_lang'] = "Varsayılan Dil";
-$L['setup_admin_account'] = "Süper Yönetici Hesabı";
+$L['setup_admin_account'] = "Süper Yöneticisi Hesabı";
 $L['setup_admin_name'] = "Kullanıcı Adı";
-$L['setup_admin_pass'] = "Parola";
+$L['setup_admin_pass'] = "Şifre";
 $L['setup_admin_email'] = "E-posta Adresi";
 $L['setup_admin_country'] = "Ülke";
 $L['setup_generate_password'] = "Oluştur";
-$L['setup_password_copied'] = "Parola panoya kopyalandı!";
+$L['setup_password_copied'] = "Şifre panoya kopyalandı!";
 $L['setup_password_min'] = "En az 8 karakter";
-$L['setup_ownaccount_name'] = "Sistemdeki kullanıcı adınız";
+$L['setup_ownaccount_name'] = "Sistem kullanıcı adınız";
 $L['setup_least8chars'] = "En az 8 karakter";
-$L['setup_doublecheck'] = "Tekrar kontrol edin, bu önemlidir!";
+$L['setup_doublecheck'] = "Dikkatlice tekrar kontrol edin!";
 
 // Extensions
 $L['setup_extensions_title'] = "Modül ve Eklenti Seçimi";
@@ -100,6 +100,12 @@ $L['setup_no_plugins'] = "/plugins/ dizininde eklenti bulunamadı.";
 // Installation
 $L['setup_install'] = "Kur";
 $L['setup_installing_title'] = "Kurulum Süreci";
+$L['setup_init_installation'] = "Kurulum başlatılıyor...";
+$L['setup_phase_db'] = "Veritabanına bağlanılıyor ve parametreler doğrulanıyor...";
+$L['setup_phase_tables'] = "Veritabanı tabloları ve şema oluşturuluyor...";
+$L['setup_phase_config'] = "Yapılandırma dosyası yazılıyor ve yönetici hesabı oluşturuluyor...";
+$L['setup_phase_extensions'] = "Seçilen modüller ve eklentiler kuruluyor...";
+$L['setup_phase_finalize'] = "Kurulum tamamlanıyor ve önbellek oluşturuluyor...";
 $L['setup_connected_to_db'] = "Veritabanına bağlanılıyor";
 $L['setup_config_created'] = "datas/config.php yapılandırma dosyası yazılıyor";
 $L['setup_tables_created'] = "Veritabanı tabloları oluşturuluyor";

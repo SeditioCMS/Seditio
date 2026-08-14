@@ -12,7 +12,7 @@ Localization done by : Neocrome
 [BEGIN_SED]
 File=system/lang/tr/main.lang.php
 Version=186
-Updated=2026-jul-29
+Updated=2026-aug-13
 Type=Lang
 Author=Seditio Team
 Description=Language main
@@ -25,7 +25,6 @@ $L['Access'] = "Erişim";
 $L['Action'] = "Eylem";
 $L['Active'] = "Aktif";
 $L['Add'] = "Ekle";
-$L['Admin.'] = "Yönetici";
 $L['Administration'] = "Yönetim";
 $L['Adminpanel'] = "Yönetim Paneli";
 $L['admintooltip']['pageadd'] = "Sayfa ekle";

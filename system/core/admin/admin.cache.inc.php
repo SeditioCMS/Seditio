@@ -32,12 +32,16 @@ $admintitle = $L['adm_internalcache'];
 if ($a == 'purge') {
 	sed_check_xg();
 	sed_cache_clearall();
+	sed_redirect(sed_url("admin", "m=cache", "", true), false, array('msg' => '922'));
+	exit;
 } elseif ($a == 'delete') {
 	sed_check_xg();
 	$c_name = sed_import('c_name', 'G', 'TXT', 64);
 	if (!empty($c_name)) {
 		$sql = sed_sql_query("DELETE FROM $db_cache WHERE c_name='" . sed_sql_prep($c_name) . "'");
 	}
+	sed_redirect(sed_url("admin", "m=cache", "", true), false, array('msg' => '922'));
+	exit;
 } elseif ($a == 'urls_delete') {
 	sed_check_xg();
 	$urls_file = SED_ROOT . '/datas/cache/sed_urls.php';

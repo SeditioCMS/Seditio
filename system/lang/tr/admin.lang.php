@@ -19,6 +19,13 @@ Description=Admin panel
 [END_SED]
 ==================== */
 
+/* ====== Dashboard & Admin Home ====== */
+
+$L['adm_clearcache'] = "Önbelleği Temizle";
+$L['adm_cache_cleared'] = "Sistem önbelleği başarıyla temizlendi!";
+$L['adm_quick_actions'] = "Hızlı İşlemler";
+$L['adm_about_system'] = "Sistem Hakkında";
+
 /* ====== Core ====== */
 
 $L['core_main'] = "Ana ayar";

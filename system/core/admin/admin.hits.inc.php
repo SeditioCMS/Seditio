@@ -6,12 +6,12 @@ Copyright (c) Seditio Team
 https://seditio.org
 
 [BEGIN_SED]
-File=admin.statistics.hits.inc.php
+File=system/core/admin/admin.hits.inc.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-aug-14
 Type=Core.admin
 Author=Seditio Team
-Description=Administration panel
+Description=Hits statistics module with SedChart, year, month and week filters
 [END_SED]
 ==================== */
 
@@ -22,120 +22,268 @@ if (!defined('SED_CODE') || !defined('SED_ADMIN')) {
 list($usr['auth_read'], $usr['auth_write'], $usr['isadmin']) = sed_auth('admin', 'a');
 sed_block($usr['auth_read']);
 
+// Register SedChart library from system assets
+sed_add_javascript('system/assets/js/sedchart.js', true);
+
 // ---------- Breadcrumbs
 $urlpaths = array();
-$urlpaths[sed_url("admin", "m=manage")] =  $L['adm_manage'];
-$urlpaths[sed_url("admin", "m=hits")] =  $L['Hits'];
+$urlpaths[sed_url("admin", "m=manage")] = $L['adm_manage'];
+$urlpaths[sed_url("admin", "m=hits")] = $L['Hits'];
 
 $admintitle = $L['Hits'];
 
-$f = sed_import('f', 'G', 'ALP', 10);
-$v = sed_import('v', 'G', 'TXT', 8);
-
 $t = new XTemplate(sed_skinfile('admin.hits', false, true));
 
-if ($f == 'year' || $f == 'month') {
-	$adminpath[] = array(sed_url("admin", "m=hits&f=" . $f . "&v=" . $v), "(" . $v . ")");
-	$sql = sed_sql_query("SELECT * FROM $db_stats WHERE stat_name LIKE '$v%' ORDER BY stat_name DESC");
+// Query all statistics from DB
+$sql = sed_sql_query("SELECT * FROM $db_stats WHERE stat_name LIKE '20%' ORDER BY stat_name ASC");
+$sqlmax = sed_sql_query("SELECT * FROM $db_stats WHERE stat_name LIKE '20%' ORDER BY stat_value DESC LIMIT 1");
+$rowmax = sed_sql_fetchassoc($sqlmax);
+$max_date = isset($rowmax['stat_name']) ? $rowmax['stat_name'] : '';
+$max_hits = isset($rowmax['stat_value']) ? (int)$rowmax['stat_value'] : 0;
 
-	while ($row = sed_sql_fetchassoc($sql)) {
-		$y = mb_substr($row['stat_name'], 0, 4);
-		$m = mb_substr($row['stat_name'], 5, 2);
-		$d = mb_substr($row['stat_name'], 8, 2);
-		$dat = @date('Y-m-d D', mktime(0, 0, 0, $m, $d, $y));
-		$hits_d[$dat] = $row['stat_value'];
+$L['adm_maxhits'] = (empty($L['adm_maxhits'])) ? "Maximum hitcount was reached %1\$s, %2\$s pages displayed this day." : $L['adm_maxhits'];
+
+$all_stats = array();
+$years_list = array();
+$months_map = array(
+	'01' => $L['January'],
+	'02' => $L['February'],
+	'03' => $L['March'],
+	'04' => $L['April'],
+	'05' => $L['May'],
+	'06' => $L['June'],
+	'07' => $L['July'],
+	'08' => $L['August'],
+	'09' => $L['September'],
+	'10' => $L['October'],
+	'11' => $L['November'],
+	'12' => $L['December']
+);
+
+while ($row = sed_sql_fetchassoc($sql)) {
+	$stat_name = $row['stat_name']; // YYYY-MM-DD
+	$val = (int)$row['stat_value'];
+	$all_stats[$stat_name] = $val;
+
+	$y = mb_substr($stat_name, 0, 4);
+	if (!in_array($y, $years_list)) {
+		$years_list[] = $y;
+	}
+}
+
+rsort($years_list); // Descending years list for select dropdown
+
+// Handle GET parameters
+$is_submitted = isset($_GET['y']) || isset($_GET['m_code']) || isset($_GET['w_code']);
+$req_year = sed_import('y', 'G', 'INT');
+$req_month = sed_import('m_code', 'G', 'TXT', 2);
+$req_week = sed_import('w_code', 'G', 'TXT', 3);
+
+// Default behavior when page is opened without parameters:
+// Set default year & month to the latest available in DB
+if (!$is_submitted) {
+	$latest_stat = !empty($all_stats) ? array_key_last($all_stats) : date('Y-m-d');
+	$req_year = (int)mb_substr($latest_stat, 0, 4);
+	$req_month = mb_substr($latest_stat, 5, 2);
+	$req_week = '0';
+}
+
+// Build Year Select Options
+foreach ($years_list as $yr) {
+	$t->assign(array(
+		"YEAR_VAL" => $yr,
+		"YEAR_SELECTED" => ($req_year == $yr) ? 'selected="selected"' : ''
+	));
+	$t->parse("ADMIN_HITS.HITS_YEAR_OPTION");
+}
+
+// Build Month Select Options
+foreach ($months_map as $m_code => $m_title) {
+	$t->assign(array(
+		"MONTH_VAL" => $m_code,
+		"MONTH_TITLE" => $m_title,
+		"MONTH_SELECTED" => ($req_month === $m_code) ? 'selected="selected"' : ''
+	));
+	$t->parse("ADMIN_HITS.HITS_MONTH_OPTION");
+}
+
+// Collect available weeks for the selected year (or all stats)
+$weeks_list = array();
+foreach ($all_stats as $date_key => $hits_val) {
+	$y = mb_substr($date_key, 0, 4);
+	if ($req_year == 0 || $y == $req_year) {
+		$m = (int)mb_substr($date_key, 5, 2);
+		$d = (int)mb_substr($date_key, 8, 2);
+		$w_num = sprintf("%02d", (int)@date('W', mktime(0, 0, 0, $m, $d, (int)$y)));
+		if (!in_array($w_num, $weeks_list)) {
+			$weeks_list[] = $w_num;
+		}
+	}
+}
+sort($weeks_list);
+
+// Build Week Select Options
+foreach ($weeks_list as $w_num) {
+	$t->assign(array(
+		"WEEK_VAL" => $w_num,
+		"WEEK_SELECTED" => ($req_week === $w_num) ? 'selected="selected"' : ''
+	));
+	$t->parse("ADMIN_HITS.HITS_WEEK_OPTION");
+}
+
+$chart_labels = array();
+$chart_values = array();
+$table_rows = array();
+
+if ($req_year > 0 && !empty($req_week) && $req_week !== '0') {
+	// Mode 1: Year AND Week selected -> Filter by Days in that Week
+	$chart_title = $L['Hits'] . ': ' . $L['adm_byweek'] . ' ' . $req_week . ' (' . $req_year . ')';
+
+	foreach ($all_stats as $date_key => $hits_val) {
+		$y = (int)mb_substr($date_key, 0, 4);
+		$m = (int)mb_substr($date_key, 5, 2);
+		$d = (int)mb_substr($date_key, 8, 2);
+		$w_num = sprintf("%02d", (int)@date('W', mktime(0, 0, 0, $m, $d, $y)));
+
+		if ($y == $req_year && $w_num === $req_week) {
+			$chart_labels[] = sprintf("%02d.%02d", $d, $m);
+			$chart_values[] = $hits_val;
+			$table_rows[$date_key] = $hits_val;
+		}
 	}
 
-	$hits_d_max = max($hits_d);
+} elseif ($req_year > 0 && !empty($req_month) && $req_month !== '0') {
+	// Mode 2: Year AND Month selected -> Filter by Days in that Month
+	$prefix = sprintf("%04d-%02d", $req_year, (int)$req_month);
+	$m_title_str = isset($months_map[$req_month]) ? $months_map[$req_month] : $req_month;
+	$chart_title = $L['Hits'] . ': ' . $m_title_str . ' ' . $req_year;
 
-	foreach ($hits_d as $day => $hits) {
-		$percentbar = floor(($hits / $hits_d_max) * 100);
-
-		$t->assign(array(
-			"HITS_ROW_DAY" => $day,
-			"HITS_ROW_HITS" => $hits,
-			"HITS_ROW_PERCENTBAR" => $percentbar
-		));
-
-		$t->parse("ADMIN_HITS.YEAR_OR_MONTH.HITS_ROW");
+	foreach ($all_stats as $date_key => $hits_val) {
+		if (mb_strpos($date_key, $prefix) === 0) {
+			$day_num = mb_substr($date_key, 8, 2);
+			$chart_labels[] = $day_num . '.' . $req_month;
+			$chart_values[] = $hits_val;
+			$table_rows[$date_key] = $hits_val;
+		}
 	}
 
-	$t->parse("ADMIN_HITS.YEAR_OR_MONTH");
+} elseif ($req_year > 0) {
+	// Mode 3: ONLY Year selected -> Filter by Months in that Year
+	$prefix = sprintf("%04d-", $req_year);
+	$chart_title = $L['Hits'] . ': ' . $req_year;
+
+	$grouped_months = array();
+	foreach ($all_stats as $date_key => $hits_val) {
+		if (mb_strpos($date_key, $prefix) === 0) {
+			$ym_key = mb_substr($date_key, 0, 7); // YYYY-MM
+			$grouped_months[$ym_key] = isset($grouped_months[$ym_key]) ? $grouped_months[$ym_key] + $hits_val : $hits_val;
+		}
+	}
+
+	foreach ($grouped_months as $ym_key => $hits_val) {
+		$m_code = mb_substr($ym_key, 5, 2);
+		$m_label = isset($months_map[$m_code]) ? $months_map[$m_code] : $ym_key;
+		$chart_labels[] = $m_label;
+		$chart_values[] = $hits_val;
+		$table_rows[$ym_key] = $hits_val;
+	}
+
 } else {
-	$sql = sed_sql_query("SELECT * FROM $db_stats WHERE stat_name LIKE '20%' ORDER BY stat_name DESC");
-	$sqlmax = sed_sql_query("SELECT * FROM $db_stats WHERE stat_name LIKE '20%' ORDER BY stat_value DESC LIMIT 1");
-	$rowmax = sed_sql_fetchassoc($sqlmax);
-	$max_date = $rowmax['stat_name'];
-	$max_hits = $rowmax['stat_value'];
+	// Mode 4: Neither Year, Month, nor Week selected -> Filter by Years
+	$chart_title = $L['Hits'] . ': ' . $L['adm_byyear'];
 
-	$L['adm_maxhits'] = (empty($L['adm_maxhits'])) ? "Maximum hitcount was reached %1\$s, %2\$s pages displayed this day." : $L['adm_maxhits'];
-
-	$ii = 0;
-	$hits_m = array();
-	$hits_w = array();
-	$hits_y = array();
-
-	while ($row = sed_sql_fetchassoc($sql)) {
-		$y = mb_substr($row['stat_name'], 0, 4);
-		$m = mb_substr($row['stat_name'], 5, 2);
-		$d = mb_substr($row['stat_name'], 8, 2);
-		$w = @date('W', mktime(0, 0, 0, $m, $d, $y));
-		$hits_w[$y . "-W" . $w] = isset($hits_w[$y . "-W" . $w]) ? $hits_w[$y . "-W" . $w] + $row['stat_value'] : $row['stat_value'];
-		$hits_m[$y . "-" . $m] = isset($hits_m[$y . "-" . $m]) ? $hits_m[$y . "-" . $m] + $row['stat_value'] : $row['stat_value'];
-		$hits_y[$y] = isset($hits_y[$y]) ? $hits_y[$y] + $row['stat_value'] : $row['stat_value'];
+	$grouped_years = array();
+	foreach ($all_stats as $date_key => $hits_val) {
+		$y_key = mb_substr($date_key, 0, 4);
+		$grouped_years[$y_key] = isset($grouped_years[$y_key]) ? $grouped_years[$y_key] + $hits_val : $hits_val;
 	}
 
-	$hits_w_max = max($hits_w);
-	$hits_m_max = max($hits_m);
-	$hits_y_max = max($hits_y);
-
-	foreach ($hits_y as $year => $hits) {
-		$percentbar = floor(($hits / $hits_y_max) * 100);
-
-		$t->assign(array(
-			"HITS_YEAR_ROW_URL" => sed_url('admin', 'm=hits&f=year&v=' . $year),
-			"HITS_YEAR_ROW_YEAR" => $year,
-			"HITS_YEAR_ROW_HITS" => $hits,
-			"HITS_YEAR_ROW_PERCENTBAR" => $percentbar
-		));
-
-		$t->parse("ADMIN_HITS.DEFAULT.HITS_YEAR_ROW");
+	foreach ($grouped_years as $y_key => $hits_val) {
+		$chart_labels[] = $y_key;
+		$chart_values[] = $hits_val;
+		$table_rows[$y_key] = $hits_val;
 	}
+}
 
-	foreach ($hits_m as $month => $hits) {
-		$percentbar = floor(($hits / $hits_m_max) * 100);
+// Table Data Rendering (Newest First)
+$table_max = !empty($table_rows) ? max($table_rows) : 1;
+if ($table_max == 0) $table_max = 1;
+$table_rows_rev = array_reverse($table_rows, true);
 
-		$t->assign(array(
-			"HITS_MONTH_ROW_URL" => sed_url('admin', 'm=hits&f=month&v=' . $month),
-			"HITS_MONTH_ROW_MONTH" => $month,
-			"HITS_MONTH_ROW_HITS" => $hits,
-			"HITS_MONTH_ROW_PERCENTBAR" => $percentbar
-		));
+foreach ($table_rows_rev as $row_key => $hits_val) {
+	$percentbar = floor(($hits_val / $table_max) * 100);
 
-		$t->parse("ADMIN_HITS.DEFAULT.HITS_MONTH_ROW");
-	}
-
-	foreach ($hits_w as $week => $hits) {
-		$ex = explode("-W", $week);
-		$percentbar = floor(($hits / $hits_w_max) * 100);
-
-		$t->assign(array(
-			"HITS_WEEK_ROW_WEEK" => $week,
-			"HITS_WEEK_ROW_HITS" => $hits,
-			"HITS_WEEK_ROW_PERCENTBAR" => $percentbar
-		));
-
-		$t->parse("ADMIN_HITS.DEFAULT.HITS_WEEK_ROW");
+	// Create drill-down links if clicking a year or month in table
+	$row_url = '';
+	if (mb_strlen($row_key) == 4) {
+		// Year row -> Drill down to Year
+		$row_url = sed_url('admin', 'm=hits&y=' . $row_key . '&m_code=0&w_code=0');
+	} elseif (mb_strlen($row_key) == 7) {
+		// Month row YYYY-MM -> Drill down to Month
+		$r_y = mb_substr($row_key, 0, 4);
+		$r_m = mb_substr($row_key, 5, 2);
+		$row_url = sed_url('admin', 'm=hits&y=' . $r_y . '&m_code=' . $r_m . '&w_code=0');
 	}
 
 	$t->assign(array(
-		"HITS_MAXHITS" => sprintf($L['adm_maxhits'], $max_date, $max_hits)
+		"HITS_ROW_KEY" => $row_key,
+		"HITS_ROW_URL" => $row_url,
+		"HITS_ROW_HITS" => number_format($hits_val, 0, '', ' '),
+		"HITS_ROW_PERCENTBAR" => $percentbar
 	));
 
-	$t->parse("ADMIN_HITS.DEFAULT");
+	$t->parse("ADMIN_HITS.HITS_TABLE_ROW");
 }
 
-$t->assign("ADMIN_HITS_TITLE", $admintitle);
+// Pass inline JS for SedChart and auto-submit form listeners
+$js_chart_labels = json_encode($chart_labels);
+$js_chart_values = json_encode($chart_values);
+$js_hits_label = json_encode($L['Hits']);
+
+sed_add_javascript("
+document.addEventListener('DOMContentLoaded', function () {
+	var container = document.getElementById('adminHitsChart');
+	if (container && typeof SedChart !== 'undefined') {
+		new SedChart(container, {
+			labels: {$js_chart_labels},
+			values: {$js_chart_values},
+			seriesLabel: {$js_hits_label}
+		});
+	}
+
+	var yearSelect = document.getElementById('hitsYearSelect');
+	var monthSelect = document.getElementById('hitsMonthSelect');
+	var weekSelect = document.getElementById('hitsWeekSelect');
+	var filterForm = document.getElementById('hitsFilterForm');
+
+	if (yearSelect && filterForm) {
+		yearSelect.addEventListener('change', function() {
+			if (monthSelect) monthSelect.value = '0';
+			if (weekSelect) weekSelect.value = '0';
+			filterForm.submit();
+		});
+	}
+	if (monthSelect && filterForm) {
+		monthSelect.addEventListener('change', function() {
+			if (weekSelect) weekSelect.value = '0';
+			filterForm.submit();
+		});
+	}
+	if (weekSelect && filterForm) {
+		weekSelect.addEventListener('change', function() {
+			if (monthSelect) monthSelect.value = '0';
+			filterForm.submit();
+		});
+	}
+});
+");
+
+$t->assign(array(
+	"ADMIN_HITS_TITLE" => $admintitle,
+	"HITS_CHART_TITLE" => $chart_title,
+	"HITS_FILTER_ACTION" => sed_url('admin', 'm=hits'),
+	"HITS_MAXHITS" => sprintf($L['adm_maxhits'], $max_date, number_format($max_hits, 0, '', ' '))
+));
 
 $t->parse("ADMIN_HITS");
 
