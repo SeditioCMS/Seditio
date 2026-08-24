@@ -218,6 +218,4 @@ table.hovered tbody tr:hover td,
 table.hovered thead tr:hover th {
   background: rgb(0, 0, 0);
   background: rgba(0, 0, 0, 0.2);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000);
-  -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";
 }

@@ -4,6 +4,35 @@
 *	3. Slinky Menu (mobile menu)
 */
 
+:root {
+  /* 1. Slick Slider */
+  --plugin-slick-arrow-color: #010101;
+  --plugin-slick-arrow-bg: transparent;
+  --plugin-slick-dot-bg: rgba(68, 81, 92, 0.30);
+  --plugin-slick-dot-active: #f99302;
+
+  /* 2. Fancybox */
+  --plugin-fancybox-bg: rgb(30, 30, 30);
+  --plugin-fancybox-btn-bg: rgba(30, 30, 30, 0.6);
+  --plugin-fancybox-btn-color: #ffffff;
+  --plugin-fancybox-btn-hover-color: #ffffff;
+  --plugin-fancybox-accent: #ff5268;
+  --plugin-fancybox-error-bg: #ffffff;
+  --plugin-fancybox-error-text: #444444;
+  --plugin-fancybox-thumbs-bg: #2a2a2a;
+  --plugin-fancybox-thumb-border: #ff5268;
+
+  /* 3. Slinky Menu */
+  --plugin-slinky-bg: #ffffff;
+  --plugin-slinky-border: #f7f2f2;
+  --plugin-slinky-text: #333333;
+  --plugin-slinky-hover-bg: #ff8c0b;
+  --plugin-slinky-hover-text: #ffffff;
+  --plugin-slinky-header-bg: #f2f2f2;
+  --plugin-slinky-header-text: #d8d8d8;
+  --plugin-slinky-back-bg: #eaeaea;
+  --plugin-slinky-sub-text: #014e9f;
+}
 
 /*-------------------------*/
 /***** 1. SLICK SLIDER *****/
@@ -176,7 +205,7 @@
     line-height: 1;
     content: "\e91c";
     font-size: 40px;
-    color: #010101;
+    color: var(--plugin-slick-arrow-color);
 }
 [dir='rtl'] .slick-prev {
 	right: 0px;
@@ -200,7 +229,7 @@
     line-height: 1;
     content: "\e91d";
     font-size: 40px;
-    color: #010101;
+    color: var(--plugin-slick-arrow-color);
 }
 .slick-down:before,
 [dir='rtl'] .slick-down:before {
@@ -213,7 +242,7 @@
     line-height: 1;
     content: "\e91b";
     font-size: 40px;
-    color: #010101;
+    color: var(--plugin-slick-arrow-color);
 }
 
 [dir='rtl'] .slick-next {
@@ -255,7 +284,7 @@
 	border:none;
 	border-radius: 100%;
 	outline: none;
-	background: rgba(68, 81, 92, 0.30);
+	background: var(--plugin-slick-dot-bg);
 }
 .slick-dots li button:hover,
 .slick-dots li button:focus {
@@ -266,7 +295,7 @@
 	opacity: 1;
 }
 .slick-dots li.slick-active button {
-	background: #f99302;
+	background: var(--plugin-slick-dot-active);
 }
 .slick-track {
     display: flex !important;
@@ -336,7 +365,7 @@ body.compensate-for-scrollbar {
     overflow-y: auto;
 }
 .fancybox-bg {
-    background: rgb(30, 30, 30);
+    background: var(--plugin-fancybox-bg);
     opacity: 0;
     transition-duration: inherit;
     transition-property: opacity;
@@ -1082,7 +1111,7 @@ body.compensate-for-scrollbar {
 
 .slinky-menu a.back {
 	width: 50px;
-    background: #eaeaea;
+    background: var(--plugin-slinky-back-bg);
     text-align: center;
 }
 
@@ -1118,18 +1147,18 @@ body.compensate-for-scrollbar {
 }
 
 .slinky-theme-default {
-  background: #f6f7f8;
+  background: var(--plugin-slinky-bg);
 }
 
 .slinky-theme-default .title {
-	color: #d8d8d8;
+	color: var(--plugin-slinky-header-text);
     padding: 1em;
 }
 
 .slinky-theme-default li {
   line-height: 1;
   font-weight:600;
-  border-bottom: 1px solid #f7f2f2;
+  border-bottom: 1px solid var(--plugin-slinky-border);
 }
 
 .slinky-theme-default li.sub {
@@ -1138,21 +1167,21 @@ body.compensate-for-scrollbar {
 
 
 .slinky-theme-default a:not(.back) {
-  color: #333;
+  color: var(--plugin-slinky-text);
   padding: 1em;
 }
 
 .slinky-theme-default li.sub>a
 {
-	color: #014e9f!important;
+	color: var(--plugin-slinky-sub-text)!important;
 }
 
 .slinky-theme-default a:not(.back):hover {
-  background: rgba(90, 200, 250, 0.25);
+  background: var(--plugin-slinky-hover-bg);
 }
 
 .slinky-theme-default a:not(.back):active {
-  background: rgba(90, 200, 250, 0.5);
+  background: var(--plugin-slinky-hover-bg);
 }
 
 .slinky-theme-default .next::after, 
@@ -1192,10 +1221,10 @@ body.compensate-for-scrollbar {
   text-align: left;
 }
 .slinky-theme-default{
-  background-color: #fff;
+  background-color: var(--plugin-slinky-bg);
 }
 .slinky-menu .header{
-  background-color: #f2f2f2;
+  background-color: var(--plugin-slinky-header-bg);
 }
 .slinky-menu ul {
     padding-left: 0;
@@ -1212,8 +1241,8 @@ body.compensate-for-scrollbar {
   background-image: url("../img/next.svg");
 }
 .slinky-theme-default a:not(.back):hover{
-	background-color: #ff8c0b;
-	color: #ffffff!important;
+	background-color: var(--plugin-slinky-hover-bg);
+	color: var(--plugin-slinky-hover-text)!important;
 }
 .slinky-theme-default a:not(.back):hover::after,
 .slinky-theme-default a:not(.back):hover::before{

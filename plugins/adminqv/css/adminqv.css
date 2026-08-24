@@ -32,12 +32,14 @@ Seditio - AdminQV plugin stylesheet
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .kpi-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 .kpi-icon {
   width: 48px;
@@ -48,10 +50,22 @@ Seditio - AdminQV plugin stylesheet
   justify-content: center;
   font-size: 22px;
 }
-.kpi-card-users .kpi-icon { background: rgba(46, 204, 113, 0.12); color: #2ecc71; }
-.kpi-card-pages .kpi-icon { background: rgba(87, 160, 0, 0.12); color: #57a000; }
-.kpi-card-posts .kpi-icon { background: rgba(241, 196, 15, 0.12); color: #f1c40f; }
-.kpi-card-comments .kpi-icon { background: rgba(155, 89, 182, 0.12); color: #9b59b6; }
+.kpi-card-users .kpi-icon {
+  background: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
+}
+.kpi-card-pages .kpi-icon {
+  background: rgba(87, 160, 0, 0.12);
+  color: #57a000;
+}
+.kpi-card-posts .kpi-icon {
+  background: rgba(241, 196, 15, 0.12);
+  color: #f1c40f;
+}
+.kpi-card-comments .kpi-icon {
+  background: rgba(155, 89, 182, 0.12);
+  color: #9b59b6;
+}
 
 .kpi-info {
   display: flex;
@@ -104,13 +118,13 @@ Seditio - AdminQV plugin stylesheet
 }
 
 .dashboard-middle-grid .analytics-box {
-  flex: 2 1 calc(66.666% - 13px);
+  flex: 2 1 calc(66.666% - 8px);
   min-width: 0;
   box-sizing: border-box;
   margin-bottom: 0;
 }
 .dashboard-middle-grid .quick-actions-box {
-  flex: 1 1 calc(33.333% - 7px);
+  flex: 1 1 calc(33.333% - 14px);
   min-width: 0;
   box-sizing: border-box;
   margin-bottom: 0;
@@ -153,7 +167,7 @@ Seditio - AdminQV plugin stylesheet
   border-color: #57a000;
   color: #57a000;
   transform: translateX(3px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 .quick-actions-list li a i {
   font-size: 18px;
@@ -192,5 +206,3 @@ Seditio - AdminQV plugin stylesheet
   border-color: #57a000;
   color: #ffffff;
 }
-
-
