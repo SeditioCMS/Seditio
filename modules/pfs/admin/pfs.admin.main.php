@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/pfs/admin/pfs.admin.main.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-aug-24
 Type=Module.admin
 Author=Seditio Team
 Description=PFS admin panel
@@ -42,9 +42,9 @@ $t->parse("ADMIN_PFS.PFS_BUTTONS");
 
 unset($disp_list);
 
-$sql = sed_sql_query("SELECT DISTINCT p.pfs_userid, u.user_name, u.user_id, COUNT(*) FROM $db_pfs AS p 
+$sql = sed_sql_query("SELECT p.pfs_userid, u.user_name, u.user_id, COUNT(*) FROM $db_pfs AS p 
 	LEFT JOIN $db_users AS u ON p.pfs_userid=u.user_id
-	WHERE pfs_folderid>=0 GROUP BY p.pfs_userid ORDER BY u.user_name ASC");
+	WHERE pfs_folderid>=0 GROUP BY p.pfs_userid, u.user_name, u.user_id ORDER BY u.user_name ASC");
 
 while ($row = sed_sql_fetchassoc($sql)) {
 	$row['user_name'] = ($row['user_id'] == 0) ? $L['SFS'] : $row['user_name'];

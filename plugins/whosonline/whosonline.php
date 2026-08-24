@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/whosonline/whosonline.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-aug-24
 Type=Plugin
 Author=Seditio Team
 Description=
@@ -39,7 +39,7 @@ $plugin_title = $L['plu_title'];
 $urlpaths = array();
 $urlpaths[sed_url("plug", "e=whosonline")] = $L['plu_title'];
 
-$sql1 = sed_sql_query("SELECT DISTINCT u.user_id, u.user_country, u.user_avatar, u.user_maingrp, o.* FROM $db_online AS o LEFT JOIN $db_users AS u ON u.user_id = o.online_userid WHERE online_name != 'v' ORDER BY u.user_name ASC");
+$sql1 = sed_sql_query("SELECT DISTINCT u.user_id, u.user_name, u.user_country, u.user_avatar, u.user_maingrp, o.* FROM $db_online AS o LEFT JOIN $db_users AS u ON u.user_id = o.online_userid WHERE online_name != 'v' ORDER BY u.user_name ASC");
 $sql2 = sed_sql_query("SELECT online_ip, online_lastseen, online_location, online_subloc FROM $db_online WHERE online_name LIKE 'v' ORDER BY online_lastseen DESC");
 $sql3 = sed_sql_query("SELECT stat_value FROM $db_stats where stat_name='maxusers' LIMIT 1");
 

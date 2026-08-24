@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/sitemap/sitemap.php
 Version=186
-Updated=2026-mar-31
+Updated=2026-aug-24
 Type=Plugin
 Author=Seditio Team
 Description=XML Sitemap (direct)
@@ -174,9 +174,8 @@ switch ($m) {
 			}
 		}
 
-		$sql = sed_sql_query("SELECT t.ft_id, t.ft_title, t.ft_movedto, s.fs_id, p.fp_updated FROM $db_forum_posts p 
-       LEFT JOIN $db_forum_topics t ON ( p.fp_topicid = t.ft_id ) LEFT JOIN $db_forum_sections s ON ( p.fp_sectionid = s.fs_id ) 
-       GROUP BY t.ft_id ORDER BY t.ft_sticky DESC, p.fp_creation DESC LIMIT " . $smcfg['forums']['limit']);
+		$sql = sed_sql_query("SELECT t.ft_id, t.ft_title, t.ft_movedto, t.ft_sectionid AS fs_id, t.ft_updated AS fp_updated FROM $db_forum_topics t 
+       ORDER BY t.ft_sticky DESC, t.ft_updated DESC LIMIT " . $smcfg['forums']['limit']);
 
 		while ($row = sed_sql_fetchassoc($sql)) {
 			list($usr['auth_read'], $usr['auth_write'], $usr['isadmin']) = sed_auth('forums', $row['fs_id']);

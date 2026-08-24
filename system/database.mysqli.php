@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/database.mysqli.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-aug-24
 Type=Core
 Author=Seditio Team
 Description=Functions MySQLi driver
@@ -80,6 +80,7 @@ function sed_sql_connect($host, $user, $pass, $db, $testconn = FALSE)
 		mysqli_close($conn_id);
 		return true;
 	}
+	@mysqli_query($conn_id, "SET SESSION sql_mode = 'NO_ENGINE_SUBSTITUTION'");
 	return ($conn_id);
 }
 

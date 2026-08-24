@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/search/search.php
 Version=186
-Updated=2026-feb-26
+Updated=2026-aug-24
 Date=2022-jul-28
 Type=Plugin
 Author=Amro
@@ -139,10 +139,11 @@ if ($do_search) {
 			}
 
 			$sql = sed_sql_query("SELECT p.fp_id, p.fp_text, t.ft_title, t.ft_id, t.ft_updated, s.fs_id, s.fs_title, s.fs_category
-			FROM $db_forum_posts p, $db_forum_topics t, $db_forum_sections s
-			WHERE 1 AND (p.fp_text LIKE '" . sed_sql_prep($sqlsearch) . "' OR t.ft_title LIKE '" . sed_sql_prep($sqlsearch) . "')
-			AND p.fp_topicid=t.ft_id AND p.fp_sectionid=s.fs_id $sqlsections
-			GROUP BY t.ft_id ORDER BY ft_updated DESC
+			FROM $db_forum_posts p
+			INNER JOIN $db_forum_topics t ON p.fp_topicid=t.ft_id
+			INNER JOIN $db_forum_sections s ON p.fp_sectionid=s.fs_id
+			WHERE (p.fp_text LIKE '" . sed_sql_prep($sqlsearch) . "' OR t.ft_title LIKE '" . sed_sql_prep($sqlsearch) . "') $sqlsections
+			ORDER BY t.ft_updated DESC
 			LIMIT $cfg_maxitems");
 
 			$items = sed_sql_numrows($sql);

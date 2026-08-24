@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/core/admin/admin.header.php
 Version=186
-Updated=2026-aug-14
+Updated=2026-aug-24
 Type=Core
 Author=Seditio Team
 Description=Admin header
@@ -186,8 +186,7 @@ if ($usr['id'] > 0) {
 	list($usr['auth_read'], $usr['auth_write'], $usr['isadmin']) = sed_auth('admin', 'a');
 
 	if (sed_auth('admin', 'a', 'A')) {
-		$order_field = (sed_stat_get("version") >= 180) ? " ORDER BY config_id ASC" : "";
-		$sql = sed_sql_query("SELECT DISTINCT(config_cat) FROM $db_config WHERE config_owner='core'" . $order_field);
+		$sql = sed_sql_query("SELECT config_cat FROM $db_config WHERE config_owner='core' GROUP BY config_cat ORDER BY MIN(config_id) ASC");
 		$config_menu = "<ul>";
 
 		while ($row = sed_sql_fetchassoc($sql)) {
