@@ -78,7 +78,7 @@ const sedadminjs = (() => {
     const isElementHidden = (element) => {
         if (!element) return true;
         if (element.style.display === 'none') return true;
-        if (element.style.display === 'block') return false;
+        if (element.style.display && element.style.display !== 'none') return false;
         return window.getComputedStyle(element).display === 'none';
     };
 
@@ -102,13 +102,19 @@ const sedadminjs = (() => {
      * @param {number} duration - Animation duration in milliseconds
      */
     const slideDown = (element, duration = 250) => {
-        element.style.display = 'block';
+        element.style.removeProperty('display');
+        let display = window.getComputedStyle(element).display;
+        if (display === 'none') {
+            display = 'block';
+        }
+        element.style.display = display;
         const height = element.offsetHeight;
         element.style.height = '0px';
         element.style.overflow = 'hidden';
         animate(element, { height: `${height}px` }, duration, () => {
             element.style.height = '';
             element.style.overflow = '';
+            element.style.removeProperty('display');
         });
     };
 

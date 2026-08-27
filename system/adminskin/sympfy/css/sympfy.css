@@ -884,7 +884,7 @@ ul.card-tabs li a {
   color: var(--admin-tab-text);
   background: transparent;
   border: 1px solid transparent;
-  border-bottom: none;
+  border-bottom: 1px solid transparent;
   border-radius: 6px 6px 0 0;
   margin: 0;
   text-decoration: none;
@@ -905,7 +905,6 @@ ul.card-tabs li a.selected {
   z-index: 2;
   background: var(--admin-tab-active-bg) !important;
   color: var(--admin-tab-active-text) !important;
-  font-weight: 600 !important;
   border: 1px solid var(--admin-tab-active-border) !important;
   border-bottom: 1px solid var(--admin-tab-active-bg) !important;
   margin-bottom: -1px !important;
