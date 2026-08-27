@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/core/admin/admin.header.php
 Version=186
-Updated=2026-aug-24
+Updated=2026-aug-27
 Type=Core
 Author=Seditio Team
 Description=Admin header

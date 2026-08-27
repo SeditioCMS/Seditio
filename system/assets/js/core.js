@@ -731,7 +731,7 @@ const sedjs = {
     },
 
     /**
-     * Modal Windows functions
+     * Modal & Floating Windows functions
      */
     modal: {
         imagefiles: ['/system/img/vars/min.gif', '/system/img/vars/close.gif', '/system/img/vars/restore.gif', '/system/img/vars/resize.gif'],
@@ -740,30 +740,43 @@ const sedjs = {
         minimizeorder: 0,
         zIndexvalue: 1000,
         tobjects: [],
-        lastactivet: {},
-        constrainToViewport: false,
+        lastactivet: null,
+        constrainToViewport: true,
 
         /**
-         * Initialize a new modal window.
-         * @param {string} t - The ID of the modal window to be created.
-         * @returns {HTMLElement|null} The created modal window element, or null if it couldn't be created.
+         * Initialize a new modal / floating window.
+         * @param {string} t - The ID of the window to create.
+         * @returns {HTMLElement|null}
          */
         init(t) {
             const domwindow = document.createElement("div");
             domwindow.id = t;
             sedjs.addClass(domwindow, "sed_modal");
+            domwindow.style.position = "fixed";
 
             const domwindowdata = [
                 '<div class="modal-handle">',
-                'Modal Window',
-                '<div class="modal-controls">',
-                `<img src="${this.imagefiles[0]}" title="Minimize" />`,
-                `<img src="${this.imagefiles[1]}" title="Close" />`,
+                '  <span class="modal-title">Modal Window</span>',
+                '  <div class="modal-controls">',
+                '    <button type="button" class="modal-control-btn modal-btn-min" title="Minimize" aria-label="Minimize">',
+                '      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13H5v-2h14v2z"/></svg>',
+                '    </button>',
+                '    <button type="button" class="modal-control-btn modal-btn-max" title="Maximize" aria-label="Maximize">',
+                '      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v16H4V4zm2 4v10h12V8H6z"/></svg>',
+                '    </button>',
+                '    <button type="button" class="modal-control-btn modal-btn-close" title="Close" aria-label="Close">',
+                '      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>',
+                '    </button>',
+                '  </div>',
                 '</div>',
+                '<div class="modal-body">',
+                '  <div class="modal-iframe-cover"></div>',
+                `  <div class="modal-contentarea" id="area-${t}"></div>`,
                 '</div>',
-                `<div class="modal-contentarea" id="area-${t}"></div>`,
                 '<div class="modal-statusarea">',
-                `<div class="modal-resizearea" style="background: transparent url(${this.imagefiles[3]}) top right no-repeat;"> </div>`,
+                '  <div class="modal-resizearea" title="Resize">',
+                '    <svg width="14" height="14" viewBox="0 0 16 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="14" y1="4" x2="4" y2="14"/><line x1="14" y1="8" x2="8" y2="14"/><line x1="14" y1="12" x2="12" y2="14"/></svg>',
+                '  </div>',
                 '</div>'
             ].join('');
 
@@ -773,20 +786,35 @@ const sedjs = {
             const tElement = document.querySelector(`#${t}`);
             if (!tElement) return null;
 
-            const divs = tElement.querySelectorAll("div[class^='modal-']");
-            for (let i = 0; i < divs.length; i++) {
-                const className = divs[i].className.replace(/modal-/, "");
-                tElement[className] = divs[i];
-            }
+            tElement.handle = tElement.querySelector('.modal-handle');
+            tElement.titleElement = tElement.querySelector('.modal-title');
+            tElement.controls = tElement.querySelector('.modal-controls');
+            tElement.body = tElement.querySelector('.modal-body');
+            tElement.cover = tElement.querySelector('.modal-iframe-cover');
+            tElement.contentarea = tElement.querySelector('.modal-contentarea');
+            tElement.statusarea = tElement.querySelector('.modal-statusarea');
+            tElement.resizearea = tElement.querySelector('.modal-resizearea');
 
             tElement.handle._parent = tElement;
             tElement.resizearea._parent = tElement;
             tElement.controls._parent = tElement;
+
             tElement.onclose = function () { return true; };
-            tElement.onmousedown = sedjs.modal.setfocus.bind(this, tElement);
-            tElement.handle.onmousedown = sedjs.modal.setupdrag.bind(this, tElement);
-            tElement.resizearea.onmousedown = sedjs.modal.setupdrag.bind(this, tElement);
-            tElement.controls.onclick = sedjs.modal.enablecontrols.bind(this, tElement);
+            tElement.onpointerdown = () => sedjs.modal.setfocus(tElement);
+
+            // Bind controls
+            const btnMin = tElement.querySelector('.modal-btn-min');
+            const btnMax = tElement.querySelector('.modal-btn-max');
+            const btnClose = tElement.querySelector('.modal-btn-close');
+
+            if (btnMin) btnMin.onclick = (e) => { e.stopPropagation(); sedjs.modal.minimize(btnMin, tElement); };
+            if (btnMax) btnMax.onclick = (e) => { e.stopPropagation(); sedjs.modal.maximize(btnMax, tElement); };
+            if (btnClose) btnClose.onclick = (e) => { e.stopPropagation(); sedjs.modal.close(tElement); };
+
+            // Setup pointer drag & resize
+            sedjs.modal.setupPointerDrag(tElement);
+            sedjs.modal.setupPointerResize(tElement);
+
             tElement.show = sedjs.modal.show.bind(this, tElement);
             tElement.hide = sedjs.modal.hide.bind(this, tElement);
             tElement.close = sedjs.modal.close.bind(this, tElement);
@@ -795,19 +823,23 @@ const sedjs = {
             tElement.isResize = sedjs.modal.isResize.bind(this, tElement);
             tElement.isScrolling = sedjs.modal.isScrolling.bind(this, tElement);
             tElement.load = sedjs.modal.load.bind(this, tElement);
+            tElement.minimize = () => sedjs.modal.minimize(btnMin, tElement);
+            tElement.maximize = () => sedjs.modal.maximize(btnMax, tElement);
+            tElement.restore = () => sedjs.modal.restore(null, tElement);
+
             this.tobjects.push(tElement);
             return tElement;
         },
 
         /**
-         * Open a modal window with specified content.
-         * @param {string} t - The ID of the modal window to open.
-         * @param {string} contenttype - The type of content to load (e.g., 'iframe', 'image', 'ajax', 'inline', 'div').
-         * @param {string} contentsource - The source of the content to load.
-         * @param {string} title - The title to display in the modal window.
-         * @param {string} attr - Attributes for the modal window (e.g., width, height, center).
-         * @param {string} recalonload - Whether to recalculate the position on load.
-         * @returns {HTMLElement|null} The opened modal window element, or null if it couldn't be opened.
+         * Open a modal / floating window with specified content.
+         * @param {string} t - Window ID
+         * @param {string} contenttype - 'iframe', 'image', 'ajax', 'inline', 'div'
+         * @param {string} contentsource - URL or HTML
+         * @param {string} title - Window title
+         * @param {string} attr - Parameters: width, height, center, resize, scrolling
+         * @param {string} recalonload - Position recalculation flag
+         * @returns {HTMLElement|null}
          */
         open(t, contenttype, contentsource, title, attr, recalonload) {
             const getValue = (name) => {
@@ -835,8 +867,9 @@ const sedjs = {
                 tElement.handle.style.display = 'none';
                 tElement.statusarea.style.display = 'none';
                 tElement.style.visibility = 'visible';
-                tElement.style.display = 'block';
+                tElement.style.display = 'flex';
                 tElement.contentarea.style.display = 'block';
+                tElement.style.opacity = '1';
 
                 overlay.onclick = (e) => {
                     if (e.target === overlay) {
@@ -844,56 +877,185 @@ const sedjs = {
                     }
                 };
             } else {
-                const width = getValue("width");
-                const height = getValue("height");
+                let width = getValue("width") || 800;
+                let height = getValue("height") || 550;
                 const isCenter = getValue("center");
-                const xpos = isCenter ? "middle" : getValue("left");
-                const ypos = isCenter ? "middle" : getValue("top");
+
+                // Clamp to viewport
+                width = Math.min(width, window.innerWidth - 30);
+                height = Math.min(height, window.innerHeight - 50);
+
+                const xpos = isCenter ? "middle" : (getValue("left") || 40);
+                const ypos = isCenter ? "middle" : (getValue("top") || 40);
 
                 tElement.setSize(width, height);
                 tElement.moveTo(xpos, ypos);
-                tElement.isResize(getValue("resize"));
-                tElement.isScrolling(getValue("scrolling"));
+                tElement.isResize(getValue("resize") !== 0);
+                tElement.isScrolling(getValue("scrolling") !== 0);
+
                 tElement.style.visibility = 'visible';
-                tElement.style.display = 'block';
+                tElement.style.display = 'flex';
+                tElement.style.opacity = '1';
                 tElement.contentarea.style.display = 'block';
             }
 
             tElement.load(contenttype, contentsource, title);
+
+            // Expose globally for child iframe scripts (PFS, CKEditor callback)
+            window.modal = tElement;
+
             return tElement;
         },
 
         /**
+         * Setup pointer-based drag for the window header.
+         * @param {HTMLElement} t - Window element
+         */
+        setupPointerDrag(t) {
+            const handle = t.handle;
+            handle.addEventListener('pointerdown', (e) => {
+                // If minimized, restore on header click (except close button)
+                if (t.classList.contains('is-minimized')) {
+                    if (!e.target.closest('.modal-btn-close')) {
+                        sedjs.modal.restore(null, t);
+                    }
+                    return;
+                }
+
+                if (e.target.closest('.modal-controls') || t.classList.contains('is-maximized')) return;
+                e.preventDefault();
+                sedjs.modal.setfocus(t);
+
+                if (window.getSelection) {
+                    window.getSelection().removeAllRanges();
+                }
+                document.body.style.userSelect = 'none';
+                document.body.style.webkitUserSelect = 'none';
+
+                if (t.cover) t.cover.style.display = 'block';
+
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const initLeft = parseInt(t.style.left, 10) || t.offsetLeft;
+                const initTop = parseInt(t.style.top, 10) || t.offsetTop;
+
+                const onPointerMove = (evt) => {
+                    evt.preventDefault();
+                    const dx = evt.clientX - startX;
+                    const dy = evt.clientY - startY;
+                    let newX = initLeft + dx;
+                    let newY = initTop + dy;
+
+                    const maxX = window.innerWidth - t.offsetWidth;
+                    const maxY = window.innerHeight - (t.handle.offsetHeight || 36);
+                    newX = Math.max(0, Math.min(newX, maxX));
+                    newY = Math.max(0, Math.min(newY, maxY));
+
+                    t.style.left = `${newX}px`;
+                    t.style.top = `${newY}px`;
+                };
+
+                const onPointerUp = () => {
+                    document.body.style.userSelect = '';
+                    document.body.style.webkitUserSelect = '';
+                    if (t.cover) t.cover.style.display = 'none';
+                    window.removeEventListener('pointermove', onPointerMove);
+                    window.removeEventListener('pointerup', onPointerUp);
+                    window.removeEventListener('pointercancel', onPointerUp);
+                };
+
+                window.addEventListener('pointermove', onPointerMove);
+                window.addEventListener('pointerup', onPointerUp);
+                window.addEventListener('pointercancel', onPointerUp);
+            });
+        },
+
+        /**
+         * Setup pointer-based resizing.
+         * @param {HTMLElement} t - Window element
+         */
+        setupPointerResize(t) {
+            const resizer = t.resizearea;
+            if (!resizer) return;
+
+            resizer.addEventListener('pointerdown', (e) => {
+                if (t.classList.contains('is-maximized') || t.classList.contains('is-minimized')) return;
+                e.stopPropagation();
+                e.preventDefault();
+                sedjs.modal.setfocus(t);
+
+                if (window.getSelection) {
+                    window.getSelection().removeAllRanges();
+                }
+                document.body.style.userSelect = 'none';
+                document.body.style.webkitUserSelect = 'none';
+
+                if (t.cover) t.cover.style.display = 'block';
+
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const startW = t.offsetWidth;
+                const startH = t.offsetHeight;
+
+                const onPointerMove = (evt) => {
+                    evt.preventDefault();
+                    const dx = evt.clientX - startX;
+                    const dy = evt.clientY - startY;
+                    const maxW = window.innerWidth - (parseInt(t.style.left, 10) || 0) - 10;
+                    const maxH = window.innerHeight - (parseInt(t.style.top, 10) || 0) - 10;
+                    const newW = Math.max(240, Math.min(startW + dx, maxW));
+                    const newH = Math.max(100, Math.min(startH + dy, maxH));
+
+                    t.style.width = `${newW}px`;
+                    t.style.height = `${newH}px`;
+                };
+
+                const onPointerUp = () => {
+                    document.body.style.userSelect = '';
+                    document.body.style.webkitUserSelect = '';
+                    if (t.cover) t.cover.style.display = 'none';
+                    window.removeEventListener('pointermove', onPointerMove);
+                    window.removeEventListener('pointerup', onPointerUp);
+                    window.removeEventListener('pointercancel', onPointerUp);
+                };
+
+                window.addEventListener('pointermove', onPointerMove);
+                window.addEventListener('pointerup', onPointerUp);
+                window.addEventListener('pointercancel', onPointerUp);
+            });
+        },
+
+        /**
          * Set the size of the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {number} w - The width to set.
-         * @param {number} h - The height to set.
+         * @param {HTMLElement} t - Window element
+         * @param {number} w - Width
+         * @param {number} h - Height
          */
         setSize(t, w, h) {
-            t.style.width = `${Math.max(parseInt(w), 150)}px`;
-            t.contentarea.style.height = `${Math.max(parseInt(h), 100)}px`;
+            const width = Math.max(parseInt(w, 10) || 800, 240);
+            const height = Math.max(parseInt(h, 10) || 550, 100);
+            t.style.width = `${width}px`;
+            t.style.height = `${height}px`;
+            if (t.contentarea) {
+                t.contentarea.style.height = '100%';
+            }
         },
 
         /**
-         * Enable or disable resizing of the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {boolean} bol - Whether resizing is enabled.
+         * Enable or disable resizing.
+         * @param {HTMLElement} t - Window element
+         * @param {boolean} bol - Status
          */
         isResize(t, bol) {
-            t.statusarea.style.display = (bol) ? "block" : "none";
-            t.resizeBool = (bol) ? 1 : 0;
+            t.statusarea.style.display = bol ? "flex" : "none";
+            t.resizeBool = bol ? 1 : 0;
         },
 
         /**
-         * Scale the size of the content to fit within the maximum dimensions.
-         * @param {number} maxW - The maximum width.
-         * @param {number} maxH - The maximum height.
-         * @param {number} currW - The current width.
-         * @param {number} currH - The current height.
-         * @returns {Array} The scaled width and height.
+         * Scale image size.
          */
         scaleSize(maxW, maxH, currW, currH) {
-            let ratio = currH / currW;
+            const ratio = currH / currW;
             if (currW >= maxW && ratio <= 1) {
                 currW = maxW;
                 currH = currW * ratio;
@@ -905,29 +1067,26 @@ const sedjs = {
         },
 
         /**
-         * Enable or disable scrolling within the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {boolean} bol - Whether scrolling is enabled.
+         * Enable or disable scrolling.
          */
         isScrolling(t, bol) {
-            t.contentarea.style.overflow = (bol) ? "auto" : "hidden";
+            t.contentarea.style.overflow = bol ? "auto" : "hidden";
         },
 
         /**
-         * Load content into the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {string} contenttype - The type of content to load.
-         * @param {string} contentsource - The source of the content to load.
-         * @param {string} title - The title to display in the modal window.
+         * Load content into window.
          */
         load(t, contenttype, contentsource, title) {
             if (t.isClosed) {
-                alert("Modal Window has been closed, so no window to load contents into. Open/Create the window again.");
                 return;
             }
-            contenttype = contenttype.toLowerCase();
+            contenttype = (contenttype || '').toLowerCase();
             if (title) {
-                t.handle.firstChild.nodeValue = title;
+                if (t.titleElement) {
+                    t.titleElement.textContent = title;
+                } else if (t.handle && t.handle.firstChild) {
+                    t.handle.firstChild.nodeValue = title;
+                }
             }
 
             switch (contenttype) {
@@ -952,44 +1111,39 @@ const sedjs = {
         },
 
         /**
-         * Manage the loading indicator for the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {boolean} show - Whether to show the loading indicator.
-         * @param {boolean} isImage - Whether the content is an image.
+         * Loading indicator management.
          */
         manageLoader(t, show, isImage) {
             if (show) {
-                const loaderDiv = document.createElement("div");
-                sedjs.addClass(loaderDiv, "loading-indicator");
-
-                if (isImage) {
-                    loaderDiv.setAttribute("style", "position:absolute;");
-                    document.body.appendChild(loaderDiv);
-                    this.moveTo(loaderDiv, 'middle', 'middle');
-                    t.loading = loaderDiv;
-                } else {
-                    loaderDiv.setAttribute("style", "position:absolute; top:50%; left:50%; transform: translate(-50%, -50%);");
-                    t.contentarea.appendChild(loaderDiv);
+                let loaderDiv = t.querySelector('.loading-indicator');
+                if (!loaderDiv) {
+                    loaderDiv = document.createElement("div");
+                    sedjs.addClass(loaderDiv, "loading-indicator");
+                    if (isImage) {
+                        loaderDiv.setAttribute("style", "position:fixed; top:50%; left:50%; transform: translate(-50%, -50%); z-index:1001;");
+                        document.body.appendChild(loaderDiv);
+                        t.loading = loaderDiv;
+                    } else {
+                        loaderDiv.setAttribute("style", "position:absolute; top:50%; left:50%; transform: translate(-50%, -50%);");
+                        t.contentarea.appendChild(loaderDiv);
+                    }
                 }
-
                 return loaderDiv;
             } else {
-                if (isImage && t.loading) {
-                    document.body.removeChild(t.loading);
+                if (isImage && t.loading && t.loading.parentNode) {
+                    t.loading.parentNode.removeChild(t.loading);
                     t.loading = null;
                 } else {
                     const loaderDiv = t.contentarea.querySelector(".loading-indicator");
-                    if (loaderDiv) {
-                        t.contentarea.removeChild(loaderDiv);
+                    if (loaderDiv && loaderDiv.parentNode) {
+                        loaderDiv.parentNode.removeChild(loaderDiv);
                     }
                 }
             }
         },
 
         /**
-         * Load an image into the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {string} contentsource - The URL of the image to load.
+         * Load image content.
          */
         loadImage(t, contentsource) {
             this.manageLoader(t, true, true);
@@ -997,51 +1151,43 @@ const sedjs = {
             const i = new Image();
             const self = this;
             i.onload = () => {
-                console.log(`Image loaded successfully, source: ${contentsource}`); // Debug log
-                self.getviewpoint(); // Update viewport dimensions and scroll position
-                self.handleResize(t, i); // Handle initial sizing and positioning
+                self.handleResize(t, i);
 
-                // Add close button (X) in the top-right corner
-                const closeBtn = document.createElement('div');
-                closeBtn.innerHTML = '✕';
-                closeBtn.className = 'close-image'; // Use the class 'close-image'
-                closeBtn.onclick = () => { sedjs.modal.close(t); };
-                t.contentarea.appendChild(closeBtn);
+                let closeBtn = t.contentarea.querySelector('.close-image');
+                if (!closeBtn) {
+                    closeBtn = document.createElement('div');
+                    closeBtn.innerHTML = '✕';
+                    closeBtn.className = 'close-image';
+                    closeBtn.onclick = () => { sedjs.modal.close(t); };
+                    t.contentarea.appendChild(closeBtn);
+                }
 
-                // Ensure image is added after the button or clear content first
-                t.contentarea.appendChild(i); // Add the image explicitly
-
-                // Remove the loading indicator and show the window with animation
+                t.contentarea.appendChild(i);
                 self.manageLoader(t, false, true);
+
                 t.style.opacity = '0';
                 setTimeout(() => { t.style.opacity = '1'; }, 10);
 
-                // Add resize listener for this modal instance
                 if (!t.resizeHandler) {
                     t.resizeHandler = () => { self.handleResize(t, i); };
-                    self.addEvent(window, t.resizeHandler, 'resize');
+                    window.addEventListener('resize', t.resizeHandler);
                 }
             };
             i.onerror = () => {
                 self.manageLoader(t, false, true);
                 t.contentarea.innerHTML = 'Error loading image';
-                console.error(`Image loading failed for source: ${contentsource}`); // Debug log
             };
 
             i.src = contentsource;
         },
 
         /**
-         * Handle resizing of the modal window for images, ensuring it stays centered and scaled.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {HTMLImageElement} img - The image element to resize.
+         * Handle image resizing.
          */
         handleResize(t, img) {
-            this.getviewpoint(); // Update viewport dimensions and scroll position
-            const maxW = this.docwidth - 40; // Margins for convenience
-            const maxH = this.docheight - 40;
+            const maxW = window.innerWidth - 40;
+            const maxH = window.innerHeight - 40;
 
-            // Scale the image to fit within the visible area
             const ratio = img.height / img.width;
             let newWidth = img.width;
             let newHeight = img.height;
@@ -1055,31 +1201,21 @@ const sedjs = {
                 newWidth = newHeight / ratio;
             }
 
-            // Set the window size
             t.setSize(newWidth, newHeight);
 
-            // Center the window in the visible area using position: fixed
-            let left = (this.docwidth - newWidth) / 2; // Horizontal centering relative to viewport
-            let top = (this.docheight - newHeight) / 2; // Vertical centering relative to viewport
+            const left = Math.max(0, (window.innerWidth - newWidth) / 2);
+            const top = Math.max(0, (window.innerHeight - newHeight) / 2);
 
-            // Constrain the position to prevent the window from exceeding the viewport
-            left = Math.max(0, Math.min(left, this.docwidth - newWidth));
-            top = Math.max(0, Math.min(top, this.docheight - newHeight));
+            t.style.position = 'fixed';
+            t.style.left = `${left}px`;
+            t.style.top = `${top}px`;
 
-            // Apply the position and size
-            t.style.position = 'fixed'; // Ensure fixed positioning
-            t.style.left = left + "px";
-            t.style.top = top + "px";
-
-            // Update the image dimensions
             img.width = newWidth;
             img.height = newHeight;
         },
 
         /**
-         * Load an iframe into the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {string} contentsource - The URL to load in the iframe.
+         * Load iframe content.
          */
         loadIframe(t, contentsource) {
             this.manageLoader(t, true, false);
@@ -1092,6 +1228,7 @@ const sedjs = {
                 iframe.style.padding = "0";
                 iframe.style.width = "100%";
                 iframe.style.height = "100%";
+                iframe.style.border = "0";
                 iframe.name = `_iframe-${t.id}`;
                 iframe.id = `id_iframe-${t.id}`;
                 t.contentarea.appendChild(iframe);
@@ -1099,38 +1236,33 @@ const sedjs = {
 
             const self = this;
             iframe.onload = () => { self.manageLoader(t, false, false); };
-
             iframe.src = contentsource;
         },
 
         /**
-         * Load inline HTML content into the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {string} contentsource - The HTML content to load.
+         * Load inline HTML.
          */
         loadInline(t, contentsource) {
             t.contentarea.innerHTML = contentsource;
         },
 
         /**
-         * Load content from a div element into the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {string} contentsource - The ID of the div to load content from.
+         * Load div content.
          */
         loadDiv(t, contentsource) {
             const inlinedivref = document.querySelector(`#${contentsource}`);
-            t.contentarea.innerHTML = (inlinedivref.defaultHTML || inlinedivref.innerHTML);
-            if (!inlinedivref.defaultHTML) {
-                inlinedivref.defaultHTML = inlinedivref.innerHTML;
+            if (inlinedivref) {
+                t.contentarea.innerHTML = (inlinedivref.defaultHTML || inlinedivref.innerHTML);
+                if (!inlinedivref.defaultHTML) {
+                    inlinedivref.defaultHTML = inlinedivref.innerHTML;
+                }
+                inlinedivref.innerHTML = "";
+                inlinedivref.style.display = "none";
             }
-            inlinedivref.innerHTML = "";
-            inlinedivref.style.display = "none";
         },
 
         /**
-         * Load content via AJAX into the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {string} contentsource - The URL to load content from.
+         * Load AJAX content.
          */
         loadAjax(t, contentsource) {
             this.manageLoader(t, true, false);
@@ -1147,362 +1279,290 @@ const sedjs = {
         },
 
         /**
-         * Set up dragging functionality for the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {Event} e - The mouse event.
+         * Legacy drag setup (kept for backwards compatibility).
          */
         setupdrag(t, e) {
-            const tElement = t;
-            this.etarget = e.target;
-            const evt = window.event || e;
-            this.initmousex = evt.clientX;
-            this.initmousey = evt.clientY;
-            this.initx = parseInt(tElement.offsetLeft, 10);
-            this.inity = parseInt(tElement.offsetTop, 10);
-            this.width = parseInt(tElement.offsetWidth, 10);
-            this.contentheight = parseInt(tElement.contentarea.offsetHeight, 10);
-            if (tElement.contentarea.datatype == "iframe") {
-                tElement.style.backgroundColor = "#F8F8F8";
-                tElement.contentarea.style.visibility = "hidden";
-            }
-            const self = this;
-            document.onmousemove = (e) => { self.getdistance(e); };
-            document.onmouseup = () => {
-                if (tElement.contentarea.datatype == "iframe") {
-                    tElement.contentarea.style.backgroundColor = "white";
-                    tElement.contentarea.style.visibility = "visible";
-                }
-                self.stop();
-            };
             return false;
         },
 
-        /**
-         * Calculate the distance moved during dragging.
-         * @param {Event} e - The mouse event.
-         */
         getdistance(e) {
-            const etarget = this.etarget;
-            const evt = window.event || e;
-            this.distancex = evt.clientX - this.initmousex;
-            this.distancey = evt.clientY - this.initmousey;
-            if (etarget.className == "modal-handle") {
-                this.move(etarget._parent, evt);
-            } else if (etarget.className == "modal-resizearea") {
-                this.resize(etarget._parent, evt);
-            }
             return false;
         },
 
-        /**
-         * Move the modal window with constraints.
-         * @param {HTMLElement} t - The modal window element to be moved.
-         * @param {Event} e - The mouse event.
-         */
-        move(t, e) {
-            this.getviewpoint();
+        move(t, e) {},
 
-            let newLeft = this.distancex + this.initx;
-            let newTop = this.distancey + this.inity;
+        resize(t, e) {},
 
-            if (this.constrainToViewport) {
-                const minX = this.scroll_left;
-                const maxX = this.scroll_left + this.docwidth - t.offsetWidth;
-                newLeft = Math.max(minX, Math.min(newLeft, maxX));
-
-                const minY = this.scroll_top;
-                const maxY = this.scroll_top + this.docheight - t.offsetHeight;
-                newTop = Math.max(minY, Math.min(newTop, maxY));
-            }
-
-            t.style.left = newLeft + "px";
-            t.style.top = newTop + "px";
-        },
-
-        /**
-         * Resize the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {Event} e - The mouse event.
-         */
-        resize(t, e) {
-            t.style.width = Math.max(this.width + this.distancex, 150) + "px";
-            t.contentarea.style.height = Math.max(this.contentheight + this.distancey, 100) + "px";
-        },
-
-        /**
-         * Enable control buttons for the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @param {Event} e - The mouse event.
-         */
         enablecontrols(t, e) {
             const sourceobj = window.event ? window.event.srcElement : e.target;
-            if (/Minimize/i.test(sourceobj.getAttribute("title"))) {
-                this.minimize(sourceobj, t);
-            } else if (/Restore/i.test(sourceobj.getAttribute("title"))) {
-                this.restore(sourceobj, t);
-            } else if (/Close/i.test(sourceobj.getAttribute("title"))) {
+            const btn = sourceobj.closest('.modal-control-btn') || sourceobj;
+            const title = btn.getAttribute("title") || "";
+            if (/Minimize/i.test(title)) {
+                this.minimize(btn, t);
+            } else if (/Maximize/i.test(title)) {
+                this.maximize(btn, t);
+            } else if (/Restore/i.test(title)) {
+                this.restore(btn, t);
+            } else if (/Close/i.test(title)) {
                 this.close(t);
             }
             return false;
         },
 
         /**
-         * Minimize the modal window.
-         * @param {HTMLElement} button - The minimize button element.
-         * @param {HTMLElement} t - The modal window element.
+         * Minimize window to bottom-left corner.
+         * @param {HTMLElement} button - Button element
+         * @param {HTMLElement} t - Window element
          */
         minimize(button, t) {
-            this.rememberattrs(t);
-            button.setAttribute("src", this.imagefiles[2]);
-            button.setAttribute("title", "Restore");
-            t.state = "minimized";
-            t.contentarea.style.display = "none";
-            t.statusarea.style.display = "none";
-            if (typeof t.minimizeorder == "undefined") {
-                this.minimizeorder++;
-                t.minimizeorder = this.minimizeorder;
+            if (t.classList.contains('is-minimized')) {
+                this.restore(button, t);
+                return;
             }
-            t.style.left = "10px";
-            t.style.width = "200px";
-            const windowspacing = t.minimizeorder * 10;
-            t.style.top = this.scroll_top + this.docheight - (t.handle.offsetHeight * t.minimizeorder) - windowspacing + "px";
+
+            t.savedLeft = t.style.left;
+            t.savedTop = t.style.top;
+            t.savedWidth = t.style.width;
+            t.savedHeight = t.style.height;
+
+            const minimizedModals = this.tobjects.filter(win => win !== t && win.classList.contains('is-minimized'));
+            t.minimizeOrder = minimizedModals.length;
+
+            t.classList.add('is-minimized');
+            t.state = "minimized";
+
+            t.style.left = '10px';
+            t.style.top = 'auto';
+            t.style.bottom = `${10 + t.minimizeOrder * 42}px`;
+            t.style.width = '240px';
+            t.style.height = 'auto';
+
+            const btnMin = t.querySelector('.modal-btn-min');
+            if (btnMin) {
+                btnMin.setAttribute('title', 'Restore');
+                btnMin.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M4 8h16v12H4V8zm2 2v8h12v-8H6zm2-6h12v2H8V4z"/></svg>';
+            }
         },
 
         /**
-         * Restore the modal window.
-         * @param {HTMLElement} button - The restore button element.
-         * @param {HTMLElement} t - The modal window element.
+         * Maximize window to viewport size or restore.
+         * @param {HTMLElement} button - Button element
+         * @param {HTMLElement} t - Window element
+         */
+        maximize(button, t) {
+            if (t.classList.contains('is-minimized')) {
+                this.restore(null, t);
+            }
+            if (t.classList.contains('is-maximized')) {
+                t.classList.remove('is-maximized');
+                t.style.left = t.savedLeft || '40px';
+                t.style.top = t.savedTop || '40px';
+                t.style.width = t.savedWidth || '800px';
+                t.style.height = t.savedHeight || '550px';
+                const btnMax = t.querySelector('.modal-btn-max');
+                if (btnMax) {
+                    btnMax.setAttribute('title', 'Maximize');
+                    btnMax.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v16H4V4zm2 4v10h12V8H6z"/></svg>';
+                }
+            } else {
+                t.savedLeft = t.style.left;
+                t.savedTop = t.style.top;
+                t.savedWidth = t.style.width;
+                t.savedHeight = t.style.height;
+
+                t.classList.add('is-maximized');
+                t.style.left = '8px';
+                t.style.top = '8px';
+                t.style.width = `${window.innerWidth - 16}px`;
+                t.style.height = `${window.innerHeight - 16}px`;
+
+                const btnMax = t.querySelector('.modal-btn-max');
+                if (btnMax) {
+                    btnMax.setAttribute('title', 'Restore');
+                    btnMax.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M4 8h16v12H4V8zm2 2v8h12v-8H6zm2-6h12v2H8V4z"/></svg>';
+                }
+            }
+        },
+
+        /**
+         * Restore minimized window.
+         * @param {HTMLElement} button - Button element
+         * @param {HTMLElement} t - Window element
          */
         restore(button, t) {
-            this.getviewpoint();
-            button.setAttribute("src", this.imagefiles[0]);
-            button.setAttribute("title", "Minimize");
+            t.classList.remove('is-minimized');
             t.state = "fullview";
-            t.style.display = "block";
-            t.contentarea.style.display = "block";
-            if (t.resizeBool) {
-                t.statusarea.style.display = "block";
+
+            t.style.bottom = 'auto';
+            t.style.left = t.savedLeft || '40px';
+            t.style.top = t.savedTop || '40px';
+            t.style.width = t.savedWidth || '800px';
+            t.style.height = t.savedHeight || '550px';
+
+            const btnMin = t.querySelector('.modal-btn-min');
+            if (btnMin) {
+                btnMin.setAttribute('title', 'Minimize');
+                btnMin.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13H5v-2h14v2z"/></svg>';
             }
-            t.style.left = parseInt(t.lastx, 10) + this.scroll_left + "px";
-            t.style.top = parseInt(t.lasty, 10) + this.scroll_top + "px";
-            t.style.width = parseInt(t.lastwidth, 10) + "px";
+
+            const remaining = this.tobjects.filter(win => win.classList.contains('is-minimized'));
+            remaining.forEach((win, idx) => {
+                win.minimizeOrder = idx;
+                win.style.bottom = `${10 + idx * 42}px`;
+            });
+
+            this.setfocus(t);
         },
 
         /**
-         * Close the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         * @returns {boolean} Whether the window was successfully closed.
+         * Close modal window.
+         * @param {HTMLElement} t - Window element
+         * @returns {boolean}
          */
         close(t) {
+            if (!t) return false;
             const overlay = document.querySelector('.modal-overlay');
-            const closeResult = t.onclose();
+            const closeResult = t.onclose ? t.onclose() : true;
             if (closeResult !== false) {
                 t.style.opacity = '0';
                 if (overlay && sedjs.hasClass(t, 'image-modal')) {
                     overlay.style.opacity = '0';
-                    setTimeout(() => { overlay.style.display = 'none'; }, 300);
+                    setTimeout(() => {
+                        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                    }, 250);
                 }
-                // Clean up the resize handler
+
+                if (t.classList.contains('is-minimized')) {
+                    const remaining = this.tobjects.filter(win => win !== t && win.classList.contains('is-minimized'));
+                    remaining.forEach((win, idx) => {
+                        win.minimizeOrder = idx;
+                        win.style.bottom = `${10 + idx * 42}px`;
+                    });
+                }
+
                 if (t.resizeHandler) {
-                    this.removeEvent(window, t.resizeHandler, 'resize');
+                    window.removeEventListener('resize', t.resizeHandler);
                     t.resizeHandler = null;
                 }
+
                 setTimeout(() => {
                     t.style.display = 'none';
-                    document.body.removeChild(t);
+                    if (t.parentNode) t.parentNode.removeChild(t);
                     sedjs.removeClass(t, 'image-modal');
-                }, 300);
+                }, 200);
+
                 t.isClosed = true;
+                this.tobjects = this.tobjects.filter(item => item !== t);
             }
             return true;
         },
 
         /**
-         * Set focus on the modal window.
-         * @param {HTMLElement} t - The modal window element.
+         * Set focus on active window.
+         * @param {HTMLElement} t - Window element
          */
         setfocus(t) {
+            if (!t) return;
             this.zIndexvalue++;
             t.style.zIndex = this.zIndexvalue;
             t.isClosed = false;
-            this.setopacity(this.lastactivet.handle, 0.5);
-            this.setopacity(t.handle, 1);
+
+            this.tobjects.forEach(win => {
+                sedjs.removeClass(win, 'is-active');
+            });
+            sedjs.addClass(t, 'is-active');
             this.lastactivet = t;
         },
 
         /**
-         * Show the modal window.
-         * @param {HTMLElement} t - The modal window element.
+         * Show window.
          */
         show(t) {
-            if (t.isClosed) {
-                alert("Modal Window has been closed, so nothing to show. Open/Create the window again.");
-                return;
-            }
-            if (t.lastx) {
-                this.restore(t.controls.firstChild, t);
+            if (t.isClosed) return;
+            if (t.classList.contains('is-minimized')) {
+                this.restore(null, t);
             } else {
-                t.style.display = "block";
+                t.style.display = "flex";
+                t.style.opacity = "1";
             }
             this.setfocus(t);
             t.state = "fullview";
         },
 
         /**
-         * Hide the modal window.
-         * @param {HTMLElement} t - The modal window element.
+         * Hide window.
          */
         hide(t) {
             t.style.display = "none";
         },
 
         /**
-         * Set the opacity of the modal window.
-         * @param {HTMLElement} targetobject - The modal window element.
-         * @param {number} value - The opacity value to set.
+         * Opacity helper (legacy compatibility).
          */
         setopacity(targetobject, value) {
-            if (!targetobject) {
-                return;
-            }
-            if (targetobject.filters && targetobject.filters[0]) {
-                if (typeof targetobject.filters[0].opacity == "number") {
-                    targetobject.filters[0].opacity = value * 100;
-                } else {
-                    targetobject.style.filter = `alpha(opacity=${value * 100})`;
-                }
-            } else if (typeof targetobject.style.MozOpacity != "undefined") {
-                targetobject.style.MozOpacity = value;
-            } else if (typeof targetobject.style.opacity != "undefined") {
+            if (targetobject) {
                 targetobject.style.opacity = value;
             }
         },
 
         /**
-         * Move the modal window to a specific position with constraints.
-         * @param {HTMLElement} t - The modal window element to be moved.
-         * @param {string|number} x - The horizontal position ("middle" or number).
-         * @param {string|number} y - The vertical position ("middle" or number).
+         * Move window to coordinates.
          */
         moveTo(t, x, y) {
-            this.getviewpoint();
-
             let newX, newY;
-
             if (x === "middle") {
-                newX = this.scroll_left + Math.max(0, (this.docwidth - t.offsetWidth) / 2);
+                newX = Math.max(0, (window.innerWidth - t.offsetWidth) / 2);
             } else {
-                newX = this.scroll_left + parseInt(x, 10);
+                newX = parseInt(x, 10) || 0;
             }
 
             if (y === "middle") {
-                newY = this.scroll_top + Math.max(0, (this.docheight - t.offsetHeight) / 2);
+                newY = Math.max(0, (window.innerHeight - t.offsetHeight) / 2);
             } else {
-                newY = this.scroll_top + parseInt(y, 10);
+                newY = parseInt(y, 10) || 0;
             }
 
             if (this.constrainToViewport) {
-                const minX = this.scroll_left;
-                const maxX = this.scroll_left + this.docwidth - t.offsetWidth;
-                newX = Math.max(minX, Math.min(newX, maxX));
-
-                const minY = this.scroll_top;
-                const maxY = this.scroll_top + this.docheight - t.offsetHeight;
-                newY = Math.max(minY, Math.min(newY, maxY));
+                newX = Math.max(0, Math.min(newX, window.innerWidth - t.offsetWidth));
+                newY = Math.max(0, Math.min(newY, window.innerHeight - (t.handle ? t.handle.offsetHeight : 36)));
             }
 
-            t.style.left = newX + "px";
-            t.style.top = newY + "px";
+            t.style.left = `${newX}px`;
+            t.style.top = `${newY}px`;
         },
 
         /**
-         * Get the viewport dimensions and scroll positions.
+         * Viewport helper (legacy compatibility).
          */
         getviewpoint() {
-            const ie = document.all && !window.opera;
-            const docElement = document.documentElement;
-            const body = document.body;
-
-            // Get the width of the visible area
-            const domclientWidth = docElement && parseInt(docElement.clientWidth, 10) || 100000;
-            this.standardbody = (document.compatMode == "CSS1Compat") ? docElement : body;
-
-            // Get scroll position
-            this.scroll_top = (ie) ?
-                (body.scrollTop || docElement.scrollTop) :
-                (window.pageYOffset !== undefined) ? window.pageYOffset : 0;
-            this.scroll_left = (ie) ?
-                (body.scrollLeft || docElement.scrollLeft) :
-                (window.pageXOffset !== undefined) ? window.pageXOffset : 0;
-
-            // Get dimensions of the visible area
-            this.docwidth = (ie) ?
-                this.standardbody.clientWidth :
-                (/Safari/i.test(navigator.userAgent)) ? window.innerWidth :
-                    Math.min(domclientWidth, window.innerWidth - 16);
-            this.docheight = (ie) ?
-                this.standardbody.clientHeight :
-                window.innerHeight || 0;
+            this.docwidth = window.innerWidth;
+            this.docheight = window.innerHeight;
+            this.scroll_top = window.pageYOffset || document.documentElement.scrollTop || 0;
+            this.scroll_left = window.pageXOffset || document.documentElement.scrollLeft || 0;
         },
 
-        /**
-         * Remember the attributes of the modal window.
-         * @param {HTMLElement} t - The modal window element.
-         */
         rememberattrs(t) {
-            this.getviewpoint();
-            t.lastx = parseInt((t.style.left || t.offsetLeft), 10) - this.scroll_left;
-            t.lasty = parseInt((t.style.top || t.offsetTop), 10) - this.scroll_top;
+            t.lastx = parseInt(t.style.left || t.offsetLeft, 10);
+            t.lasty = parseInt(t.style.top || t.offsetTop, 10);
             t.lastwidth = parseInt(t.style.width, 10);
         },
 
-        /**
-         * Stop dragging or resizing the modal window.
-         */
-        stop() {
-            this.etarget = null;
-            document.onmousemove = null;
-            document.onmouseup = null;
-        },
+        stop() {},
 
-        /**
-         * Add an event listener to the modal window.
-         * @param {HTMLElement} target - The element to attach the event to.
-         * @param {Function} functionref - The function to call when the event occurs.
-         * @param {string} tasktype - The type of event to listen for.
-         */
         addEvent(target, functionref, tasktype) {
-            const tasktypeAdjusted = (window.addEventListener) ? tasktype : "on" + tasktype;
-            if (target.addEventListener) {
-                target.addEventListener(tasktypeAdjusted, functionref, false);
-            } else if (target.attachEvent) {
-                target.attachEvent(tasktypeAdjusted, functionref);
+            if (target && target.addEventListener) {
+                target.addEventListener(tasktype, functionref, false);
             }
         },
 
-        /**
-         * Remove an event listener from the target element.
-         * @param {HTMLElement} target - The element to remove the event from.
-         * @param {Function} functionref - The function to remove.
-         * @param {string} tasktype - The type of event to remove.
-         */
         removeEvent(target, functionref, tasktype) {
-            const tasktypeAdjusted = (window.removeEventListener) ? tasktype : "on" + tasktype;
-            if (target.removeEventListener) {
-                target.removeEventListener(tasktypeAdjusted, functionref, false);
-            } else if (target.detachEvent) {
-                target.detachEvent(tasktypeAdjusted, functionref);
+            if (target && target.removeEventListener) {
+                target.removeEventListener(tasktype, functionref, false);
             }
         },
 
-        /**
-         * Clean up event listeners and references.
-         */
         cleanup() {
-            for (let i = 0; i < this.tobjects.length; i++) {
-                this.tobjects[i].handle._parent = this.tobjects[i].resizearea._parent = this.tobjects[i].controls._parent = null;
-            }
-            window.onload = null;
+            this.tobjects = [];
         }
     },
 
