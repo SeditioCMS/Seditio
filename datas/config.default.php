@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=datas/config.default.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-sep-02
 Type=Config
 Author=Seditio Team
 Description=Configuration
@@ -78,7 +78,6 @@ $db_logger             = $cfg['sqldbprefix'] . 'logger';
 $db_menu            = $cfg['sqldbprefix'] . 'menu';
 $db_online             = $cfg['sqldbprefix'] . 'online';
 $db_pages             = $cfg['sqldbprefix'] . 'pages';
-$db_parser             = $cfg['sqldbprefix'] . 'parser';
 $db_pfs             = $cfg['sqldbprefix'] . 'pfs';
 $db_pfs_folders     = $cfg['sqldbprefix'] . 'pfs_folders';
 $db_plugins         = $cfg['sqldbprefix'] . 'plugins';

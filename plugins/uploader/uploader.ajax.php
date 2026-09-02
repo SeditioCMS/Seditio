@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/uploader/uploader.ajax.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-sep-02
 Type=Plugin
 Author=Amro
 Description=
@@ -220,8 +220,5 @@ if (in_array($f_extension, $allow_extension) == FALSE) {
 $res = new stdClass;
 $res->filename = $filename;
 $res->error = $disp_errors;
-header("Content-type: application/json; charset=UTF-8");
-header("Cache-Control: must-revalidate");
-header("Pragma: no-cache");
-header("Expires: -1");
+sed_sendheaders('application/json');
 print json_encode($res);

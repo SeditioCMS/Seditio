@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/robots/robots.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-sep-02
 Type=Plugin
 Author=Seditio Team
 Description=
@@ -48,6 +48,6 @@ if ($sitemap) {
 	$sed_robots_collection[] = "\nSitemap: " . $sys['abs_url'] . "sitemap.xml";
 }
 
-header('Content-Type: text/plain; charset=' . $cfg['charset']);
+sed_sendheaders('text/plain');
 echo sed_generate_robots($noindex);
 exit;

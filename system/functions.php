@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/functions.php
 Version=186
-Updated=2026-aug-11
+Updated=2026-sep-02
 Type=Core
 Author=Seditio Team
 Description=Functions
@@ -171,6 +171,7 @@ $cfg['msgtype_name'] = array('e' => 'error', 's' => 'success', 'i' => 'info', 'w
 
 // Determine response header 
 $cfg['msg_status'] = array(
+	// Seditio internal message codes
 	100 => '403 Forbidden',
 	101 => '200 OK',
 	102 => '200 OK',
@@ -186,12 +187,6 @@ $cfg['msg_status'] = array(
 	153 => '403 Forbidden',
 	157 => '403 Forbidden',
 	300 => '200 OK',
-	400 => '400 Bad Request',
-	401 => '401 Authorization Required',
-	403 => '403 Forbidden',
-	404 => '404 Not Found',
-	500 => '500 Internal Server Error',
-	503 => '503 Service Unavailable',
 	602 => '403 Forbidden',
 	603 => '403 Forbidden',
 	900 => '503 Service Unavailable',
@@ -204,7 +199,26 @@ $cfg['msg_status'] = array(
 	930 => '403 Forbidden',
 	940 => '403 Forbidden',
 	950 => '403 Forbidden',
-	951 => '503 Service Unavailable'
+	951 => '503 Service Unavailable',
+
+	// Standard HTTP response codes (RFC 7231 / 7235 / 6585)
+	200 => '200 OK',
+	201 => '201 Created',
+	204 => '204 No Content',
+	301 => '301 Moved Permanently',
+	302 => '302 Found',
+	304 => '304 Not Modified',
+	400 => '400 Bad Request',
+	401 => '401 Unauthorized',
+	403 => '403 Forbidden',
+	404 => '404 Not Found',
+	405 => '405 Method Not Allowed',
+	409 => '409 Conflict',
+	422 => '422 Unprocessable Entity',
+	429 => '429 Too Many Requests',
+	500 => '500 Internal Server Error',
+	502 => '502 Bad Gateway',
+	503 => '503 Service Unavailable'
 );
 
 /* ======== Empty default Var ======== */
@@ -4537,25 +4551,86 @@ function sed_radiobox_skin($check, $name)
 /* sed_selectbox_users() moved to modules/users/inc/users.functions.php */
 
 /**
- * Sends standard HTTP headers and disables browser cache
+ * Sends standard HTTP headers with response code, content type, smart caching and extra headers
  *
- * @param string $content_type The content type of the response (default is 'text/html')
- * @param string $response_code The HTTP response code (default is '200 OK')
+ * @param string $content_type Content-Type MIME (default 'text/html')
+ * @param string|int $response_code HTTP response code or Seditio message code (default '200 OK')
+ * @param bool|int $cache Cache behavior: FALSE for no-cache (default), TRUE to allow browser cache, INT for max-age seconds
+ * @param array|string $extra_headers Extra headers associative array, or string filename for Content-Disposition attachment
+ * @param string|bool $charset Custom charset (default auto-detect: UTF-8 for text, none for binary streams, FALSE to disable)
  * @return bool Always returns TRUE
  */
-function sed_sendheaders($content_type = 'text/html', $response_code = '200 OK')
+function sed_sendheaders($content_type = 'text/html', $response_code = '200 OK', $cache = false, $extra_headers = array(), $charset = '')
 {
-	// Determine the protocol (HTTP/1.1 or HTTP/2)
-	$protocol = (isset($_SERVER['SERVER_PROTOCOL'])) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
-	// Send the HTTP response code
-	header($protocol . ' ' . $response_code);
-	// Send headers to disable browser caching
-	header('Expires: Mon, 01 Apr 1974 00:00:00 GMT');
-	header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
-	header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
-	header('Pragma: no-cache');
-	// Send the content type header
-	header('Content-Type: ' . $content_type . '; charset=UTF-8');
+	global $cfg;
+
+	// 1. Determine HTTP status code and text via $cfg['msg_status']
+	if (is_numeric($response_code)) {
+		$code_int = (int)$response_code;
+		$status_str = isset($cfg['msg_status'][$code_int]) ? $cfg['msg_status'][$code_int] : ($code_int . ' Unknown');
+	} else {
+		$status_str = (string)$response_code;
+	}
+
+	$protocol = (isset($_SERVER['SERVER_PROTOCOL']) && !empty($_SERVER['SERVER_PROTOCOL'])) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
+	header($protocol . ' ' . $status_str);
+
+	// 2. Cache headers management
+	if ($cache === false || $cache === 0) {
+		// Strict no-cache (default, full backwards compatibility)
+		header('Expires: Mon, 01 Apr 1974 00:00:00 GMT');
+		header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+		header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: no-cache');
+	} elseif (is_numeric($cache) && (int)$cache > 0) {
+		// Public cache with max-age in seconds
+		$max_age = (int)$cache;
+		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $max_age) . ' GMT');
+		header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+		header('Cache-Control: public, max-age=' . $max_age);
+	}
+
+	// 3. Smart Content-Type & Charset handling
+	$append_charset = '';
+	if ($charset === false) {
+		$append_charset = '';
+	} elseif (!empty($charset)) {
+		$append_charset = '; charset=' . $charset;
+	} else {
+		// Auto-detect: only add charset for text and text-like formats
+		$text_types = array('text/', 'application/json', 'application/xml', 'application/javascript', 'application/xhtml+xml', 'application/rss+xml', 'image/svg+xml');
+		$is_text = false;
+		foreach ($text_types as $prefix) {
+			if (strpos($content_type, $prefix) !== false) {
+				$is_text = true;
+				break;
+			}
+		}
+		if ($is_text) {
+			$def_charset = !empty($cfg['charset']) ? $cfg['charset'] : 'UTF-8';
+			$append_charset = '; charset=' . $def_charset;
+		}
+	}
+
+	header('Content-Type: ' . $content_type . $append_charset);
+
+	// 4. Extra headers or download attachment filename
+	if (is_string($extra_headers) && !empty($extra_headers)) {
+		$safe_filename = str_replace(array("\r", "\n", '"'), '', $extra_headers);
+		header('Content-Disposition: attachment; filename="' . $safe_filename . '"');
+	} elseif (is_array($extra_headers)) {
+		foreach ($extra_headers as $h_name => $h_val) {
+			if (is_int($h_name)) {
+				$clean_h = str_replace(array("\r", "\n"), '', $h_val);
+				header($clean_h);
+			} else {
+				$clean_name = str_replace(array("\r", "\n", ':'), '', $h_name);
+				$clean_val = str_replace(array("\r", "\n"), '', $h_val);
+				header($clean_name . ': ' . $clean_val);
+			}
+		}
+	}
+
 	return TRUE;
 }
 
@@ -4679,7 +4754,7 @@ function sed_set_host($default_host)  // New in 175
 	if (isset($_SERVER['HTTP_HOST'])) {
 		$_SERVER['HTTP_HOST'] = mb_strtolower($_SERVER['HTTP_HOST']);
 		if (!preg_match('/^\[?(?:[a-z0-9-:\]_]+\.?)+$/', $_SERVER['HTTP_HOST'])) {
-			header('HTTP/1.1 400 Bad Request');
+			sed_sendheaders('text/html', 400);
 			exit;
 		}
 	} else {
@@ -5396,8 +5471,7 @@ function sed_sefurlredirect()
 		}
 		$redirect301 = sed_url($section, $params, "", true);
 
-		header("HTTP/1.1 301 Moved Permanently");
-		header("Location: " . $redirect301);
+		sed_sendheaders('text/html', 301, false, array('Location' => $redirect301));
 		exit;
 	}
 }

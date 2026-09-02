@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/ckeditor/ckeditor.ajax.php
 Version=185
-Updated=2026-feb-14
+Updated=2026-sep-02
 Type=Plugin
 Author=Amro
 Description=
@@ -212,8 +212,5 @@ $result_upload = array(
     "error" => array("message" => $disp_errors)
 );
 
-header("Content-type: application/json; charset=UTF-8");
-header("Cache-Control: must-revalidate");
-header("Pragma: no-cache");
-header("Expires: -1");
+sed_sendheaders('application/json');
 print json_encode($result_upload);

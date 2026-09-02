@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/rss/rss.php
 Version=186
-Updated=2026-mar-31
+Updated=2026-sep-02
 Type=Plugin
 Author=Seditio Team
 Description=RSS feeds (direct)
@@ -60,7 +60,7 @@ if ($rss_timetolive < 1) {
 $items = array();
 $i = 0;
 
-header("Content-type: text/xml; charset=" . $cfg['charset']);
+sed_sendheaders('text/xml');
 
 if ($usr['id'] == 0) {
 	$name = mb_substr(md5($m . $c . $id . $q . $s), 0, 10);

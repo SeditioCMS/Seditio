@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/functions.image.php
 Version=186
-Updated=2026-jul-17
+Updated=2026-sep-02
 Type=Core
 Author=Amro
 Description=Image Functions
@@ -229,20 +229,20 @@ function sed_resize($filename)
 
     $parsed = sed_get_resize_params($filename);
     if ($parsed === false) {
-        header("HTTP/1.1 404 Not Found");
+        sed_sendheaders('text/html', 404);
         exit;
     }
 
     list($original_file, $type, $width, $height, $set_watermark, $use_webp, $namespace) = $parsed;
 
     if (empty($original_file)) {
-        header("HTTP/1.1 404 Not Found");
+        sed_sendheaders('text/html', 404);
         exit;
     }
 
     $src_path = sed_image_resolve_original_path($original_file, $namespace);
     if ($src_path === false) {
-        header("HTTP/1.1 404 Not Found");
+        sed_sendheaders('text/html', 404);
         exit;
     }
 
@@ -259,7 +259,7 @@ function sed_resize($filename)
     $check_ais = (count($cfg['available_image_sizes']) > 0) ? in_array($size, $cfg['available_image_sizes']) : TRUE;
 
     if (!$check_ais) {
-        header("HTTP/1.1 404 Not Found");
+        sed_sendheaders('text/html', 404);
         exit;
     }
 
@@ -355,7 +355,7 @@ function sed_add_resize_params($filename, $type = '', $width = 0, $height = 0, $
         } else {
             // TODO fix this option does not work now
             //$resized_filename = $file . '.' . $type . ($set_watermark ? 'w' : '') . '.' . $ext . ($use_webp ? '.webp' : '');
-            header("HTTP/1.1 404 Not Found");
+            sed_sendheaders('text/html', 404);
             exit;
         }
     }

@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/core/ajax/ajax.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-sep-02
 Type=Core
 Author=Amro
 Description=Ajax Interface
@@ -25,8 +25,7 @@ require(SED_ROOT . '/datas/config.php');
 require(SED_ROOT . '/system/common.php');
 
 if (!sed_check_csrf()) {
-    header("Content-type: application/json; charset=UTF-8");
-    http_response_code(403);
+    sed_sendheaders('application/json', 403);
     echo json_encode(['error' => 'Access denied. Invalid CSRF AJAX header.']);
     exit;
 }
@@ -92,9 +91,6 @@ if ($m == 'pages' && !empty($query)) {
 $res = new stdClass;
 $res->suggestions = $suggestions;
 
-header("Content-type: application/json; charset=UTF-8");
-header("Cache-Control: must-revalidate");
-header("Pragma: no-cache");
-header("Expires: -1");
+sed_sendheaders('application/json');
 print json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 exit;

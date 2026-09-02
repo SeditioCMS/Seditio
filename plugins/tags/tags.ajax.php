@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/tags/tags.ajax.php
 Version=186
-Updated=2026-mar-18
+Updated=2026-sep-02
 Type=Plugin
 [END_SED]
 
@@ -43,6 +43,6 @@ if (!empty($q_input)) {
 	}
 }
 
-header('Content-Type: application/json; charset=UTF-8');
+sed_sendheaders('application/json');
 echo json_encode($result);
 exit;

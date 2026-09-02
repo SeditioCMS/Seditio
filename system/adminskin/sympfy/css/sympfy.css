@@ -210,6 +210,11 @@ strong {
   color: var(--admin-text-strong);
 }
 
+a strong,
+a b {
+  color: inherit;
+}
+
 small {
   font-size: 0.85em;
 }
@@ -1029,48 +1034,143 @@ table.cells tr:nth-child(even) {
 
 /*-------------------------*/
 
-.shortcut-button {
-  border: 1px solid var(--admin-tab-border);
-  background: #f7f7f7 url(../img/shortcut-button-bg.gif) top left no-repeat;
-  display: block;
-  max-width: 125px;
-  min-width: 120px;
-  min-height: 80px;
+ul.shortcut-buttons-set {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 12px;
   margin: 0 0 20px 0;
+  padding: 0;
+  list-style: none;
 }
 
-.bt1 {
-  height: 104px;
-  width: 114px;
+ul.shortcut-buttons-set li {
+  display: flex;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+  list-style: none;
+  flex: 0 0 auto;
+}
+
+.shortcut-button {
+  border: 1px solid var(--admin-tab-border);
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 125px;
+  min-height: 85px;
+  height: 100%;
+  box-sizing: border-box;
+  text-decoration: none;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .shortcut-button span {
-  display: block;
-  padding: 15px 10px 15px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 12px 8px;
   text-align: center;
   color: var(--admin-text-main);
   font-size: 13px;
   line-height: 1.3em;
+  box-sizing: border-box;
+}
+
+.shortcut-button span i {
+  font-size: 2.25em; /* 10% smaller than 2.5em (ic-3x) */
+  line-height: 1;
+  margin-bottom: 7px;
+  display: inline-block;
+  transition: transform 0.2s ease;
 }
 
 .shortcut-button span img {
-  margin-bottom: 10px;
+  max-width: 36px;
+  max-height: 36px;
+  margin-bottom: 7px;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.shortcut-button span br {
+  display: none;
 }
 
 .shortcut-button:hover {
-  background: #fff;
+  background: #ffffff;
+  border-color: var(--admin-primary);
   text-decoration: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.shortcut-button:hover span i,
+.shortcut-button:hover span img {
+  transform: scale(1.05);
 }
 
 .shortcut-button span:hover {
   color: var(--admin-primary);
 }
 
-ul.shortcut-buttons-set li {
-  float: left;
-  margin: 0 15px 0 0;
-  padding: 0 !important;
-  background: 0;
+.shortcut-button.current,
+.shortcut-button.active {
+  background: #ffffff !important;
+  border-color: var(--admin-primary) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+.shortcut-button.current span,
+.shortcut-button.active span {
+  color: var(--admin-primary) !important;
+  font-weight: 600;
+}
+
+.shortcut-button.current span i,
+.shortcut-button.active span i {
+  color: var(--admin-primary) !important;
+}
+
+@media (max-width: 600px) {
+  ul.shortcut-buttons-set {
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  ul.shortcut-buttons-set li {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 105px;
+  }
+
+  .shortcut-button {
+    width: 100%;
+    min-height: 75px;
+  }
+
+  .shortcut-button span {
+    padding: 10px 6px;
+    font-size: 12px;
+  }
+
+  .shortcut-button span i {
+    font-size: 2em;
+    margin-bottom: 5px;
+  }
+
+  .shortcut-button span img {
+    max-width: 32px;
+    max-height: 32px;
+    margin-bottom: 5px;
+  }
 }
 
 /*-------------------------*/

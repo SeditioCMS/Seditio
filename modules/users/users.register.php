@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/users/users.register.php
 Version=186
-Updated=2026-feb-21
+Updated=2026-sep-02
 Type=Module
 Author=Seditio Team
 Description=User registration
@@ -54,7 +54,7 @@ $extrafields = sed_extrafield_get('users');
 $number_of_extrafields = count($extrafields);
 // ----------------------	
 
-if ($a == 'add') {
+if ($a == 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 	$bannedreason = FALSE;
 	sed_shield_protect();
 
@@ -67,12 +67,10 @@ if ($a == 'add') {
 	}
 	/* ===== */
 
-	$rusername = sed_import('rusername', 'P', 'TXT', 100, TRUE);
-
-	$ruserfirstname = sed_import('ruserfirstname', 'P', 'TXT', 100, TRUE);   // sed 177
-	$ruserlastname = sed_import('ruserlastname', 'P', 'TXT', 100, TRUE);     // sed 177
-
-	$ruseremail = sed_import('ruseremail', 'P', 'TXT', 64, TRUE);
+	$rusername = sed_import('rusername', 'P', 'TXT', 100);
+	$ruserfirstname = sed_import('ruserfirstname', 'P', 'TXT', 100);   // sed 177
+	$ruserlastname = sed_import('ruserlastname', 'P', 'TXT', 100);     // sed 177
+	$ruseremail = sed_import('ruseremail', 'P', 'TXT', 64);
 	$rpassword1 = sed_import('rpassword1', 'P', 'TXT', 32);
 	$rpassword2 = sed_import('rpassword2', 'P', 'TXT', 32);
 	$rcountry = sed_import('rcountry', 'P', 'TXT');
@@ -86,7 +84,19 @@ if ($a == 'add') {
 	$rday = sed_import('rday', 'P', 'INT');
 	$ruserskype = sed_import('ruserskype', 'P', 'TXT');
 	$ruserwebsite = sed_import('ruserwebsite', 'P', 'TXT');
-	$ruseremail = mb_strtolower($ruseremail);
+
+	$rusername = !empty($rusername) ? $rusername : '';
+	$ruserfirstname = !empty($ruserfirstname) ? $ruserfirstname : '';
+	$ruserlastname = !empty($ruserlastname) ? $ruserlastname : '';
+	$ruseremail = !empty($ruseremail) ? mb_strtolower($ruseremail) : '';
+	$rpassword1 = !empty($rpassword1) ? $rpassword1 : '';
+	$rpassword2 = !empty($rpassword2) ? $rpassword2 : '';
+	$rcountry = !empty($rcountry) ? $rcountry : '';
+	$rlocation = !empty($rlocation) ? $rlocation : '';
+	$roccupation = !empty($roccupation) ? $roccupation : '';
+	$rusergender = !empty($rusergender) ? $rusergender : '';
+	$ruserskype = !empty($ruserskype) ? $ruserskype : '';
+	$ruserwebsite = !empty($ruserwebsite) ? $ruserwebsite : '';
 
 	// --------- Extra fields     
 	if ($number_of_extrafields > 0) $ruserextrafields = sed_extrafield_buildvar($extrafields, 'ruser', 'user');

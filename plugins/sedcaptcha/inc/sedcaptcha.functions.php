@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/sedcaptcha/inc/sedcaptcha.functions.php
 Version=186
-Updated=2026-feb-26
+Updated=2026-sep-02
 Type=Plugin
 Author=Seditio Team
 Description=Captcha functions (image, generate, verify, session)

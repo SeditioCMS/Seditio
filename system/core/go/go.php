@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=go/go.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-sep-02
 Type=Core
 Author=Amro
 Description=External url redirect & check referer
@@ -33,10 +33,9 @@ if (!empty($ref) && mb_strpos($ref, $sys['domain']) !== FALSE) {
 		$url = base64_decode($url);
 	}
 	$url = sed_addhttp($url);
-	header("Location: $url");
+	sed_sendheaders('text/html', 302, false, array('Location' => $url));
 	exit();
 } else {
-	header("HTTP/1.1 301 Moved Permanently");
-	header("Location: " . $sys['abs_url']);
+	sed_sendheaders('text/html', 301, false, array('Location' => $sys['abs_url']));
 	exit();
 }

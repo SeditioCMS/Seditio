@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/sitemap/sitemap.php
 Version=186
-Updated=2026-aug-24
+Updated=2026-sep-02
 Type=Plugin
 Author=Seditio Team
 Description=XML Sitemap (direct)
@@ -228,7 +228,7 @@ if (isset($smcfg[$m])) {
 }
 
 @ob_clean();
-header("Content-type: text/xml; charset=UTF-8");
+sed_sendheaders('text/xml');
 
 if (function_exists('mb_check_encoding')) {
 	if (!mb_check_encoding($feed, 'UTF-8')) {
