@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/users/users.auth.php
 Version=186
-Updated=2026-aug-11
+Updated=2026-sep-07
 Type=Module
 Author=Seditio Team
 Description=User authentication
@@ -114,9 +114,7 @@ if ($a == 'check') {
 							include(SED_ROOT . '/plugins/' . $pl['pl_code'] . '/' . $pl['pl_file'] . '.php');
 						}
 					}
-					/* ===== */
 
-					$sql = sed_sql_query("DELETE FROM $db_online WHERE online_userid='-1' AND online_ip='" . $usr['ip'] . "' LIMIT 1");
 					sed_redirect(sed_url("message", "msg=104&redirect=" . $redirect, "", true));
 					exit;
 				}

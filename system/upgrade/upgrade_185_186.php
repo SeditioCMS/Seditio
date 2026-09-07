@@ -8,10 +8,10 @@ https://seditio.org
 [BEGIN_SED]
 File=system/upgrade/upgrade_185_186.php
 Version=186
-Updated=2026-jun-18
+Updated=2026-sep-07
 Type=Core.upgrade
 Author=Seditio Team
-Description=Database upgrade: PFS nested folders; menu category auto-children
+Description=Database upgrade: PFS nested folders; menu category auto-children; separate shield table; whosonline plugin hooks
 [END_SED]
 ==================== */
 
@@ -50,6 +50,37 @@ if ($chk_menu && sed_sql_numrows($chk_menu) > 0) {
 		$adminmain .= "menu: menu_cat_pages column added.<br />";
 	}
 }
+
+/* ======== Shield table: separate flood protection table ======== */
+$adminmain .= "Checking shield table...<br />";
+$chk_shield = @sed_sql_query("SHOW TABLES LIKE '$db_shield'");
+if (!$chk_shield || sed_sql_numrows($chk_shield) == 0) {
+	sed_sql_query("CREATE TABLE IF NOT EXISTS $db_shield (
+	  shield_ip varchar(45) NOT NULL DEFAULT '',
+	  shield_lastseen int(11) NOT NULL DEFAULT '0',
+	  shield_hammer tinyint(4) NOT NULL DEFAULT '0',
+	  shield_limit int(11) NOT NULL DEFAULT '0',
+	  shield_action varchar(32) NOT NULL DEFAULT '',
+	  PRIMARY KEY (shield_ip),
+	  KEY shield_lastseen (shield_lastseen)
+	) ENGINE={$cfg['mysqlengine']} DEFAULT CHARSET={$cfg['mysqlcharset']} COLLATE={$cfg['mysqlcollate']};");
+	$adminmain .= "shield table created.<br />";
+}
+
+/* ======== Whosonline plugin: reinstall using core functions ======== */
+$adminmain .= "Reinstalling whosonline plugin...<br />";
+$chk_plug = @sed_sql_query("SELECT COUNT(*) FROM $db_plugins WHERE pl_code = 'whosonline'");
+if ($chk_plug && sed_sql_result($chk_plug, 0, 'COUNT(*)') > 0) {
+	$adminmain .= "Removing old whosonline plugin registration...<br />";
+	$adminmain .= sed_plugin_uninstall('whosonline', false, false);
+}
+
+$adminmain .= "Dropping legacy online table...<br />";
+$db_online_legacy = $cfg['sqldbprefix'] . 'online';
+@sed_sql_query("DROP TABLE IF EXISTS $db_online_legacy");
+
+$adminmain .= "Installing whosonline plugin (v3.0)...<br />";
+$adminmain .= sed_plugin_install('whosonline');
 
 $adminmain .= "-----------------------<br />";
 $adminmain .= "Changing the SQL version number to 186...<br />";

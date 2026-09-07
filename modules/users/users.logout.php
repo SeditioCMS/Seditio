@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/users/users.logout.php
 Version=186
-Updated=2026-feb-21
+Updated=2026-sep-07
 Type=Module
 Author=Seditio Team
 Description=User logout
@@ -41,7 +41,6 @@ if ($cfg['authmode'] == 2 || $cfg['authmode'] == 3) {
 }
 
 if ($usr['id'] > 0) {
-	$sql = sed_sql_query("DELETE FROM $db_online WHERE online_ip='" . $usr['ip'] . "'");
 	$rmdpass_secret = md5(sed_unique(16)); // New sed175
 	$sql = sed_sql_query("UPDATE $db_users SET user_secret = '" . $rmdpass_secret . "', user_lastip='" . $usr['ip'] . "' WHERE user_id='" . $usr['id'] . "' LIMIT 1");
 	sed_redirect(sed_url("message", "msg=102", "", true));

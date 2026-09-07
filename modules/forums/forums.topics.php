@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/forums/forums.topics.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-sep-07
 Type=Core
 Author=Seditio Team
 Description=Forums
@@ -279,8 +279,11 @@ if (empty($d)) {
 
 $fs_desc = sed_cc($fs_desc);
 
-$sql = sed_sql_query("SELECT COUNT(*) FROM $db_online WHERE online_location='Forums' and online_subloc='" . sed_sql_prep($fs_title) . "'");
-$fs_viewers = sed_sql_result($sql, 0, "COUNT(*)");
+$fs_viewers = 0;
+if (sed_plug_active('whosonline')) {
+	$sql = sed_sql_query("SELECT COUNT(*) FROM $db_online WHERE online_location='Forums' and online_subloc='" . sed_sql_prep($fs_title) . "'");
+	$fs_viewers = sed_sql_result($sql, 0, "COUNT(*)");
+}
 $sql = sed_sql_query("SELECT COUNT(*) FROM $db_forum_topics WHERE ft_sectionid='$s' and ft_mode=1");
 $prvtopics = sed_sql_result($sql, 0, "COUNT(*)");
 $sql = sed_sql_query("SELECT COUNT(*) FROM $db_forum_topics WHERE ft_sectionid='$s'");
@@ -405,9 +408,11 @@ if (!empty($forum_subforums)) {
 
 	if (!isset($sed_sections_vw)) {
 		$sed_sections_vw = array();
-		$sqltmp = sed_sql_query("SELECT online_subloc, COUNT(*) FROM $db_online WHERE online_location='Forums' GROUP BY online_subloc");
-		while ($tmprow = sed_sql_fetchassoc($sqltmp)) {
-			$sed_sections_vw[$tmprow['online_subloc']] = $tmprow['COUNT(*)'];
+		if (sed_plug_active('whosonline')) {
+			$sqltmp = sed_sql_query("SELECT online_subloc, COUNT(*) FROM $db_online WHERE online_location='Forums' GROUP BY online_subloc");
+			while ($tmprow = sed_sql_fetchassoc($sqltmp)) {
+				$sed_sections_vw[$tmprow['online_subloc']] = $tmprow['COUNT(*)'];
+			}
 		}
 		sed_cache_store('sed_sections_vw', $sed_sections_vw, 120);
 	}

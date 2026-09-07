@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=datas/config.default.php
 Version=186
-Updated=2026-sep-02
+Updated=2026-sep-07
 Type=Config
 Author=Seditio Team
 Description=Configuration
@@ -19,18 +19,18 @@ Description=Configuration
 // MySQL database parameters. Change to fit your host.
 // ========================
 
-$cfg['mysqlhost'] = 'localhost';    // Database host URL
-$cfg['mysqluser'] = 'root';            // Database user
-$cfg['mysqlpassword'] = '';            // Database password
-$cfg['mysqldb'] = 'seditio';        // Database name
+$cfg['mysqlhost'] = 'localhost';	// Database host URL
+$cfg['mysqluser'] = 'root';			// Database user
+$cfg['mysqlpassword'] = '';			// Database password
+$cfg['mysqldb'] = 'seditio';		// Database name
 
 // ========================
 // Default skin and default language
 // ========================
 
-$cfg['defaultskin'] = 'sympfy';        // Default skin code. Be SURE it's pointing to a valid folder in /skins/... !!
-$cfg['defaultlang'] = 'en';            // Default language code
-$cfg['adminskin'] = 'sympfy';        // Default admin skin
+$cfg['defaultskin'] = 'sympfy';		// Default skin code. Be SURE it's pointing to a valid folder in /skins/... !!
+$cfg['defaultlang'] = 'en';			// Default language code
+$cfg['adminskin'] = 'sympfy';		// Default admin skin
 
 // ========================
 // More settings
@@ -39,16 +39,16 @@ $cfg['adminskin'] = 'sympfy';        // Default admin skin
 // TRUE = enabled / FALSE = disabled
 // ========================
 
-$cfg['sqldbprefix'] = 'sed_';            // Database tables prefix
-$cfg['sqldb'] = 'mysqli';                 // Database connector (mysqli only).
+$cfg['sqldbprefix'] = 'sed_';			// Database tables prefix
+$cfg['sqldb'] = 'mysqli'; 				// Database connector (mysqli only).
 $cfg['mysqlengine'] = 'InnoDB';   // Table engine (InnoDB recommended)
 $cfg['mysqlcharset'] = 'utf8mb4';
 $cfg['mysqlcollate'] = 'utf8mb4_unicode_ci';
-$cfg['site_secret'] = '';                     // Site secret key
-$cfg['authmode'] = 3;                     // (1:cookies, 2:sessions, 3:cookies+sessions) default=3
-$cfg['redirmode'] = FALSE;                // 0 or 1, Set to '1' if you cannot sucessfully log in (IIS servers)
-$cfg['ipcheck'] = TRUE;                  // Will kill the logged-in session if the IP has changed
-$cfg['multihost'] = TRUE;            // Allow multiple host names for this site
+$cfg['site_secret'] = ''; 					// Site secret key
+$cfg['authmode'] = 3; 					// (1:cookies, 2:sessions, 3:cookies+sessions) default=3
+$cfg['redirmode'] = FALSE;				// 0 or 1, Set to '1' if you cannot sucessfully log in (IIS servers)
+$cfg['ipcheck'] = TRUE;  				// Will kill the logged-in session if the IP has changed
+$cfg['multihost'] = TRUE;			// Allow multiple host names for this site
 $cfg['patchmode'] = FALSE;           // TRUE = enable automatic schema patches (for upgrades)
 
 // ========================
@@ -60,36 +60,36 @@ $cfg['patchmode'] = FALSE;           // TRUE = enable automatic schema patches (
 // Else do not change.
 // ========================
 
-$db_auth            = $cfg['sqldbprefix'] . 'auth';
-$db_banlist         = $cfg['sqldbprefix'] . 'banlist';
-$db_cache             = $cfg['sqldbprefix'] . 'cache';
-$db_com             = $cfg['sqldbprefix'] . 'com';
-$db_core            = $cfg['sqldbprefix'] . 'core';
-$db_config             = $cfg['sqldbprefix'] . 'config';
-$db_dic             = $cfg['sqldbprefix'] . 'dic';
-$db_dic_items       = $cfg['sqldbprefix'] . 'dic_items';
-$db_forum_posts     = $cfg['sqldbprefix'] . 'forum_posts';
-$db_forum_sections     = $cfg['sqldbprefix'] . 'forum_sections';
-$db_forum_structure    = $cfg['sqldbprefix'] . 'forum_structure';
-$db_forum_topics     = $cfg['sqldbprefix'] . 'forum_topics';
-$db_groups             = $cfg['sqldbprefix'] . 'groups';
-$db_groups_users     = $cfg['sqldbprefix'] . 'groups_users';
-$db_logger             = $cfg['sqldbprefix'] . 'logger';
-$db_menu            = $cfg['sqldbprefix'] . 'menu';
-$db_online             = $cfg['sqldbprefix'] . 'online';
-$db_pages             = $cfg['sqldbprefix'] . 'pages';
-$db_pfs             = $cfg['sqldbprefix'] . 'pfs';
-$db_pfs_folders     = $cfg['sqldbprefix'] . 'pfs_folders';
-$db_plugins         = $cfg['sqldbprefix'] . 'plugins';
-$db_pm                 = $cfg['sqldbprefix'] . 'pm';
-$db_polls             = $cfg['sqldbprefix'] . 'polls';
-$db_polls_options     = $cfg['sqldbprefix'] . 'polls_options';
-$db_polls_voters     = $cfg['sqldbprefix'] . 'polls_voters';
-$db_rated             = $cfg['sqldbprefix'] . 'rated';
-$db_ratings         = $cfg['sqldbprefix'] . 'ratings';
-$db_referers         = $cfg['sqldbprefix'] . 'referers';
-$db_smilies         = $cfg['sqldbprefix'] . 'smilies';
-$db_stats             = $cfg['sqldbprefix'] . 'stats';
-$db_structure         = $cfg['sqldbprefix'] . 'structure';
-$db_trash             = $cfg['sqldbprefix'] . 'trash';
-$db_users             = $cfg['sqldbprefix'] . 'users';
+$db_auth			= $cfg['sqldbprefix'] . 'auth';
+$db_banlist 		= $cfg['sqldbprefix'] . 'banlist';
+$db_cache 			= $cfg['sqldbprefix'] . 'cache';
+$db_com 			= $cfg['sqldbprefix'] . 'com';
+$db_core			= $cfg['sqldbprefix'] . 'core';
+$db_config 			= $cfg['sqldbprefix'] . 'config';
+$db_dic 			= $cfg['sqldbprefix'] . 'dic';
+$db_dic_items 		= $cfg['sqldbprefix'] . 'dic_items';
+$db_forum_posts 	= $cfg['sqldbprefix'] . 'forum_posts';
+$db_forum_sections 	= $cfg['sqldbprefix'] . 'forum_sections';
+$db_forum_structure = $cfg['sqldbprefix'] . 'forum_structure';
+$db_forum_topics 	= $cfg['sqldbprefix'] . 'forum_topics';
+$db_groups 			= $cfg['sqldbprefix'] . 'groups';
+$db_groups_users 	= $cfg['sqldbprefix'] . 'groups_users';
+$db_logger 			= $cfg['sqldbprefix'] . 'logger';
+$db_menu 			= $cfg['sqldbprefix'] . 'menu';
+$db_pages 			= $cfg['sqldbprefix'] . 'pages';
+$db_pfs 			= $cfg['sqldbprefix'] . 'pfs';
+$db_pfs_folders 	= $cfg['sqldbprefix'] . 'pfs_folders';
+$db_plugins 		= $cfg['sqldbprefix'] . 'plugins';
+$db_pm 				= $cfg['sqldbprefix'] . 'pm';
+$db_polls 			= $cfg['sqldbprefix'] . 'polls';
+$db_polls_options 	= $cfg['sqldbprefix'] . 'polls_options';
+$db_polls_voters 	= $cfg['sqldbprefix'] . 'polls_voters';
+$db_rated 			= $cfg['sqldbprefix'] . 'rated';
+$db_ratings 		= $cfg['sqldbprefix'] . 'ratings';
+$db_referers 		= $cfg['sqldbprefix'] . 'referers';
+$db_shield 			= $cfg['sqldbprefix'] . 'shield';
+$db_smilies 		= $cfg['sqldbprefix'] . 'smilies';
+$db_stats 			= $cfg['sqldbprefix'] . 'stats';
+$db_structure 		= $cfg['sqldbprefix'] . 'structure';
+$db_trash 			= $cfg['sqldbprefix'] . 'trash';
+$db_users 			= $cfg['sqldbprefix'] . 'users';

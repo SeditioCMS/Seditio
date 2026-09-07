@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/functions.php
 Version=186
-Updated=2026-sep-02
+Updated=2026-sep-07
 Type=Core
 Author=Seditio Team
 Description=Functions
@@ -257,7 +257,6 @@ $sed_dbnames = array(
 	'groups_users',
 	'logger',
 	'menu',
-	'online',
 	'pages',
 	'pfs',
 	'pfs_folders',
@@ -269,6 +268,7 @@ $sed_dbnames = array(
 	'rated',
 	'ratings',
 	'referers',
+	'shield',
 	'smilies',
 	'stats',
 	'structure',
@@ -2245,6 +2245,7 @@ function sed_plug_active($code)
 	}
 	return false;
 }
+
 
 /** 
  * Returns current url 
@@ -4764,14 +4765,14 @@ function sed_set_host($default_host)  // New in 175
 }
 
 /** 
- * Clears current user action in Who's online. 
+ * Clears current user action in Shield. 
  * 
  */
 function sed_shield_clearaction()
 {
-	global  $db_online, $usr;
+	global $db_shield, $usr;
 
-	$sql = sed_sql_query("UPDATE $db_online SET online_action='' WHERE online_ip='" . $usr['ip'] . "'");
+	$sql = sed_sql_query("UPDATE $db_shield SET shield_action='' WHERE shield_ip='" . $usr['ip'] . "'");
 	return;
 }
 
@@ -4814,9 +4815,9 @@ function sed_shield_hammer($hammer, $action, $lastseen)
  */
 function sed_shield_protect()
 {
-	global $cfg, $sys, $online_count, $shield_limit, $shield_action;
+	global $cfg, $sys, $shield_limit, $shield_action;
 
-	if ($cfg['shieldenabled'] && $online_count > 0 && $shield_limit > $sys['now']) {
+	if ($cfg['shieldenabled'] && !empty($shield_limit) && $shield_limit > $sys['now']) {
 		sed_diefatal('Shield protection activated, please retry in ' . ($shield_limit - $sys['now']) . ' seconds...<br />After this duration, you can refresh the current page to continue.<br />Last action was : ' . $shield_action);
 	}
 	return;
@@ -4830,10 +4831,13 @@ function sed_shield_protect()
  */
 function sed_shield_update($shield_add, $shield_newaction)
 {
-	global $cfg, $usr, $sys, $db_online;
+	global $cfg, $usr, $sys, $db_shield;
 	if ($cfg['shieldenabled']) {
 		$shield_newlimit = $sys['now'] + floor($shield_add * $cfg['shieldtadjust'] / 100);
-		$sql = sed_sql_query("UPDATE $db_online SET online_shield='$shield_newlimit', online_action='$shield_newaction' WHERE online_ip='" . $usr['ip'] . "'");
+		$shield_newaction = sed_sql_prep($shield_newaction);
+		$sql = sed_sql_query("INSERT INTO $db_shield (shield_ip, shield_lastseen, shield_hammer, shield_limit, shield_action)
+			VALUES ('" . $usr['ip'] . "', " . (int)$sys['now'] . ", 0, " . (int)$shield_newlimit . ", '" . $shield_newaction . "')
+			ON DUPLICATE KEY UPDATE shield_limit = " . (int)$shield_newlimit . ", shield_action = '" . $shield_newaction . "'");
 	}
 	return;
 }

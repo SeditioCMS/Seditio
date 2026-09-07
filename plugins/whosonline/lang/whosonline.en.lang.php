@@ -8,12 +8,18 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/whosonline/lang/whosonline.en.lang.php
 Version=186
-Updated=2026-feb-14
-Type=
+Updated=2026-sep-07
+Type=Plugin
 Author=Seditio Team
 Description=
 [END_SED]
 ==================== */
+
+$L['cfg_timeout'] = array("Online timeout in seconds", "Default 900 (15 minutes)");
+$L['cfg_cache_ttl'] = array("Aggregated online counts cache TTL in seconds", "0 to disable cache");
+$L['cfg_showavatars'] = array("Display avatars of users?", "");
+$L['cfg_miniavatar_x'] = array("The size of a mini-avatars on the axis x, in pixels", "");
+$L['cfg_miniavatar_y'] = array("The size of a mini-avatars on the axis y, in pixels", "");
 
 $L['plu_title'] = "Who's online ?";
 $L['plu_mostonline'] = "Most users ever online was ";

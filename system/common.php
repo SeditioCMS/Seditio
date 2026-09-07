@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/common.php
 Version=186
-Updated=2026-aug-11
+Updated=2026-sep-07
 Type=Core
 Author=Seditio Team
 Description=Common
@@ -343,76 +343,33 @@ if ($cfg['gzip']) {
 
 ob_start('sed_outputfilters'); //fix v173
 
-/* ======== Who's online (part 1) and shield protection ======== */
+/* ======== Who's online defaults ======== */
 
-if (!$cfg['disablewhosonline']) {
-	$sql = sed_sql_query("DELETE FROM $db_online WHERE online_lastseen<'$online_timedout'");
-	$sql = sed_sql_query("SELECT COUNT(*) FROM $db_online WHERE online_name='v'");
-	$sys['whosonline_vis_count'] = sed_sql_result($sql, 0, 'COUNT(*)');
-	$sql = sed_sql_query("SELECT online_name, online_userid FROM $db_online WHERE online_name NOT LIKE 'v' ORDER BY online_name ASC");
-	$sys['whosonline_reg_count'] = sed_sql_numrows($sql);
-	$sys['whosonline_all_count'] = $sys['whosonline_reg_count'] + $sys['whosonline_vis_count'];
-	$out['whosonline_reg_list'] = '';
-	$ii = 0;
-	while ($row = sed_sql_fetchassoc($sql)) {
-		$out['whosonline_reg_list'] .= ($ii > 0) ? ', ' : '';
-		$out['whosonline_reg_list'] .= sed_build_user($row['online_userid'], sed_cc($row['online_name']));
-		$sed_usersonline[] = $row['online_userid'];
-		$ii++;
-	}
-}
+$sys['whosonline_vis_count'] = 0;
+$sys['whosonline_reg_count'] = 0;
+$sys['whosonline_all_count'] = 0;
+$out['whosonline_reg_list'] = '';
+$out['whosonline'] = '';
+$sed_usersonline = array();
 
 /* =========== Shield Protection ================= */
 
+$shield_limit = 0;
+$shield_action = '';
+$shield_hammer = 0;
 
-if (!$cfg['disablewhosonline'] || $cfg['shieldenabled']) {
-	if ($usr['id'] > 0) {
-		$sql = sed_sql_query("SELECT online_id FROM $db_online WHERE online_userid='" . $usr['id'] . "'");
-
-		if ($row = sed_sql_fetchassoc($sql)) {
-			$online_count = 1;
-
-			if ($cfg['shieldenabled']) {
-				$sql2 = sed_sql_query("SELECT online_shield, online_action, online_hammer, online_lastseen FROM $db_online WHERE online_userid='" . $usr['id'] . "'");
-				if ($row = sed_sql_fetchassoc($sql2)) {
-					$shield_limit = $row['online_shield'];
-					$shield_action = $row['online_action'];
-					$shield_hammer = sed_shield_hammer($row['online_hammer'], $shield_action, $row['online_lastseen']);
-				}
-			}
-		}
-	} else {
-		$sql = sed_sql_query("SELECT COUNT(*) FROM $db_online WHERE online_ip='" . $usr['ip'] . "'");
-		$online_count = sed_sql_result($sql, 0, 'COUNT(*)');
-
-		if ($online_count > 0) {
-
-			if ($cfg['shieldenabled']) {
-				$sql2 = sed_sql_query("SELECT online_shield, online_action, online_hammer, online_lastseen FROM $db_online WHERE online_ip='" . $usr['ip'] . "'");
-				if ($row = sed_sql_fetchassoc($sql2)) {
-					$shield_limit = $row['online_shield'];
-					$shield_action = $row['online_action'];
-					$shield_hammer = sed_shield_hammer($row['online_hammer'], $shield_action, $row['online_lastseen']);
-				}
-			}
-		}
-	}
-}
-
-/* ======== Max users ======== */
-
-if (!$cfg['disablehitstats']) {
-	$maxusers = 0;
-
-	$sql = sed_sql_query("SELECT stat_value FROM $db_stats where stat_name='maxusers' LIMIT 1");
-	if ($row = sed_sql_fetcharray($sql)) {
-		$maxusers = $row[0];
-	} else {
-		$sql = sed_sql_query("INSERT INTO $db_stats (stat_name, stat_value) VALUES ('maxusers', 1)");
+if ($cfg['shieldenabled']) {
+	// Garbage collection for stale shield records (1 in 100 requests)
+	if (mt_rand(1, 100) == 1) {
+		$shield_timedout = $sys['now'] - 900;
+		sed_sql_query("DELETE FROM $db_shield WHERE shield_lastseen < $shield_timedout AND shield_limit < " . (int)$sys['now']);
 	}
 
-	if ($maxusers < $sys['whosonline_all_count']) {
-		$sql = sed_sql_query("UPDATE $db_stats SET stat_value='" . $sys['whosonline_all_count'] . "' WHERE stat_name='maxusers'");
+	$sql = sed_sql_query("SELECT shield_limit, shield_action, shield_hammer, shield_lastseen FROM $db_shield WHERE shield_ip='" . $usr['ip'] . "' LIMIT 1");
+	if ($row = sed_sql_fetchassoc($sql)) {
+		$shield_limit = (int)$row['shield_limit'];
+		$shield_action = $row['shield_action'];
+		$shield_hammer = sed_shield_hammer((int)$row['shield_hammer'], $shield_action, (int)$row['shield_lastseen']);
 	}
 }
 
@@ -451,9 +408,6 @@ if (file_exists($msg_lang_file)) {
 $yesno_arr = array(1 => $L['Yes'], 0 => $L['No']);
 $yesno_revers_arr = array(0 => $L['Yes'], 1 => $L['No']);
 
-/* ======== Who's online part 2 ======== */
-
-$out['whosonline'] = ($cfg['disablewhosonline']) ? '' : $sys['whosonline_reg_count'] . ' ' . $L['com_members'] . ', ' . $sys['whosonline_vis_count'] . ' ' . $L['com_guests'];
 $out['copyright'] = "<a href=\"https://seditio.org\">" . $L['foo_poweredby'] . " Seditio</a>";
 
 /* ======== Various ======== */

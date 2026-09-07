@@ -327,13 +327,6 @@ ul.systemlist li::before {
   clear: both;
 }
 
-.form .form-row:after,
-.form .form-row:before {
-  content: ' ';
-  display: table;
-  clear: both;
-}
-
 .form-field {
   margin-bottom: 0;
 }
@@ -393,6 +386,41 @@ ul.systemlist li::before {
 
 .auth-form {
   max-width: 700px;
+}
+
+@media (max-width: 768px) {
+  .responsive-form .form-row {
+    display: block;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .responsive-form .form-label,
+  .responsive-form .form-field,
+  .responsive-form .form-field-2col {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    float: none;
+    box-sizing: border-box;
+  }
+
+  .responsive-form .form-label {
+    padding: 15px 0 5px 0;
+  }
+
+  .responsive-form .form-label label {
+    font-weight: 600;
+  }
+
+  .responsive-form .form-field {
+    padding: 0 0 15px 0;
+    border-bottom: 1px solid var(--core-table-border);
+  }
+
+  .responsive-form .form-row:last-child .form-field {
+    border-bottom: none;
+  }
 }
 
 /*-------------------------*/

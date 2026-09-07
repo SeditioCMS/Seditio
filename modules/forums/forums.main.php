@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/forums/forums.main.php
 Version=186
-Updated=2026-feb-14
+Updated=2026-sep-07
 Type=Module
 Author=Seditio Team
 Description=Forums sections (main page)
@@ -88,9 +88,11 @@ if (!isset($sed_sections_act)) {
 
 if (!isset($sed_sections_vw)) {
 	$sed_sections_vw = array();
-	$sqltmp = sed_sql_query("SELECT online_subloc, COUNT(*) FROM $db_online WHERE online_location='Forums' GROUP BY online_subloc");
-	while ($tmprow = sed_sql_fetchassoc($sqltmp)) {
-		$sed_sections_vw[$tmprow['online_subloc']] = $tmprow['COUNT(*)'];
+	if (sed_plug_active('whosonline')) {
+		$sqltmp = sed_sql_query("SELECT online_subloc, COUNT(*) FROM $db_online WHERE online_location='Forums' GROUP BY online_subloc");
+		while ($tmprow = sed_sql_fetchassoc($sqltmp)) {
+			$sed_sections_vw[$tmprow['online_subloc']] = $tmprow['COUNT(*)'];
+		}
 	}
 	sed_cache_store('sed_sections_vw', $sed_sections_vw, 120);
 }

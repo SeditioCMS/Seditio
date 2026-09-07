@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/setup/setup.config.php
 Version=186
-Updated=2026-jul-20
+Updated=2026-sep-07
 Type=Core.setup
 Author=Seditio Team
 Description=Default system configuration generator for setup installer
@@ -96,7 +96,6 @@ $cfg_data .= "\$db_groups 			= \$cfg['sqldbprefix'].'groups';\n";
 $cfg_data .= "\$db_groups_users 	= \$cfg['sqldbprefix'].'groups_users';\n";
 $cfg_data .= "\$db_logger 			= \$cfg['sqldbprefix'].'logger';\n";
 $cfg_data .= "\$db_menu 			= \$cfg['sqldbprefix'].'menu';\n";
-$cfg_data .= "\$db_online 			= \$cfg['sqldbprefix'].'online';\n";
 $cfg_data .= "\$db_pages 			= \$cfg['sqldbprefix'].'pages';\n";
 $cfg_data .= "\$db_pfs 				= \$cfg['sqldbprefix'].'pfs';\n";
 $cfg_data .= "\$db_pfs_folders 		= \$cfg['sqldbprefix'].'pfs_folders';\n";
@@ -108,6 +107,7 @@ $cfg_data .= "\$db_polls_voters 	= \$cfg['sqldbprefix'].'polls_voters';\n";
 $cfg_data .= "\$db_rated 			= \$cfg['sqldbprefix'].'rated';\n";
 $cfg_data .= "\$db_ratings 			= \$cfg['sqldbprefix'].'ratings';\n";
 $cfg_data .= "\$db_referers 		= \$cfg['sqldbprefix'].'referers';\n";
+$cfg_data .= "\$db_shield 			= \$cfg['sqldbprefix'].'shield';\n";
 $cfg_data .= "\$db_smilies 			= \$cfg['sqldbprefix'].'smilies';\n";
 $cfg_data .= "\$db_stats 			= \$cfg['sqldbprefix'].'stats';\n";
 $cfg_data .= "\$db_structure 		= \$cfg['sqldbprefix'].'structure';\n";

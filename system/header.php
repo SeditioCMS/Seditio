@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/header.php
 Version=186
-Updated=2026-jul-29
+Updated=2026-sep-07
 Type=Core
 Author=Seditio Team
 Description=Global header
@@ -61,7 +61,7 @@ $out['currenturl'] = sed_getcurrenturl();
 $out['canonical_url'] = empty($out['canonical_url']) ? str_replace('&', '&amp;', $sys['canonical_url']) : $out['canonical_url'];  // New in 175
 $out['register_link'] = (sed_module_active('users') && sed_module_part_active('users', 'users.register')) ? sed_url("users", "m=register") : '';  // New in 175
 $out['auth_link'] = sed_url("users", "m=auth");  // New in 175
-$out['whosonline_link'] = sed_url("plug", "e=whosonline");  // New in 175
+$out['whosonline_link'] = (sed_plug_active('whosonline')) ? sed_url("plug", "e=whosonline") : '';
 
 if (sed_module_active('page') && sed_auth('page', 'any', 'A')) {
 	$sqltmp2 = sed_sql_query("SELECT COUNT(*) FROM $db_pages WHERE page_state=1");

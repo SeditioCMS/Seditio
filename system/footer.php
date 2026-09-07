@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/footer.php
 Version=186
-Updated=2026-aug-06
+Updated=2026-sep-07
 Type=Core
 Author=Seditio Team
 Description=Global footer
@@ -31,28 +31,12 @@ if (is_array($extp)) {
 $out['bottomline'] = ($cfg['keepcrbottom']) ? $cfg['bottomline'] . " " . $out['copyright'] : $cfg['bottomline'];
 $out['javascript'] = sed_javascript();
 
-/* ======== Who's online (part 2) ======== */
+/* ======== Shield protection ======== */
 
-if (!$cfg['disablewhosonline']) {
-	if ($usr['id'] > 0) {
-		$sql = sed_sql_query("SELECT online_id FROM $db_online WHERE online_userid='" . $usr['id'] . "'");
-
-		if ($row = sed_sql_fetchassoc($sql)) {
-			$online_count = 1;
-			$sql2 = sed_sql_query("UPDATE $db_online SET online_lastseen='" . $sys['now'] . "', online_location='" . sed_sql_prep($location) . "', online_subloc='" . sed_sql_prep($sys['sublocation']) . "', online_hammer=" . (int)$shield_hammer . " WHERE online_userid='" . $usr['id'] . "'");
-		} else {
-			$sql2 = sed_sql_query("INSERT INTO $db_online (online_ip, online_name, online_lastseen, online_location, online_subloc, online_userid, online_shield, online_hammer) VALUES ('" . $usr['ip'] . "', '" . sed_sql_prep($usr['name']) . "', " . (int)$sys['now'] . ", '" . sed_sql_prep($location) . "',  '" . sed_sql_prep($sys['sublocation']) . "', " . (int)$usr['id'] . ", 0, 0)");
-		}
-	} else {
-		$sql = sed_sql_query("SELECT COUNT(*) FROM $db_online WHERE online_ip='" . $usr['ip'] . "'");
-		$online_count = sed_sql_result($sql, 0, 'COUNT(*)');
-
-		if ($online_count > 0) {
-			$sql2 = sed_sql_query("UPDATE $db_online SET online_lastseen='" . $sys['now'] . "', online_location='" . $location . "', online_subloc='" . sed_sql_prep($sys['sublocation']) . "', online_hammer=" . (int)$shield_hammer . " WHERE online_userid = -1 AND online_ip='" . $usr['ip'] . "'");
-		} else {
-			$sql2 = sed_sql_query("INSERT INTO $db_online (online_ip, online_name, online_lastseen, online_location, online_subloc, online_userid, online_shield, online_hammer) VALUES ('" . $usr['ip'] . "', 'v', " . (int)$sys['now'] . ", '" . $location . "', '" . sed_sql_prep($sys['sublocation']) . "', -1, 0, 0)");
-		}
-	}
+if ($cfg['shieldenabled']) {
+	$sql = sed_sql_query("INSERT INTO $db_shield (shield_ip, shield_lastseen, shield_hammer, shield_limit, shield_action) 
+		VALUES ('" . $usr['ip'] . "', " . (int)$sys['now'] . ", " . (int)$shield_hammer . ", 0, '') 
+		ON DUPLICATE KEY UPDATE shield_lastseen = " . (int)$sys['now'] . ", shield_hammer = " . (int)$shield_hammer);
 }
 
 /* === Hook === */

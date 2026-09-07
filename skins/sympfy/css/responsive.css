@@ -340,32 +340,6 @@
     text-align: center;
   }
 
-  .responsive-form .form-row {
-    display: block !important;
-  }
-
-  .responsive-form .form-label,
-  .responsive-form .form-field {
-    width: 100%;
-    float: none;
-    max-width: 100%;
-    padding: 10px 0 0 0px;
-  }
-
-  .responsive-form .form-label {
-    padding: 20px 0 0 0px;
-  }
-
-  .responsive-form .form-field {
-    border-bottom: 1px solid #f1efef;
-    padding-bottom: 15px;
-  }
-
-  .responsive-form .form-label label {
-    font-weight: 600;
-    color: #555555;
-  }
-
   .resp-table {
     display: block;
     width: 100%;

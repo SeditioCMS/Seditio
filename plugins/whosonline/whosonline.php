@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/whosonline/whosonline.php
 Version=186
-Updated=2026-aug-24
+Updated=2026-sep-07
 Type=Plugin
 Author=Seditio Team
 Description=

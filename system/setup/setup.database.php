@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/setup/setup.database.php
 Version=186
-Updated=2026-jul-20
+Updated=2026-sep-07
 Type=Core.setup
 Author=Seditio Team
 Description=Database structure and import logic for setup installer
@@ -159,19 +159,14 @@ $sql = sed_sql_query("CREATE TABLE IF NOT EXISTS " . $sqldbprefix . "logger (
   PRIMARY KEY (log_id)
 ) ENGINE={$cfg['mysqlengine']} DEFAULT CHARSET={$cfg['mysqlcharset']} COLLATE={$cfg['mysqlcollate']};");
 
-$sql = sed_sql_query("CREATE TABLE IF NOT EXISTS " . $sqldbprefix . "online (
-  online_id int(11) NOT NULL auto_increment,
-  online_ip varchar(45) NOT NULL DEFAULT '',
-  online_name varchar(24) NOT NULL DEFAULT '',
-  online_lastseen int(11) NOT NULL DEFAULT '0',
-  online_location varchar(32) NOT NULL DEFAULT '',
-  online_subloc varchar(255) NOT NULL DEFAULT '',
-  online_userid int(11) NOT NULL DEFAULT '0',
-  online_shield int(11) NOT NULL DEFAULT '0',
-  online_action varchar(32) NOT NULL DEFAULT '',
-  online_hammer tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (online_id),
-  KEY online_lastseen (online_lastseen)
+$sql = sed_sql_query("CREATE TABLE IF NOT EXISTS " . $sqldbprefix . "shield (
+  shield_ip varchar(45) NOT NULL DEFAULT '',
+  shield_lastseen int(11) NOT NULL DEFAULT '0',
+  shield_hammer tinyint(4) NOT NULL DEFAULT '0',
+  shield_limit int(11) NOT NULL DEFAULT '0',
+  shield_action varchar(32) NOT NULL DEFAULT '',
+  PRIMARY KEY (shield_ip),
+  KEY shield_lastseen (shield_lastseen)
 ) ENGINE={$cfg['mysqlengine']} DEFAULT CHARSET={$cfg['mysqlcharset']} COLLATE={$cfg['mysqlcollate']};");
 
 $sql = sed_sql_query("CREATE TABLE IF NOT EXISTS " . $sqldbprefix . "plugins (

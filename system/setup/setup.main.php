@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/setup/setup.main.php
 Version=186
-Updated=2026-sep-02
+Updated=2026-sep-07
 Type=Core.setup
 Author=Seditio Team
 Description=Main controller and API for modern setup installer
@@ -325,9 +325,9 @@ if (!empty($_POST['ajax_action'])) {
             // Explicitly declare globals used in setup scope
             global $db_auth, $db_banlist, $db_cache, $db_com, $db_core, $db_config, $db_dic, $db_dic_items,
                    $db_forum_posts, $db_forum_sections, $db_forum_structure, $db_forum_topics, $db_groups,
-                   $db_groups_users, $db_logger, $db_menu, $db_online, $db_pages, $db_pfs, $db_pfs_folders, $db_plugins,
+                   $db_groups_users, $db_logger, $db_menu, $db_pages, $db_pfs, $db_pfs_folders, $db_plugins,
                    $db_pm, $db_polls, $db_polls_options, $db_polls_voters, $db_rated, $db_ratings, $db_referers,
-                   $db_smilies, $db_structure, $db_stats, $db_trash, $db_users;
+                   $db_shield, $db_smilies, $db_structure, $db_stats, $db_trash, $db_users;
 
             $db_auth            = $sqldbprefix . 'auth';
             $db_banlist         = $sqldbprefix . 'banlist';
@@ -345,7 +345,6 @@ if (!empty($_POST['ajax_action'])) {
             $db_groups_users    = $sqldbprefix . 'groups_users';
             $db_logger          = $sqldbprefix . 'logger';
             $db_menu            = $sqldbprefix . 'menu';
-            $db_online          = $sqldbprefix . 'online';
             $db_pages           = $sqldbprefix . 'pages';
             $db_pfs             = $sqldbprefix . 'pfs';
             $db_pfs_folders     = $sqldbprefix . 'pfs_folders';
@@ -357,6 +356,7 @@ if (!empty($_POST['ajax_action'])) {
             $db_rated           = $sqldbprefix . 'rated';
             $db_ratings         = $sqldbprefix . 'ratings';
             $db_referers        = $sqldbprefix . 'referers';
+            $db_shield          = $sqldbprefix . 'shield';
             $db_smilies         = $sqldbprefix . 'smilies';
             $db_structure       = $sqldbprefix . 'structure';
             $db_stats           = $sqldbprefix . 'stats';
