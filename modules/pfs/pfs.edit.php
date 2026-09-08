@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/pfs/pfs.edit.php
 Version=186
-Updated=2026-jun-18
+Updated=2026-sep-08
 Type=Module
 Author=Seditio Team
 Description=PFS edit file
@@ -27,13 +27,16 @@ $v = sed_import('v', 'G', 'TXT');
 $c1 = sed_import('c1', 'G', 'TXT');
 $c2 = sed_import('c2', 'G', 'TXT');
 $userid = sed_import('userid', 'G', 'INT');
+if (is_null($userid)) {
+	$userid = sed_import('userid', 'P', 'INT');
+}
 
 list($usr['auth_read'], $usr['auth_write'], $usr['isadmin']) = sed_auth('pfs', 'a');
 sed_block($usr['auth_write']);
 
 $more = '';
 
-if (!$usr['isadmin'] || $userid == '') {
+if (!$usr['isadmin'] || is_null($userid) || $userid === '') {
 	$userid = $usr['id'];
 	$useradm = FALSE;
 } else {
@@ -46,7 +49,7 @@ if ($userid != $usr['id']) {
 }
 
 $standalone = FALSE;
-$user_info = sed_userinfo($userid);
+$user_info = ($userid > 0) ? sed_userinfo($userid) : array();
 $maingroup = ($userid == 0) ? 5 : $user_info['user_maingrp'];
 
 $moretitle = ($userid > 0 && $useradm) ? " &laquo;" . $user_info['user_name'] . "&raquo;" : "";
@@ -69,7 +72,7 @@ $shorttitle = $L['pfs_editfile'];
 
 // ---------- Breadcrumbs
 $urlpaths = array();
-$urlpaths[sed_url("pfs", $more)] = $L['PFS'] . $moretitle;
+$urlpaths[sed_url("pfs", $more)] = (($userid == 0) ? $L['SFS'] : $L['PFS']) . $moretitle;
 
 if ($userid != $usr['id']) {
 	sed_block($usr['isadmin']);

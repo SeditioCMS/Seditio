@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/pfs/pfs.main.php
 Version=186
-Updated=2026-jul-17
+Updated=2026-sep-08
 Type=Module
 Author=Seditio Team
 Description=PFS main
@@ -31,6 +31,9 @@ $v = sed_import('v', 'G', 'TXT');
 $c1 = sed_import('c1', 'G', 'TXT');
 $c2 = sed_import('c2', 'G', 'TXT');
 $userid = sed_import('userid', 'G', 'INT');
+if (is_null($userid)) {
+    $userid = sed_import('userid', 'P', 'INT');
+}
 
 $L_pff_type[0] = $L['Private'];
 $L_pff_type[1] = $L['Public'];
@@ -38,7 +41,7 @@ $L_pff_type[2] = $L['Gallery'];
 
 $more = '';
 
-if (!$usr['isadmin'] || $userid == '') {
+if (!$usr['isadmin'] || is_null($userid) || $userid === '') {
     $userid = $usr['id'];
     $useradm = FALSE;
 } else {
@@ -54,7 +57,7 @@ $files_count = 0;
 $folders_count = 0;
 $standalone = FALSE;
 $upload_status = array();
-$user_info = sed_userinfo($userid);
+$user_info = ($userid > 0) ? sed_userinfo($userid) : array();
 $maingroup = ($userid == 0) ? 5 : $user_info['user_maingrp'];
 
 $moretitle = ($userid > 0 && $useradm) ? " «" . $user_info['user_name'] . "»" : "";
@@ -93,9 +96,11 @@ $urlpaths[sed_url("pfs", $more)] = $L['pfs_title'] . $moretitle;
 
 if ($userid != $usr['id']) {
     sed_block($usr['isadmin']);
-    $title .= ($userid == 0) ? '' : " (" . sed_build_user($user_info['user_id'], $user_info['user_name']) . ")";
-    $urlpaths[sed_url("users", "m=details&id=" . $user_info['user_id'])] = $user_info['user_name'];
-    $shorttitle = $user_info['user_name'];
+    if ($userid > 0) {
+        $title .= " (" . sed_build_user($user_info['user_id'], $user_info['user_name']) . ")";
+        $urlpaths[sed_url("users", "m=details&id=" . $user_info['user_id'])] = $user_info['user_name'];
+        $shorttitle = $user_info['user_name'];
+    }
 }
 
 /* === Hook === */

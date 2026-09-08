@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/functions.php
 Version=186
-Updated=2026-sep-07
+Updated=2026-sep-08
 Type=Core
 Author=Seditio Team
 Description=Functions
@@ -5263,7 +5263,7 @@ function sed_check_params($params)
 {
 	$res = array();
 	foreach ($params as $key => $val) {
-		if (!empty($val)) {
+		if ($val !== '' && $val !== null && $val !== false) {
 			$res[$key] = $val;
 		}
 	}
@@ -5333,8 +5333,9 @@ function sed_url($section, $params = '', $anchor = '', $header = false, $enablea
 				// Check if all required parameters match
 				foreach ($rule['params'] as $key => $val) {
 					if (
-						empty($args[$key])
-						|| (!array_key_exists($key, $args))
+						!array_key_exists($key, $args)
+						|| $args[$key] === ''
+						|| $args[$key] === null
 						|| ($val != '*' && $args[$key] != $val)
 					) {
 						$matched = false;
