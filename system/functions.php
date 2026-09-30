@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/functions.php
 Version=186
-Updated=2026-sep-23
+Updated=2026-sep-28
 Type=Core
 Author=Seditio Team
 Description=Functions
@@ -113,6 +113,8 @@ $cfg['mysqlengine'] = 'InnoDB';
 $cfg['mysqlcharset'] = 'utf8mb4';
 $cfg['mysqlcollate'] = 'utf8mb4_unicode_ci';
 $cfg['version'] = '186';
+$cfg['hash_algorithm'] = 'sha256';
+$cfg['cookiesamesite'] = 'Lax';
 $cfg['patchmode'] = FALSE;  // TRUE = enable automatic schema patches (for upgrades)
 $cfg['versions_list'] = array(120, 121, 125, 126, 130, 150, 159, 160, 161, 162, 170, 171, 172, 173, 175, 177, 178, 179, 180, 185, 186);
 $cfg['group_colors'] = array('red', 'yellow', 'black', 'blue', 'white', 'green', 'gray', 'navy', 'darkmagenta', 'pink', 'cadetblue', 'linen', 'deepskyblue', 'inherit');
@@ -2332,12 +2334,14 @@ function sed_get_userip()
  * @param  string $data Data to be hash-protected
  * @param  int $type Type of hashing algorithm (1 - double hash with salt, 2 - double hash with salt & site secret)
  * @param  string $salt Hashing salt, usually a random value
- * @param  string $algorithm The hashing algorithm to use (e.g., 'md5', 'sha256', 'sha512'). Default is 'md5'.
+ * @param  string $algorithm The hashing algorithm to use (e.g., 'md5', 'sha256', 'sha512'). Default is empty (uses $cfg['hash_algorithm'] or 'sha256').
  * @return string $res Hashed value
  */
-function sed_hash($data, $type = 1, $salt = '', $algorithm = 'md5')
+function sed_hash($data, $type = 1, $salt = '', $algorithm = '')
 {
 	global $cfg;
+
+	$algorithm = empty($algorithm) ? (!empty($cfg['hash_algorithm']) ? $cfg['hash_algorithm'] : 'sha256') : $algorithm;
 
 	if (isset($cfg['site_secret']) && !empty($cfg['site_secret']) && ($type == 2)) {
 		$res = hash($algorithm, hash($algorithm, $data) . $cfg['site_secret'] . $salt);
@@ -3508,14 +3512,14 @@ function sed_menu_merge_category_children(&$menu_tree, $menu_row)
  * @param string $class Additional CSS class for the menu
  * @return string|null HTML menu code or null if the menu is empty
  */
-function sed_menu_tree($menus, $parent_id, $level = 0, $only_parent = false, $only_childrensonlevel = false, $class = "")
+function sed_menu_tree($menus, $parent_id, $level = 0, $only_parent = false, $only_childrensonlevel = false, $class = "", $without_ul = false)
 {
 	global $sys;
 
 	// Check if the menu exists for the given parent_id
 	if (is_array($menus) && isset($menus[$parent_id])) {
 		$ul_class = ($level == 0 && !empty($class)) ? " " . $class : "";
-		$tree = "<ul class=\"level-" . $level . $ul_class . "\">";
+		$tree = ($level == 0 && $without_ul) ? "" : "<ul class=\"level-" . $level . $ul_class . "\">";
 
 		if ($only_parent == false) {
 			$level++;
@@ -4591,7 +4595,7 @@ function sed_radiobox_skin($check, $name)
  */
 function sed_sendheaders($content_type = 'text/html', $response_code = '200 OK', $cache = false, $extra_headers = array(), $charset = '')
 {
-	global $cfg;
+	global $cfg, $sys;
 
 	// 1. Determine HTTP status code and text via $cfg['msg_status']
 	if (is_numeric($response_code)) {
@@ -4643,7 +4647,15 @@ function sed_sendheaders($content_type = 'text/html', $response_code = '200 OK',
 
 	header('Content-Type: ' . $content_type . $append_charset);
 
-	// 4. Extra headers or download attachment filename
+	// 4. Security headers
+	header('X-Frame-Options: SAMEORIGIN');
+	header('X-Content-Type-Options: nosniff');
+	header('Referrer-Policy: strict-origin-when-cross-origin');
+	if (!empty($sys['secure'])) {
+		header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+	}
+
+	// 5. Extra headers or download attachment filename
 	if (is_string($extra_headers) && !empty($extra_headers)) {
 		$safe_filename = str_replace(array("\r", "\n", '"'), '', $extra_headers);
 		header('Content-Disposition: attachment; filename="' . $safe_filename . '"');
@@ -4673,10 +4685,15 @@ function sed_sendheaders($content_type = 'text/html', $response_code = '200 OK',
  * @param string $domain The domain that the cookie is available. 
  * @param bool $secure Indicates that the cookie should only be transmitted over a secure HTTPS connection. When set to TRUE, the cookie will only be set if a secure connection exists. 
  * @param bool $httponly HttpOnly flag 
+ * @param string $samesite SameSite attribute: 'Lax', 'Strict', 'None' or empty (defaults to $cfg['cookiesamesite'] or 'Lax')
  * @return bool 
  */
-function sed_setcookie($name, $value, $expire = '', $path = '/', $domain = '', $secure = false, $httponly = true)
+function sed_setcookie($name, $value, $expire = '', $path = '/', $domain = '', $secure = false, $httponly = true, $samesite = '')
 {
+	global $cfg;
+
+	$samesite = empty($samesite) ? (isset($cfg['cookiesamesite']) ? $cfg['cookiesamesite'] : 'Lax') : $samesite;
+
 	// local domains cookie support
 	if (mb_strpos($domain, '.') === FALSE) {
 		$domain = '';
@@ -4690,21 +4707,39 @@ function sed_setcookie($name, $value, $expire = '', $path = '/', $domain = '', $
 		if (mb_substr($domain, 0, 1) != '.') $domain = '.' . $domain;
 	}
 
-	return setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+	if (PHP_VERSION_ID >= 70300) {
+		$options = array(
+			'expires' => (int)$expire,
+			'path' => $path,
+			'domain' => $domain,
+			'secure' => (bool)$secure,
+			'httponly' => (bool)$httponly,
+			'samesite' => $samesite
+		);
+		return setcookie($name, $value, $options);
+	} else {
+		$cookie_path = empty($samesite) ? $path : $path . '; SameSite=' . $samesite;
+		return setcookie($name, $value, (int)$expire, $cookie_path, $domain, (bool)$secure, (bool)$httponly);
+	}
 }
 
 /** 
- * Set the session cookie parameters with optional HttpOnly flag
+ * Set the session cookie parameters with optional HttpOnly flag and SameSite support
  *   
  * @param int $expire The time the cookie expires in unixtime 
  * @param string $path The path on the server in which the cookie will be available on. 
  * @param string $domain The domain that the cookie is available. 
  * @param bool $secure Indicates that the cookie should only be transmitted over a secure HTTPS connection. When set to TRUE, the cookie will only be set if a secure connection exists. 
  * @param bool $httponly HttpOnly flag 
+ * @param string $samesite SameSite attribute: 'Lax', 'Strict', 'None' or empty (defaults to $cfg['cookiesamesite'] or 'Lax')
  * @return bool 
  */
-function sed_setcookie_params($expire = 0, $path = '/', $domain = '', $secure = false, $httponly = true)
+function sed_setcookie_params($expire = 0, $path = '/', $domain = '', $secure = false, $httponly = true, $samesite = '')
 {
+	global $cfg;
+
+	$samesite = empty($samesite) ? (isset($cfg['cookiesamesite']) ? $cfg['cookiesamesite'] : 'Lax') : $samesite;
+
 	// local domains cookie support
 	if (mb_strpos($domain, '.') === FALSE) {
 		$domain = '';
@@ -4718,7 +4753,19 @@ function sed_setcookie_params($expire = 0, $path = '/', $domain = '', $secure = 
 		if (mb_substr($domain, 0, 1) != '.') $domain = '.' . $domain;
 	}
 
-	return session_set_cookie_params($expire, $path, $domain, $secure, $httponly);
+	if (PHP_VERSION_ID >= 70300) {
+		return session_set_cookie_params(array(
+			'lifetime' => (int)$expire,
+			'path' => $path,
+			'domain' => $domain,
+			'secure' => (bool)$secure,
+			'httponly' => (bool)$httponly,
+			'samesite' => $samesite
+		));
+	} else {
+		$cookie_path = empty($samesite) ? $path : $path . '; SameSite=' . $samesite;
+		return session_set_cookie_params((int)$expire, $cookie_path, $domain, (bool)$secure, (bool)$httponly);
+	}
 }
 
 /** 

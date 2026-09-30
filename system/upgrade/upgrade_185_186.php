@@ -8,10 +8,10 @@ https://seditio.org
 [BEGIN_SED]
 File=system/upgrade/upgrade_185_186.php
 Version=186
-Updated=2026-sep-22
+Updated=2026-sep-28
 Type=Core.upgrade
 Author=Seditio Team
-Description=Database upgrade: PFS nested folders; menu category auto-children; whosonline plugin hooks; dynamic translations & compiled cache
+Description=Database upgrade: PFS nested folders; menu category auto-children; whosonline plugin hooks; dynamic translations & compiled cache; user password and salt columns enlarged
 [END_SED]
 ==================== */
 
@@ -94,6 +94,12 @@ if (!$chk_tra || sed_sql_numrows($chk_tra) == 0) {
 	$adminmain .= "Compiling initial language cache files...<br />";
 	sed_translations_generate();
 }
+
+/* ======== Users table: enlarge password and salt columns (v186) ======== */
+$adminmain .= "Checking users table (password and salt columns)...<br />";
+@sed_sql_query("ALTER TABLE $db_users MODIFY user_password VARCHAR(255) NOT NULL DEFAULT ''");
+@sed_sql_query("ALTER TABLE $db_users MODIFY user_salt VARCHAR(64) NOT NULL DEFAULT ''");
+$adminmain .= "users: user_password and user_salt columns enlarged.<br />";
 
 $adminmain .= "-----------------------<br />";
 $adminmain .= "Changing the SQL version number to 186...<br />";

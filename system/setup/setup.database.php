@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/setup/setup.database.php
 Version=186
-Updated=2026-sep-17
+Updated=2026-sep-28
 Type=Core.setup
 Author=Seditio Team
 Description=Database structure and import logic for setup installer
@@ -215,10 +215,10 @@ $sql = sed_sql_query("CREATE TABLE IF NOT EXISTS " . $sqldbprefix . "users (
   user_name varchar(100) NOT NULL DEFAULT '',
   user_firstname varchar(100) NOT NULL DEFAULT '',   
   user_lastname varchar(100) NOT NULL DEFAULT '',  
-  user_password varchar(32) NOT NULL DEFAULT '',
-  user_salt varchar(16) NOT NULL DEFAULT '',
+  user_password varchar(255) NOT NULL DEFAULT '',
+  user_salt varchar(64) NOT NULL DEFAULT '',
   user_secret varchar(32) NOT NULL DEFAULT '',
-  user_passtype tinyint(1) DEFAULT '1',
+  user_passtype tinyint(1) DEFAULT '2',
   user_maingrp int(11) unsigned NOT NULL DEFAULT '4',
   user_country char(2) NOT NULL DEFAULT '',
   user_text text NOT NULL,

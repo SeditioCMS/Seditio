@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/users/users.register.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-sep-28
 Type=Module
 Author=Seditio Team
 Description=User registration
@@ -126,7 +126,7 @@ if ($a == 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 			$defgroup = ($cfg['regnoactivation']) ? 4 : 2;
 		}
 
-		$mdsalt = sed_unique(16); // New sed172    
+		$mdsalt = sed_unique(32); // New sed172    
 		$mdpass = sed_hash($rpassword1, 1, $mdsalt);  // New sed172
 
 		$mdpass_secret = md5(sed_unique(16)); // New sed172 for generate cookies
@@ -189,7 +189,7 @@ if ($a == 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 			'$mdpass',
 			'$mdsalt',
 			'$mdpass_secret',
-			1,
+			2,
 			" . (int)$defgroup . ",
 			'" . sed_sql_prep($rcountry) . "',
 			'" . sed_sql_prep($rlocation) . "',

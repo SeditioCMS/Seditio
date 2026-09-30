@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/users/users.auth.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-sep-28
 Type=Module
 Author=Seditio Team
 Description=User authentication
@@ -44,7 +44,7 @@ if ($a == 'check') {
 	/* ===== */
 
 	$rusername = sed_import('rusername', 'P', 'TXT', 24, TRUE);
-	$rpassword = sed_import('rpassword', 'P', 'TXT', 16, TRUE);
+	$rpassword = sed_import('rpassword', 'P', 'TXT', 32, TRUE);
 	$rcookiettl = sed_import('rcookiettl', 'P', 'INT');
 
 	$error_string .= (mb_strlen($rusername) < 2) ? $L['aut_usernametooshort'] . "<br />" : '';
@@ -56,7 +56,14 @@ if ($a == 'check') {
 
 		if ($row = sed_sql_fetchassoc($sql)) {
 			$mdsalt = $row['user_salt'];
-			$rmdpass = ($row['user_passtype'] == 0) ? sed_hash($rpassword, 0) : sed_hash($rpassword, 1, $mdsalt);
+			$passtype = (int)$row['user_passtype'];
+			if ($passtype == 2) {
+				$rmdpass = sed_hash($rpassword, 1, $mdsalt);
+			} elseif ($passtype == 1) {
+				$rmdpass = sed_hash($rpassword, 1, $mdsalt, 'md5');
+			} else {
+				$rmdpass = sed_hash($rpassword, 0, '', 'md5');
+			}
 
 			if ($rmdpass != $row['user_password']) {
 				sed_shield_update(7, "Log in");

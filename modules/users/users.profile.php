@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/users/users.profile.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-sep-28
 Type=Module
 Author=Seditio Team
 Description=User profile
@@ -141,9 +141,9 @@ switch ($a) {
 		$ruseremail = sed_import('ruseremail', 'P', 'TXT');
 		$ruserhideemail = sed_import('ruserhideemail', 'P', 'BOL');
 		$ruserpmnotify = sed_import('ruserpmnotify', 'P', 'BOL');
-		$rnewpass1 = sed_import('rnewpass1', 'P', 'TXT');
-		$rnewpass2 = sed_import('rnewpass2', 'P', 'TXT');
-		$ruseroldpass = sed_import('ruseroldpass', 'P', 'TXT');
+		$rnewpass1 = sed_import('rnewpass1', 'P', 'TXT', 32);
+		$rnewpass2 = sed_import('rnewpass2', 'P', 'TXT', 32);
+		$ruseroldpass = sed_import('ruseroldpass', 'P', 'TXT', 32);
 		$rusertext = mb_substr($rusertext, 0, $cfg['usertextmax']);
 
 		// --------- Extra fields     
@@ -160,7 +160,14 @@ switch ($a) {
 				if (empty($ruseroldpass)) {
 					$error_string .= $L['pro_oldpassrequired'] . "<br />";
 				} else {
-					$rmdold = ($urr['user_passtype'] == 0) ? sed_hash($ruseroldpass, 0) : sed_hash($ruseroldpass, 1, $urr['user_salt']);
+					$old_passtype = (int)$urr['user_passtype'];
+					if ($old_passtype == 2) {
+						$rmdold = sed_hash($ruseroldpass, 1, $urr['user_salt']);
+					} elseif ($old_passtype == 1) {
+						$rmdold = sed_hash($ruseroldpass, 1, $urr['user_salt'], 'md5');
+					} else {
+						$rmdold = sed_hash($ruseroldpass, 0, '', 'md5');
+					}
 					if ($rmdold !== $urr['user_password']) {
 						$error_string .= $L['pro_oldpasswrong'] . "<br />";
 					}
@@ -172,7 +179,7 @@ switch ($a) {
 
 			if (empty($error_string)) {
 
-				$rmdsalt = sed_unique(16); // New sed172          
+				$rmdsalt = sed_unique(32); // New sed172          
 				$rnewpass = sed_hash($rnewpass1, 1, $rmdsalt); // New sed172						
 				$rnewpass_secret = md5(sed_unique(16)); // New sed172
 
@@ -180,7 +187,7 @@ switch ($a) {
 				user_password='" . sed_sql_prep($rnewpass) . "',
 				user_salt='" . sed_sql_prep($rmdsalt) . "',
 				user_secret='" . sed_sql_prep($rnewpass_secret) . "',        
-				user_passtype=1  
+				user_passtype=2  
 				WHERE user_id='" . $usr['id'] . "'");
 
 				if ($cfg['authmode'] == 1 || $cfg['authmode'] == 3) {

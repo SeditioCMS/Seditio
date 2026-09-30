@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/uploader/uploader.ajax.php
 Version=186
-Updated=2026-sep-02
+Updated=2026-sep-30
 Type=Plugin
 Author=Amro
 Description=
@@ -32,6 +32,25 @@ if (!defined('SED_CODE')) {
 
 list($usr['auth_read'], $usr['auth_write'], $usr['isadmin']) = sed_auth('pfs', 'a');
 
+if (!$usr['auth_write']) {
+	sed_sendheaders('application/json', 403);
+	echo json_encode(array('error' => $L['pfs_filetoobigorext']));
+	exit;
+}
+
+$sk = sed_sourcekey();
+$sk_prev = sed_sourcekey_prev();
+$xg = sed_import('x', 'G', 'ALP');
+$xp = sed_import('xp', 'P', 'ALP');
+
+$csrf_valid = sed_check_csrf() || (!empty($xp) && ($xp === $sk || $xp === $sk_prev)) || (!empty($xg) && ($xg === $sk || $xg === $sk_prev));
+
+if (!$csrf_valid) {
+	sed_sendheaders('application/json', 403);
+	echo json_encode(array('error' => 'Access denied. Invalid CSRF token.'));
+	exit;
+}
+
 //error_reporting(0);
 
 $pfs_delete = $cfg['plugin']['uploader']['pfs_delete'];
@@ -48,10 +67,7 @@ $upl_filename = sed_import('upl_filename', 'G', 'TXT');
 
 if ($upl_delete) {
 	if ($pfs_delete == "yes") {
-		sed_block($usr['auth_write']);
-		//sed_check_xg();
-
-		$sql = sed_sql_query("SELECT pfs_id, pfs_file, pfs_folderid FROM $db_pfs WHERE pfs_userid='" . $usr['id'] . "' AND pfs_file='$upl_delete' LIMIT 1");
+		$sql = sed_sql_query("SELECT pfs_id, pfs_file, pfs_folderid FROM $db_pfs WHERE pfs_userid='" . (int)$usr['id'] . "' AND pfs_file='" . sed_sql_prep($upl_delete) . "' LIMIT 1");
 
 		if ($row = sed_sql_fetchassoc($sql)) {
 			$pfs_file = $row['pfs_file'];
@@ -63,37 +79,34 @@ if ($upl_delete) {
 					@unlink($cfg['th_dir'] . $pfs_file);
 				}
 			}
-			$sql = sed_sql_query("DELETE FROM $db_pfs WHERE pfs_id='" . $row['pfs_id'] . "'");
+			$sql = sed_sql_query("DELETE FROM $db_pfs WHERE pfs_id='" . (int)$row['pfs_id'] . "'");
 			exit;
 		}
 	}
 	exit;
 } elseif ($upl_rotate) {
-	sed_block($usr['auth_write']);
-	//sed_check_xg();
-
-	$sql = sed_sql_query("SELECT pfs_id, pfs_file, pfs_folderid FROM $db_pfs WHERE pfs_userid='" . $usr['id'] . "' AND pfs_file='$upl_rotate' LIMIT 1");
+	$sql = sed_sql_query("SELECT pfs_id, pfs_file, pfs_folderid FROM $db_pfs WHERE pfs_userid='" . (int)$usr['id'] . "' AND pfs_file='" . sed_sql_prep($upl_rotate) . "' LIMIT 1");
 
 	if ($row = sed_sql_fetchassoc($sql)) {
 		$pfs_file = $row['pfs_file'];
 		$f = $row['pfs_folderid'];
 		$ff = $cfg['pfs_dir'] . $pfs_file;
 		if (file_exists($ff) && (mb_substr($pfs_file, 0, mb_strpos($pfs_file, "-")) == $usr['id'] || $usr['isadmin'])) {
-			sed_rotateimage($cfg['pfs_dir'] . $upl_rotate, $upl_degree_lvl);
-			sed_rotateimage($cfg['th_dir'] . $upl_rotate, $upl_degree_lvl);
-			echo $upl_rotate;
+			sed_rotateimage($cfg['pfs_dir'] . $pfs_file, $upl_degree_lvl);
+			sed_rotateimage($cfg['th_dir'] . $pfs_file, $upl_degree_lvl);
+			echo sed_cc($pfs_file);
 		}
 	}
 	exit;
 }
 
-$sql_total = sed_sql_query("SELECT SUM(pfs_size) FROM $db_pfs WHERE pfs_userid='" . $usr['id'] . "'");
+$sql_total = sed_sql_query("SELECT SUM(pfs_size) FROM $db_pfs WHERE pfs_userid='" . (int)$usr['id'] . "'");
 $pfs_totalsize = sed_sql_result($sql_total, 0, "SUM(pfs_size)");
 
 $user_info = sed_userinfo($usr['id']);
 $maingroup = ($usr['id'] == 0) ? 5 : $user_info['user_maingrp'];
 
-$sql = sed_sql_query("SELECT grp_pfs_maxfile, grp_pfs_maxtotal FROM $db_groups WHERE grp_id='$maingroup'");
+$sql = sed_sql_query("SELECT grp_pfs_maxfile, grp_pfs_maxtotal FROM $db_groups WHERE grp_id='" . (int)$maingroup . "'");
 if ($row = sed_sql_fetchassoc($sql)) {
 	$maxfile = $row['grp_pfs_maxfile'];
 	$maxtotal = $row['grp_pfs_maxtotal'];
@@ -200,7 +213,7 @@ if (in_array($f_extension, $allow_extension) == FALSE) {
 			" . (int)$u_size . ",
 			0) ");
 
-		$sql = sed_sql_query("UPDATE $db_pfs_folders SET pff_updated='" . $sys['now'] . "' WHERE pff_id='$folderid'");
+		$sql = sed_sql_query("UPDATE $db_pfs_folders SET pff_updated='" . (int)$sys['now'] . "' WHERE pff_id='" . (int)$folderid . "'");
 
 		sed_image_process(
 			$cfg['pfs_dir'] . $filename,  // $source

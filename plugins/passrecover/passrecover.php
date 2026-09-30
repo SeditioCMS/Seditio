@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/passrecover/passrecover.php
 Version=186
-Updated=2026-sep-18
+Updated=2026-sep-28
 Type=Plugin
 Author=Seditio Team
 Description=
@@ -102,10 +102,10 @@ if ($a == 'request' && $email != '') {
 
 		if ($generate_password == "yes" && $a == 'newpassword') {
 			$newpassword = sed_unique(7); // New sed172  					
-			$mdsalt = sed_unique(16); // New sed172    
+			$mdsalt = sed_unique(32); // New sed172    
 			$mdpass = sed_hash($newpassword, 1, $mdsalt);  // New sed172    		    	
 
-			$sql = sed_sql_query("UPDATE $db_users SET user_password='$mdpass', user_salt='$mdsalt', user_passtype=1 WHERE user_id='$ruserid'");
+			$sql = sed_sql_query("UPDATE $db_users SET user_password='$mdpass', user_salt='$mdsalt', user_passtype=2 WHERE user_id='$ruserid'");
 
 			$rsubject = $cfg['maintitle'] . " - " . $plugin_title;
 

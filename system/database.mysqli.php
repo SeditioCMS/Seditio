@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/database.mysqli.php
 Version=186
-Updated=2026-aug-24
+Updated=2026-sep-28
 Type=Core
 Author=Seditio Team
 Description=Functions MySQLi driver
@@ -69,12 +69,15 @@ function sed_sql_close($conn_id = null)
  */
 function sed_sql_connect($host, $user, $pass, $db, $testconn = FALSE)
 {
+	global $cfg;
 	$conn_id = @mysqli_connect($host, $user, $pass, $db);
 	if (mysqli_connect_errno() || empty($db)) {
 		if ($testconn) {
 			return false;
 		}
-		sed_diefatal('Connect failed. Please check your settings in the file datas/config.php. ' . mysqli_connect_error());
+		$conn_err = mysqli_connect_error();
+		error_log('Seditio DB Connect Error: ' . $conn_err);
+		sed_diefatal('Connect failed. Please check your settings in the file datas/config.php.' . (!empty($cfg['devmode']) ? ' ' . $conn_err : ''));
 	}
 	if ($testconn) {
 		mysqli_close($conn_id);
@@ -257,10 +260,15 @@ function sed_sql_query($query, $halterr = true, $conn_id = null)
 	$xtime = microtime();
 
 	if ($halterr) {
-		$result = mysqli_query($conn_id, $query) or sed_diefatal(
-			'SQL error: ' . sed_sql_error() .
-				($cfg['devmode'] && sed_auth('admin', 'a', 'A') ? ' | Query: ' . $query : '')
-		);
+		$result = mysqli_query($conn_id, $query);
+		if (!$result) {
+			$sql_err = sed_sql_error($conn_id);
+			error_log('Seditio SQL Error: ' . $sql_err . ' | Query: ' . $query);
+			$error_msg = !empty($cfg['devmode'])
+				? 'SQL error: ' . $sql_err . ' | Query: ' . $query
+				: 'Database error occurred. Please contact the administrator or check error logs.';
+			sed_diefatal($error_msg);
+		}
 	} else {
 		$result = mysqli_query($conn_id, $query);
 	}

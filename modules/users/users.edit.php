@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/users/users.edit.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-sep-28
 Type=Module
 Author=Seditio Team
 Description=User editing
@@ -99,7 +99,7 @@ if ($a == 'update') {
 	$ruseroccupation = sed_import('ruseroccupation', 'P', 'TXT');
 	$ruserdelete = sed_import('ruserdelete', 'P', 'BOL');
 	$ruserdelpfs = sed_import('ruserdelpfs', 'P', 'BOL');
-	$rusernewpass = sed_import('rusernewpass', 'P', 'TXT', 16);
+	$rusernewpass = sed_import('rusernewpass', 'P', 'TXT', 32);
 	$rusergroupsms = sed_import('rusergroupsms', 'P', 'ARR');
 
 	// --------- Extra fields     
@@ -160,9 +160,9 @@ if ($a == 'update') {
 
 	if (empty($error_string)) {
 		if (mb_strlen($rusernewpass) > 0) {
-			$rusermdsalt = sed_unique(16); // New sed172          		        
+			$rusermdsalt = sed_unique(32); // New sed172          		        
 			$ruserpassword = sed_hash($rusernewpass, 1, $rusermdsalt);
-			$ruserpasstype = 1;
+			$ruserpasstype = 2;
 		} else {
 			$ruserpassword = $urr['user_password'];
 			$rusermdsalt = $urr['user_salt'];

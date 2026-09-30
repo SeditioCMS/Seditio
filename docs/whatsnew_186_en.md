@@ -27,11 +27,19 @@ This document provides a comprehensive technical overview of the new features, a
 ### Modernized HTTP Header Management (`sed_sendheaders()`)
 * The system status registry `$cfg['msg_status']` has been expanded to include all standard HTTP status codes (200, 201, 204, 301, 302, 303, 304, 307, 308, 400, 401, 403, 404, 410, 500, 503).
 * The `sed_sendheaders()` function has been modernized with intelligent character set negotiation, custom response headers, and `Cache-Control` directive support.
+* Integrated automatic dispatch of standard HTTP security headers: `X-Frame-Options: SAMEORIGIN` (Clickjacking mitigation), `X-Content-Type-Options: nosniff` (MIME sniffing prevention), `Referrer-Policy: strict-origin-when-cross-origin`, and `Strict-Transport-Security` (HSTS when running over HTTPS).
 * Direct native PHP `header()` calls across AJAX endpoints, feeds (RSS, Sitemap, Robots), the image resizer, and redirects have been replaced with `sed_sendheaders()`.
 * Extended HTTP redirect status code support in `sed_redirect()`, improving canonical redirects for SEF URLs.
 
-### Improved Anti-CSRF Token Handling
+### Password Hashing Modernization & SameSite Cookie Protection
+* **Modern Cryptographic Hash Algorithms:** Introduced `$cfg['hash_algorithm']` (defaulting to `sha256`) supporting SHA-256 and SHA-512 with per-user cryptographically random 32-character salts (`user_salt`).
+* **Seamless Backward Compatibility:** Transparent verification for legacy single and double MD5 password hashes (`user_passtype = 0` and `user_passtype = 1`). User accounts are automatically migrated to `user_passtype = 2` upon password change or reset.
+* **Database Schema Expansion:** Expanded `user_password` to `VARCHAR(255)` and `user_salt` to `VARCHAR(64)` across fresh installation schemas and upgrade scripts. Standardized input password length limit to 32 characters.
+* **SameSite Cookie Attribute Support:** Extended `sed_setcookie()` and `sed_setcookie_params()` with the `$samesite` parameter (defaults to `Lax` via `$cfg['cookiesamesite']`), mitigating cross-site CSRF risks across PHP 5.6 to 8.x.
+
+### Improved Anti-CSRF Token Handling & Uploader Hardening
 * The anti-CSRF token verification system now preserves the previous token across requests. This eliminates false-positive "Wrong parameter in the URL" errors during multi-tab browsing or repeated form submissions.
+* Secured AJAX Uploader (`plugins/uploader/uploader.ajax.php`): patched potential SQL injection vectors with input escaping, sanitized file rotation outputs, and enforced CSRF token verification (`sed_check_csrf()` and `sed_check_xg()`).
 
 ### Global Localization of System Messages and Inline Auth Errors
 * The system message dictionary `system/lang/**/message.lang.php` is now included globally in `system/common.php`, making `$L['msgXXX']` arrays accessible across all modules and plugins without redundant `require` calls.
@@ -67,6 +75,11 @@ This document provides a comprehensive technical overview of the new features, a
 * Safe initialization of user permissions (`user_auth` is guaranteed to be an array even when empty).
 * User registration processing is strictly restricted to `POST` requests, eliminating validation errors on accidental direct `GET` requests.
 * Strict compliance with PHP 5.6+ syntax standards has been preserved across all modifications.
+
+### Database Error Masking & Diagnostic Logging
+* In the MySQLi driver (`system/database.mysqli.php`), raw database errors and query bodies are withheld from public output when `$cfg['devmode'] = false`, preventing sensitive database architecture leakage.
+* Database connection failures (`sed_sql_connect`) and query errors (`sed_sql_query`) are systematically recorded in the server `error_log()`.
+* When `$cfg['devmode'] = true`, detailed diagnostic output and exact queries are printed on screen without requiring active administrator authentication, simplifying debugging during fatal system errors.
 
 ---
 
@@ -186,5 +199,6 @@ The automatic upgrade migration script `system/upgrade/upgrade_185_186.php` perf
 2. **Table `sed_menu`**: Adds columns `menu_cat`, `menu_cat_subcats`, and `menu_cat_pages`.
 3. **Table `sed_shield`**: Creates the dedicated anti-hammer protection table.
 4. **Table `sed_online`**: Drops the obsolete online activity table.
-5. **Plugin `whosonline`**: Performs a clean uninstallation of legacy hooks and registers the plugin v3.0 architecture.
-6. **Version Registry**: Updates the database version entry in `sed_stats` to `186`.
+5. **Table `sed_users`**: Expands columns `user_password` to `VARCHAR(255)` and `user_salt` to `VARCHAR(64)` for SHA-256/SHA-512 password hashing.
+6. **Plugin `whosonline`**: Performs a clean uninstallation of legacy hooks and registers the plugin v3.0 architecture.
+7. **Version Registry**: Updates the database version entry in `sed_stats` to `186`.

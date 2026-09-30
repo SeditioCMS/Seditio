@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 (function() {
     CKEDITOR.plugins.add('internallink', {
         lang: 'en,ru',
@@ -105,7 +105,8 @@
             httpRequest.open('GET', serviceURL, true);
 			// Indicate AJAX request
 			httpRequest.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); 
-			httpRequest.setRequestHeader('X-Seditio-Csrf', document.querySelector('meta[name="csrf-token"]').content || '');
+			var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+			httpRequest.setRequestHeader('X-Seditio-Csrf', csrfMeta ? csrfMeta.content : '');
             httpRequest.send();
         }
     };

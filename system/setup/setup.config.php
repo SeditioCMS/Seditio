@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/setup/setup.config.php
 Version=186
-Updated=2026-sep-22
+Updated=2026-sep-28
 Type=Core.setup
 Author=Seditio Team
 Description=Default system configuration generator for setup installer
@@ -69,6 +69,8 @@ $cfg_data .= "\$cfg['ipcheck'] = TRUE;  				// Will kill the logged-in session i
 
 $cfg_data .= "\$cfg['multihost'] = TRUE;            // Allow multiple host names for this site\n";
 $cfg_data .= "\$cfg['patchmode'] = TRUE;           // TRUE = enable automatic schema patches (for upgrades)\n";
+$cfg_data .= "\$cfg['hash_algorithm'] = 'sha256';  // Password and data hashing algorithm ('sha256', 'sha512', 'md5')\n";
+$cfg_data .= "\$cfg['cookiesamesite'] = 'Lax';     // Cookie SameSite attribute ('Lax', 'Strict', 'None')\n";
 
 $cfg_data .= "\n// ========================\n";
 $cfg_data .= "// Name of MySQL tables\n";

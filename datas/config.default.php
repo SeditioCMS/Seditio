@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=datas/config.default.php
 Version=186
-Updated=2026-sep-22
+Updated=2026-sep-28
 Type=Config
 Author=Seditio Team
 Description=Configuration
@@ -50,6 +50,8 @@ $cfg['redirmode'] = FALSE;				// 0 or 1, Set to '1' if you cannot sucessfully lo
 $cfg['ipcheck'] = TRUE;  				// Will kill the logged-in session if the IP has changed
 $cfg['multihost'] = TRUE;			// Allow multiple host names for this site
 $cfg['patchmode'] = TRUE;           // TRUE = enable automatic schema patches (for upgrades)
+$cfg['hash_algorithm'] = 'sha256';  // Password and data hashing algorithm ('sha256', 'sha512', 'md5')
+$cfg['cookiesamesite'] = 'Lax';     // Cookie SameSite attribute ('Lax', 'Strict', 'None')
 
 // ========================
 // Name of MySQL tables

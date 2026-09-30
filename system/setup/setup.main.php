@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/setup/setup.main.php
 Version=186
-Updated=2026-sep-17
+Updated=2026-sep-28
 Type=Core.setup
 Author=Seditio Team
 Description=Main controller and API for modern setup installer
@@ -455,7 +455,7 @@ if (!empty($_POST['ajax_action'])) {
             // 6. Superadministrator account creation
             $ip = $_SERVER['REMOTE_ADDR'];
             $defgroup = 5; // Administrators
-			$mdsalt = sed_unique(16);
+			$mdsalt = sed_unique(32);
 			$mdpass = sed_hash($rpassword, 1, $mdsalt);
 			$mdpass_secret = md5(sed_unique(16));
 			$validationkey = md5(microtime());
@@ -490,7 +490,7 @@ if (!empty($_POST['ajax_action'])) {
 			'$mdpass',
 			'$mdsalt',
 			'$mdpass_secret',
-			1,			
+			2,			
 			" . (int)$defgroup . ",
 			'" . sed_sql_prep($rcountry) . "',
 			'',

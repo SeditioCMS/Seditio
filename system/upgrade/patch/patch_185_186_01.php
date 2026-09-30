@@ -8,10 +8,10 @@ https://seditio.org
 [BEGIN_SED]
 File=system/upgrade/patch/patch_185_186_01.php
 Version=186
-Updated=2026-sep-22
+Updated=2026-sep-28
 Type=Core.patch
 Author=Seditio Team
-Description=Schema patch for v185->v186: add minimal shield and languages tables required for bootstrap
+Description=Schema patch for v185->v186: add minimal shield, languages tables and expand user password/salt columns
 [END_SED]
 ==================== */
 
@@ -20,14 +20,7 @@ if (!defined('SED_CODE')) {
 }
 
 /* Ensure global table names and configuration are accessible */
-global $cfg, $db_shield, $db_languages, $sed_languages;
-
-if (empty($db_shield)) {
-	$db_shield = $cfg['sqldbprefix'] . 'shield';
-}
-if (empty($db_languages)) {
-	$db_languages = $cfg['sqldbprefix'] . 'languages';
-}
+global $cfg, $db_shield, $db_languages, $db_users, $sed_languages;
 
 /* ======== Shield table: required in common.php and footer ======== */
 $chk_shield = @sed_sql_query("SHOW TABLES LIKE '$db_shield'", false);
@@ -73,3 +66,8 @@ if (!$chk_lang || sed_sql_numrows($chk_lang) == 0) {
 		}
 	}
 }
+
+/* ======== Users table: enlarge password and salt columns (v186) ======== */
+@sed_sql_query("ALTER TABLE $db_users MODIFY user_password VARCHAR(255) NOT NULL DEFAULT ''", false);
+@sed_sql_query("ALTER TABLE $db_users MODIFY user_salt VARCHAR(64) NOT NULL DEFAULT ''", false);
+
