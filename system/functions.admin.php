@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/functions.admin.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-oct-05
 Type=Core
 Author=Seditio Team
 Description=Functions
@@ -1288,7 +1288,7 @@ function sed_menu_assign_category_form($t, $block, $mcat, $mcat_subcats, $mcat_p
 {
 	global $L;
 
-	if (!sed_module_active('page') || !function_exists('sed_selectbox_categories')) {
+	if (!sed_module_active('page')) {
 		return;
 	}
 

@@ -33,6 +33,9 @@
 						<li><a href="{PHP.sys.request_uri}#tab2">{PHP.L.Meta}</a></li>
 						<li><a href="{PHP.sys.request_uri}#tab3">{PHP.L.Options}</a></li>
 						{PAGEEDIT_I18N_TABS_HEADERS}
+						<!-- IF {REVISIONS_CONTENT} -->
+						<li><a href="{PHP.sys.request_uri}#tab-revisions">{PHP.L.Revisions} <!-- IF {REVISIONS_COUNT} -->({REVISIONS_COUNT})<!-- ENDIF --></a></li>
+						<!-- ENDIF -->
 					</ul>
 
 					<div class="tab-box">
@@ -224,6 +227,12 @@
 						</div>
 
 						{PAGEEDIT_I18N_TABS_BODY}
+
+						<!-- IF {REVISIONS_CONTENT} -->
+						<div id="tab-revisions" class="tabs">
+							{REVISIONS_CONTENT}
+						</div>
+						<!-- ENDIF -->
 
 					</div>
 

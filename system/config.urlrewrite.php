@@ -95,7 +95,7 @@ $sed_urlrewrite = array(
      /*  Messages rewriting */
      array(
           'order' => 595,
-          'cond' => '#^/message/([0-9]+)/([a-zA-Z0-9]+)(/?)$#',
+          'cond' => '#^/message/([0-9]+)/([^/]+)(/?)$#',
           'rule' => 'system/core/message/message.php?msg=$1&redirect=$2'
      ),
      array(

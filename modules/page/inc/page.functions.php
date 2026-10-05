@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/page/inc/page.functions.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-oct-05
 Type=Module
 Author=Seditio Team
 Description=Page structure, list API, list filters
@@ -249,6 +249,9 @@ function sed_structure_delcat($id, $c)
 
 	$sql = sed_sql_query("DELETE FROM $db_structure WHERE structure_id='$id'");
 	$sql = sed_sql_query("DELETE FROM $db_auth WHERE auth_code='page' AND auth_option='$c'");
+	if (sed_plug_active('revisions')) {
+		sed_revision_wipe_entity('structure', (string)$id);
+	}
 	sed_auth_clear('all');
 	sed_cache_clear('sed_cat');
 	sed_page_clear_menu_cache();

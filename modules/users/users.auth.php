@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/users/users.auth.php
 Version=186
-Updated=2026-sep-28
+Updated=2026-oct-02
 Type=Module
 Author=Seditio Team
 Description=User authentication
@@ -123,6 +123,10 @@ if ($a == 'check') {
 			$error_string .= $L['msg154_1'];
 		}
 	}
+}
+
+if ($cfg['maintenance'] && $usr['level'] < $cfg['maintenancelevel']) {
+	sed_diemaintenance($error_string);
 }
 
 $out['subtitle'] = $L['aut_logintitle'];

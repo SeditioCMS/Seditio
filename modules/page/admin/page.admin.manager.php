@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/page/admin/page.admin.manager.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-oct-05
 Type=Module.admin
 Author=Seditio Team
 Description=Page manager
@@ -47,6 +47,8 @@ if ($a == 'delete') {
 
 		if (sed_plug_active('trashcan') && !empty($cfg['plugin']['trashcan']['trash_page'])) {
 			sed_trash_put('page', (isset($L['Page']) ? $L['Page'] : 'Page') . " #" . $id . " " . $row['page_title'], $id, $row);
+		} elseif (sed_plug_active('revisions')) {
+			sed_revision_wipe_entity('page', $id);
 		}
 
 		/* === Hook === */

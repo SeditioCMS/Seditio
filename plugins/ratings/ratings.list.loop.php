@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/ratings/ratings.list.loop.php
 Version=186
-Updated=2026-feb-26
+Updated=2026-oct-05
 Type=Plugin
 Description=Ratings row for list (list.loop)
 [END_SED]
@@ -33,7 +33,7 @@ $pratings = "&ratings=1";
 $pag['page_pageurlrat'] = (empty($pag['page_alias'])) ? sed_url("page", "id=" . $pag['page_id'] . $pratings) : sed_url("page", "al=" . $pag['page_alias'] . $pratings);
 
 $rating_value = (float)(isset($pag['page_rating']) ? $pag['page_rating'] : 0);
-$rating_widget = function_exists('sed_ratings_render_readonly') ? sed_ratings_render_readonly($rating_value, 'p' . $pag['page_id']) : (string)$rating_value;
+$rating_widget = sed_ratings_render_readonly($rating_value, 'p' . $pag['page_id']);
 $list_row_ratings = sed_link($pag['page_pageurlrat'], $rating_widget);
 $item_code = 'p' . $pag['page_id'];
 

@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/page/admin/page.admin.structure.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-oct-01
 Type=Module.admin
 Author=Seditio Team
 Description=Page structure and queue
@@ -52,6 +52,13 @@ switch ($mn) {
 
 		if ($n == 'options') {
 			if ($a == 'update') {
+
+				if (sed_plug_active('revisions') && !empty($id)) {
+					$sql_curr = sed_sql_query("SELECT * FROM $db_structure WHERE structure_id = '$id' LIMIT 1");
+					if ($current_cat = sed_sql_fetchassoc($sql_curr)) {
+						sed_revision_add('structure', (string)$current_cat['structure_id'], $current_cat['structure_title'], $current_cat, $L['rev_auto_edit_comment']);
+					}
+				}
 
 				/* === Hook === */
 				foreach (sed_getextplugins('admin.page.structure.edit.first') as $pl) {
@@ -202,6 +209,10 @@ switch ($mn) {
 				"STRUCTURE_UPDATE_ALLOWRATINGS" => $form_allowratings,
 				"STRUCTURE_UPDATE_MYPFS" => $pfs
 			));
+
+			if (sed_plug_active('revisions') && !empty($id)) {
+				sed_revisions_assign_tags($t, 'structure', (string)$id);
+			}
 
 			/* === Hook === */
 			foreach (sed_getextplugins('admin.page.structure.edit.tags') as $pl) {

@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/users/users.edit.php
 Version=186
-Updated=2026-sep-28
+Updated=2026-oct-05
 Type=Module
 Author=Seditio Team
 Description=User editing
@@ -138,7 +138,7 @@ if ($a == 'update') {
 
 				$sql = sed_sql_query("DELETE FROM $db_users WHERE user_id='$id'");
 				$sql = sed_sql_query("DELETE FROM $db_groups_users WHERE gru_userid='$id'");
-				if ($ruserdelpfs && sed_module_active('pfs') && function_exists('sed_pfs_deleteall_module')) {
+				if ($ruserdelpfs && sed_module_active('pfs')) {
 					sed_pfs_deleteall_module($id);
 				}
 

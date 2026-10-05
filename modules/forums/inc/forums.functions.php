@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/forums/inc/forums.functions.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-oct-05
 Type=Module
 Author=Seditio Team
 Description=Forums API functions
@@ -826,7 +826,7 @@ function sed_forum_ensure_section_auth()
 			$did_insert = true;
 		}
 	}
-	if ($did_insert && function_exists('sed_auth_clear')) {
+	if ($did_insert) {
 		sed_auth_clear('all');
 	}
 	$ensured = true;

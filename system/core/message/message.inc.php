@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/core/message/message.inc.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-oct-05
 Type=Core
 Author=Seditio Team
 Description=Messages
@@ -61,8 +61,8 @@ switch ($msg) {
 	case '104':
 		$message = $L['msg104_0'];
 		$body = str_replace('{username}', $usr['name'], $L['msg104_1']);
-		$rd = 4;
-		$ru = empty($redirect) ? sed_url("index", "", "", true, true) : str_replace("&", "&amp;", base64_decode($redirect));
+		$rd = (!empty($cfg['maintenance'])) ? 2 : 4;
+		$ru = (!empty($cfg['maintenance']) || empty($redirect)) ? sed_url("index", "", "", true, true) : str_replace("&", "&amp;", base64_decode($redirect));
 		break;
 
 	case '105':
@@ -287,7 +287,7 @@ $title_data = array($cfg['maintitle'], $out['subtitle'], $cfg['subtitle']);
 $out['subtitle'] = sed_title('defaulttitle', $title_tags, $title_data);
 
 require(SED_ROOT . "/system/header.php");
-$t = new XTemplate("skins/" . $skin . "/message.tpl");
+$t = new XTemplate(sed_skinfile('message'));
 
 $errmsg = $message;
 $message .= ($usr['isadmin']) ? " (#" . $msg . ")" : '';

@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/comments/comments.trashcan.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-oct-05
 Type=Plugin
 [END_SED]
 
@@ -72,7 +72,7 @@ function sed_trash_comment_restore($data, $itemid)
 		sed_log("Comment #" . $com_id . " restored from the trash can.", 'adm');
 	}
 
-	if (!empty($com_code) && mb_substr($com_code, 0, 1) == 'p' && function_exists('sed_get_comcount')) {
+	if (!empty($com_code) && mb_substr($com_code, 0, 1) == 'p') {
 		global $db_pages;
 		$page_id = mb_substr($com_code, 1, 10);
 		sed_sql_query("UPDATE $db_pages SET page_comcount='" . sed_get_comcount($com_code) . "' WHERE page_id='" . (int)$page_id . "'");

@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=plugins/ratings/ratings.admin.plug.php
 Version=186
-Updated=2026-feb-18
+Updated=2026-oct-05
 Type=Plugin
 Description=Ratings administration
 [END_SED]
@@ -84,7 +84,7 @@ while ($row = sed_sql_fetchassoc($sql)) {
 	$sql1 = sed_sql_query("SELECT COUNT(*) FROM $db_rated WHERE rated_code='" . $id2 . "'");
 	$votes = sed_sql_result($sql1, 0, "COUNT(*)");
 
-	$rat_url = function_exists('sed_ratings_item_url') ? sed_ratings_item_url($row['rating_code']) : '';
+	$rat_url = sed_ratings_item_url($row['rating_code']);
 
 	$t->assign(array(
 		"RATINGS_LIST_DELETE_URL" => sed_url("admin", "m=ratings&a=delete&id=" . $row['rating_code'] . "&" . sed_xg()),

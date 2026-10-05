@@ -15,6 +15,9 @@
 			<li><a href="{PHP.sys.request_uri}#tab1" class="selected" data-tabtitle="{PHP.L.Structure}">{PHP.L.Structure}</a></li>
 			<li><a href="{PHP.sys.request_uri}#tab2" data-tabtitle="{PHP.L.Meta}">{PHP.L.Meta}</a></li>
 			{STRUCTURE_UPDATE_I18N_TABS_HEADERS}
+			<!-- IF {REVISIONS_CONTENT} -->
+			<li><a href="{PHP.sys.request_uri}#tab-revisions" data-tabtitle="{PHP.L.Revisions}">{PHP.L.Revisions} <!-- IF {REVISIONS_COUNT} -->({REVISIONS_COUNT})<!-- ENDIF --></a></li>
+			<!-- ENDIF -->
 		</ul>
 	</div>
 
@@ -129,6 +132,12 @@
 			</div>
 
 			{STRUCTURE_UPDATE_I18N_TABS_BODY}
+
+			<!-- IF {REVISIONS_CONTENT} -->
+			<div class="tab-content" id="tab-revisions">
+				{REVISIONS_CONTENT}
+			</div>
+			<!-- ENDIF -->
 
 			<div style="text-align: center; padding:15px 0;">
 				<button type="submit" class="submit btn">{PHP.L.Update}</button>

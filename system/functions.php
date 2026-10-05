@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/functions.php
 Version=186
-Updated=2026-sep-28
+Updated=2026-oct-05
 Type=Core
 Author=Seditio Team
 Description=Functions
@@ -2093,11 +2093,11 @@ function sed_dieifdisabled($disabled)
  * Maintenance Mode
  * 
  */
-function sed_diemaintenance()
+function sed_diemaintenance($err_msg = '')
 {
 	global $L, $cfg, $sys;
 
-	$mskin = "skins/" . $cfg['defaultskin'] . "/maintenance.tpl";
+	$mskin = sed_skinfile('maintenance', false, true);
 
 	if (file_exists($mskin)) {
 		$maintenans_header1 = $cfg['doctype'] . "<html><head>" . sed_htmlmetas();
@@ -2111,11 +2111,19 @@ function sed_diemaintenance()
 			"MAINTENANCE_FOOTER" => $maintenans_footer,
 			"MAINTENANCE_MAINTITLE" => sed_cc($cfg['maintitle']),
 			"MAINTENANCE_SUBTITLE" => sed_cc($cfg['subtitle']),
+			"MAINTENANCE_TITLE" => $L['Maintenance'],
+			"MAINTENANCE_BODY" => !empty($cfg['maintenancereason']) ? $cfg['maintenancereason'] : '',
 			"MAINTENANCE_REASON" => $cfg['maintenancereason'],
-			"MAINTENANCE_FORM_SEND" => sed_url("users", "m=auth&a=check&" . $sys['url_redirect']),
+			"MAINTENANCE_FORM_SEND" => sed_url("users", "m=auth&a=check&redirect=" . base64_encode(sed_url("index", "", "", false, true))),
 			"MAINTENANCE_USER" => sed_textbox("rusername", "", 24, 100),
 			"MAINTENANCE_PASSWORD" => sed_textbox("rpassword", "", 16, 32, "password", false, "password")
 		));
+
+		if (!empty($err_msg)) {
+			$t->assign("MAINTENANCE_ERROR_BODY", $err_msg);
+			$t->parse("MAINTENANCE.MAINTENANCE_ERROR");
+		}
+
 		$t->parse("MAINTENANCE");
 		$t->out("MAINTENANCE");
 		exit;
@@ -3402,7 +3410,7 @@ function sed_menu_items_from_category($menu_item)
 {
 	global $sed_cat;
 
-	if (!sed_module_active('page') || !function_exists('sed_page_category_children')) {
+	if (!sed_module_active('page')) {
 		return array();
 	}
 
@@ -5261,9 +5269,7 @@ function sed_stringinfile($file, $str, $maxsize = 32768)
 		fclose($fp);
 	} else {
 		$result = FALSE;
-		if (function_exists('sed_log')) {
-			sed_log('sed_stringinfile: unable to open file: ' . $file . (file_exists($file) ? ' (exists, check permissions)' : ' (file not found)'), 'sys');
-		}
+		sed_log('sed_stringinfile: unable to open file: ' . $file . (file_exists($file) ? ' (exists, check permissions)' : ' (file not found)'), 'sys');
 	}
 	return ($result);
 }

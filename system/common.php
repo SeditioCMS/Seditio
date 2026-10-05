@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=system/common.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-oct-02
 Type=Core
 Author=Seditio Team
 Description=Common
@@ -700,7 +700,8 @@ $usr['gmttime'] = @date($cfg['dateformat'], $sys['now_offset']) . ' GMT';
 
 /* ======== Maintenance Mode ======== */  // New in 175
 
-if ($cfg['maintenance'] && $usr['level'] < $cfg['maintenancelevel'] && !defined('SED_USERS')) {
+$is_maintenance_auth = (defined('SED_USERS') && $m == 'auth' && $a == 'check');
+if ($cfg['maintenance'] && $usr['level'] < $cfg['maintenancelevel'] && !$is_maintenance_auth) {
 	sed_diemaintenance();
 }
 

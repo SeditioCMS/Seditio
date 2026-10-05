@@ -11,33 +11,34 @@
 
   /* Inputs, Textareas, Selects */
   --fw-input-bg: #ffffff;
-  --fw-input-border: #e4e2e2;
-  --fw-input-border-hover: #9da3b1;
-  --fw-input-text: #383838;
-  --fw-input-placeholder: #bbbdbf;
+  --fw-input-border: #d1d5db;
+  --fw-input-border-hover: #9ca3af;
+  --fw-input-border-focus: #296eb0;
+  --fw-input-text: #1f2937;
+  --fw-input-placeholder: #9ca3af;
 
   /* Checkboxes & Radios */
   --fw-check-bg: #ffffff;
   --fw-check-border: #cdd1da;
-  --fw-check-active-bg: #5ba7bf;
-  --fw-check-active-border: #448aa1;
-  --fw-check-disabled-bg: #ababab;
-  --fw-check-disabled-border: #ababab;
-  --fw-check-label-text: #cccccc;
+  --fw-check-active-bg: #296eb0;
+  --fw-check-active-border: #1f568a;
+  --fw-check-disabled-bg: #e5e7eb;
+  --fw-check-disabled-border: #d1d5db;
+  --fw-check-label-text: #6b7280;
 
   /* Buttons */
-  --fw-btn-bg: #313139;
-  --fw-btn-gradient-end: #737373;
+  --fw-btn-bg: #1a5fb4;
+  --fw-btn-gradient-end: #1f568a;
   --fw-btn-text: #ffffff;
-  --fw-btn-border: #1b1b1b;
-  --fw-btn-hover-bg: #448aa1;
-  --fw-btn-hover-gradient-end: #7cd1ed;
+  --fw-btn-border: #1a5fb4;
+  --fw-btn-hover-bg: #1f568a;
+  --fw-btn-hover-gradient-end: #16436c;
   --fw-btn-hover-text: #ffffff;
-  --fw-btn-hover-border: #3f849a;
-  --fw-btn-icon-bg: #315eb4;
-  --fw-btn-icon-border: #133d8d;
-  --fw-btn-icon-hover-bg: #5980cb;
-  --fw-btn-icon-hover-border: #2f59a9;
+  --fw-btn-hover-border: #16436c;
+  --fw-btn-icon-bg: #296eb0;
+  --fw-btn-icon-border: #1f568a;
+  --fw-btn-icon-hover-bg: #1f568a;
+  --fw-btn-icon-hover-border: #1a4975;
 
   /* Blockquote */
   --fw-quote-text: #999999;
@@ -1708,30 +1709,43 @@ input[type="number"],
 input[type="password"],
 input[type="tel"],
 input[type="text"],
+input[type="search"],
 textarea {
     background: var(--fw-input-bg);
     border: 1px solid var(--fw-input-border);
-    border-radius: 2px;
+    border-radius: 6px;
     box-shadow: none;
     color: var(--fw-input-text);
     height: auto;
-    font-size: 1em;
-    padding: 9px 13px 9px 13px;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 9px 12px;
     outline: 0;
     max-width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 select {
     background: var(--fw-input-bg);
     border: 1px solid var(--fw-input-border);
-    border-radius: 2px;
+    border-radius: 6px;
     box-shadow: none;
     color: var(--fw-input-text);
     height: auto;
-    font-size: 1em;
-    padding: 8px 13px 8px 13px;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 9px 12px;
     outline: 0;
     max-width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 input[type="text"]:focus,
@@ -1740,14 +1754,21 @@ input[type="number"]:focus,
 input[type="number"]:hover,
 input[type="password"]:focus,
 input[type="password"]:hover,
+input[type="email"]:focus,
+input[type="email"]:hover,
+input[type="tel"]:focus,
+input[type="tel"]:hover,
+input[type="search"]:focus,
+input[type="search"]:hover,
 textarea:focus,
-textarea:hover {
-    -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
-    box-shadow: none;
-    z-index: 3;
-    border-color: var(--fw-input-border-hover);
+textarea:hover,
+select:focus,
+select:hover {
+    border-color: var(--fw-input-border-focus);
     background: var(--fw-input-bg);
     outline: 0;
+    -webkit-box-shadow: 0 0 0 3px rgba(41, 110, 176, 0.15);
+    box-shadow: 0 0 0 3px rgba(41, 110, 176, 0.15);
 }
 
 input::-webkit-input-placeholder {
@@ -1766,35 +1787,59 @@ input::placeholder {
     color: var(--fw-input-placeholder);
 }
 
-.btn {
-    background: var(--fw-btn-bg);
-    background: linear-gradient(0deg, var(--fw-btn-bg) 0%, var(--fw-btn-gradient-end) 100%);
+.btn,
+input[type="submit"],
+input[type="button"],
+button {
+    background: linear-gradient(180deg, var(--fw-btn-bg), var(--fw-btn-gradient-end));
     color: var(--fw-btn-text);
-    box-shadow: inset 0px 1px 0px 0px #000000;
-    border: 0;
-    border-left: 1px solid var(--fw-btn-border);
-    border-right: 1px solid var(--fw-btn-border);
+    border: 1px solid var(--fw-btn-border);
+    border-radius: 6px;
     display: inline-block;
     outline: none;
     cursor: pointer;
     text-decoration: none;
-    font-size: 1em;
-    padding: 10px 30px;
-    -webkit-border-radius: 0px;
-    -moz-border-radius: 0px;
-    border-radius: 0px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    padding: 9px 20px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 2px rgba(0, 0, 0, 0.05);
+    -webkit-transition: background 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: background 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .btn:hover,
 .btn:focus,
-.btn:active {
+input[type="submit"]:hover,
+input[type="submit"]:focus,
+button:hover,
+button:focus {
     text-decoration: none;
     color: var(--fw-btn-hover-text);
-    background: var(--fw-btn-hover-bg);
-    background: linear-gradient(0deg, var(--fw-btn-hover-bg) 0%, var(--fw-btn-hover-gradient-end) 100%);
-    border-left: 1px solid var(--fw-btn-hover-border);
-    border-right: 1px solid var(--fw-btn-hover-border);
-    box-shadow: inset 0px 1px 0px 0px var(--fw-btn-hover-bg);
+    background: linear-gradient(180deg, var(--fw-btn-hover-bg), var(--fw-btn-hover-gradient-end));
+    border-color: var(--fw-btn-hover-border);
+}
+
+.btn:active,
+input[type="submit"]:active,
+button:active {
+    background: linear-gradient(180deg, var(--fw-btn-hover-gradient-end), var(--fw-btn-hover-bg));
+    -webkit-box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.btn.btn-big {
+    padding: 12px 24px;
+    font-size: 16px;
+}
+
+.btn.btn-small {
+    padding: 5px 8px;
+    font-size: 12px;
 }
 
 .btn-icon {

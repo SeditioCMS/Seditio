@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/page/page.edit.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-oct-05
 Type=Module
 Author=Seditio Team
 Description=Edit page
@@ -114,6 +114,8 @@ if ($a == 'update') {
 			if ($row = sed_sql_fetchassoc($sql)) {
 				if (sed_plug_active('trashcan') && !empty($cfg['plugin']['trashcan']['trash_page'])) {
 					sed_trash_put('page', (isset($L['Page']) ? $L['Page'] : 'Page') . " #" . $id . " " . $row['page_title'], $id, $row);
+				} elseif (sed_plug_active('revisions')) {
+					sed_revision_wipe_entity('page', $id);
 				}
 
 				/* === Hook === */
@@ -142,6 +144,12 @@ if ($a == 'update') {
 				exit;
 			}
 		} else {
+			if (sed_plug_active('revisions') && !empty($id)) {
+				$sql_curr_page = sed_sql_query("SELECT * FROM $db_pages WHERE page_id='$id' LIMIT 1");
+				if ($curr_page = sed_sql_fetchassoc($sql_curr_page)) {
+					sed_revision_add('page', $id, $curr_page['page_title'], $curr_page, $L['rev_auto_edit_comment']);
+				}
+			}
 			$rpagedate = ($rpagedatenow) ? $sys['now_offset'] : sed_mktime($rhour, $rminute, 0, $rmonth, $rday, $ryear) - $usr['timezone'] * 3600;
 			$rpagebegin = sed_mktime($rhour_beg, $rminute_beg, 0, $rmonth_beg, $rday_beg, $ryear_beg) - $usr['timezone'] * 3600;
 			$rpageexpire = sed_mktime($rhour_exp, $rminute_exp, 0, $rmonth_exp, $rday_exp, $ryear_exp) - $usr['timezone'] * 3600;
@@ -218,8 +226,12 @@ if ($a == 'update') {
 
 			$url_redir = (empty($rpagealias)) ? sed_url("page", "id=" . $id, "", true) : sed_url("page", "al=" . $rpagealias, "", true);
 
-			if (defined('SED_ADMIN')) {
-				sed_redirect(sed_url("admin", "m=page&s=manager&c=" . $rpagecat, "", true), false, ['msg' => '917']);
+			$stay = sed_import('stay', 'P', 'INT');
+
+			if ($stay) {
+				sed_redirect(sed_url("admin", "m=page&s=edit&id=" . $id, "", true), false, array('msg' => '917'));
+			} elseif (defined('SED_ADMIN')) {
+				sed_redirect(sed_url("admin", "m=page&s=manager&c=" . $rpagecat, "", true), false, array('msg' => '917'));
 			} else {
 				sed_redirect($url_redir);
 			}
@@ -346,6 +358,10 @@ $t->assign(array(
 if (count($extrafields) > 0) {
 	$extra_array = sed_build_extrafields('page', 'PAGEEDIT_FORM', $extrafields, $pag, 'rpage');
 	$t->assign($extra_array);
+}
+
+if (sed_plug_active('revisions') && !empty($id)) {
+	sed_revisions_assign_tags($t, 'page', $id);
 }
 
 /* === Hook === */

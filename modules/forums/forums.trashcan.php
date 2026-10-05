@@ -8,7 +8,7 @@ https://seditio.org
 [BEGIN_SED]
 File=modules/forums/forums.trashcan.php
 Version=186
-Updated=2026-sep-21
+Updated=2026-oct-05
 Type=Module
 [END_SED]
 
@@ -51,24 +51,22 @@ if (isset($sed_trashcan_types) && is_array($sed_trashcan_types)) {
  */
 function sed_trash_forumpost_restore($data, $itemid)
 {
-	if (function_exists('sed_forum_resynctopic')) {
-		global $db_forum_topics, $db_forum_posts, $db_trash;
+	global $db_forum_topics, $db_forum_posts, $db_trash;
 
-		$sql = sed_sql_query("SELECT ft_id FROM $db_forum_topics WHERE ft_id='" . sed_sql_prep($data['fp_topicid']) . "'");
+	$sql = sed_sql_query("SELECT ft_id FROM $db_forum_topics WHERE ft_id='" . sed_sql_prep($data['fp_topicid']) . "'");
 
-		if ($row = sed_sql_fetchassoc($sql)) {
-			sed_trash_insert($data, $db_forum_posts);
-			sed_log("Post #" . $itemid . " restored from the trash can.", 'adm');
-			sed_forum_resynctopic($data['fp_topicid']);
-			sed_forum_sectionsetlast($data['fp_sectionid']);
-			sed_forum_resync($data['fp_sectionid']);
-			return true;
-		} else {
-			$sql1 = sed_sql_query("SELECT tr_id FROM $db_trash WHERE tr_type='forumtopic' AND tr_itemid='q" . sed_sql_prep($data['fp_topicid']) . "'");
-			if ($row1 = sed_sql_fetchassoc($sql1)) {
-				sed_trash_restore($row1['tr_id']);
-				sed_trash_delete($row1['tr_id']);
-			}
+	if ($row = sed_sql_fetchassoc($sql)) {
+		sed_trash_insert($data, $db_forum_posts);
+		sed_log("Post #" . $itemid . " restored from the trash can.", 'adm');
+		sed_forum_resynctopic($data['fp_topicid']);
+		sed_forum_sectionsetlast($data['fp_sectionid']);
+		sed_forum_resync($data['fp_sectionid']);
+		return true;
+	} else {
+		$sql1 = sed_sql_query("SELECT tr_id FROM $db_trash WHERE tr_type='forumtopic' AND tr_itemid='q" . sed_sql_prep($data['fp_topicid']) . "'");
+		if ($row1 = sed_sql_fetchassoc($sql1)) {
+			sed_trash_restore($row1['tr_id']);
+			sed_trash_delete($row1['tr_id']);
 		}
 	}
 
@@ -84,29 +82,25 @@ function sed_trash_forumpost_restore($data, $itemid)
  */
 function sed_trash_forumtopic_restore($data, $itemid)
 {
-	if (function_exists('sed_forum_resynctopic')) {
-		global $db_forum_topics, $db_forum_posts, $db_trash;
+	global $db_forum_topics, $db_forum_posts, $db_trash;
 
-		sed_trash_insert($data, $db_forum_topics);
-		sed_log("Topic #" . $data['ft_id'] . " restored from the trash can.", 'adm');
+	sed_trash_insert($data, $db_forum_topics);
+	sed_log("Topic #" . $data['ft_id'] . " restored from the trash can.", 'adm');
 
-		$clean_itemid = (strpos($itemid, 'q') === 0) ? substr($itemid, 1) : $itemid;
-		$sql = sed_sql_query("SELECT tr_id FROM $db_trash WHERE tr_type='forumpost' AND tr_itemid LIKE '%-" . sed_sql_prep($itemid) . "'");
+	$clean_itemid = (strpos($itemid, 'q') === 0) ? substr($itemid, 1) : $itemid;
+	$sql = sed_sql_query("SELECT tr_id FROM $db_trash WHERE tr_type='forumpost' AND tr_itemid LIKE '%-" . sed_sql_prep($itemid) . "'");
 
-		while ($row = sed_sql_fetchassoc($sql)) {
-			$res2 = sed_trash_get($row['tr_id']);
-			if (is_array($res2)) {
-				sed_trash_insert($res2['tr_datas'], $db_forum_posts);
-				sed_trash_delete($row['tr_id']);
-				sed_log("Post #" . $res2['tr_datas']['fp_id'] . " restored from the trash can (belongs to topic #" . $res2['tr_datas']['fp_topicid'] . ").", 'adm');
-			}
+	while ($row = sed_sql_fetchassoc($sql)) {
+		$res2 = sed_trash_get($row['tr_id']);
+		if (is_array($res2)) {
+			sed_trash_insert($res2['tr_datas'], $db_forum_posts);
+			sed_trash_delete($row['tr_id']);
+			sed_log("Post #" . $res2['tr_datas']['fp_id'] . " restored from the trash can (belongs to topic #" . $res2['tr_datas']['fp_topicid'] . ").", 'adm');
 		}
-
-		sed_forum_resynctopic($clean_itemid);
-		sed_forum_sectionsetlast($data['ft_sectionid']);
-		sed_forum_resync($data['ft_sectionid']);
-		return true;
 	}
 
-	return false;
+	sed_forum_resynctopic($clean_itemid);
+	sed_forum_sectionsetlast($data['ft_sectionid']);
+	sed_forum_resync($data['ft_sectionid']);
+	return true;
 }

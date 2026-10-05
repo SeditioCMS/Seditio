@@ -334,6 +334,38 @@ pre {
   font-size: 16px !important;
 }
 
+.btn-icon {
+  width: 24px;
+  height: 24px;
+  padding: 4px 0px;
+  text-align: center;
+  display: inline-block;
+  font-size: 14px;
+  line-height: 12px;
+  border-radius: 2px;
+  background: #315eb4 !important;
+  color: #ffffff !important;
+  border: 1px solid #133d8d !important;
+  text-decoration: none;
+  box-sizing: border-box;
+  margin: 0 1px;
+}
+
+.btn-icon i {
+  color: #ffffff !important;
+  font-size: 14px !important;
+  line-height: 14px;
+}
+
+.btn-icon:hover,
+.btn-icon:focus,
+.btn-icon:active {
+  background: #5980cb !important;
+  border: 1px solid #2f59a9 !important;
+  text-decoration: none;
+  color: #ffffff !important;
+}
+
 .btn:hover {
   text-decoration: none;
   background: var(--admin-primary-hover) url(../img/bg-button-green.gif) top left repeat-x !important;
